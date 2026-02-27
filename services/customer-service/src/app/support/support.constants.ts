@@ -1,4 +1,0 @@
-export const SUPPORT_CONSTANTS = {
-  MAX_TICKETS_PER_CUSTOMER: 50,
-  TICKET_REF_PREFIX: 'TKT',
-} as const;

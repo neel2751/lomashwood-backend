@@ -1,6 +1,0 @@
-export const PROFILE_CONSTANTS = {
-  MAX_ADDRESSES: 10,
-  CACHE_TTL_SECONDS: 3600,
-  DEFAULT_LOCALE: 'en-GB',
-  DEFAULT_COUNTRY: 'GB',
-} as const;
