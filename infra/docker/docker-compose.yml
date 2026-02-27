@@ -1,0 +1,390 @@
+version: "3.9"
+
+networks:
+  lomash-internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  networks:
+    - lomash-internal
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+x-healthcheck-defaults: &hc-defaults
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 30s
+
+x-db-env: &db-env
+  POSTGRES_USER: ${POSTGRES_USER:-lomash_master}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local}
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-changeme_local}
+
+services:
+
+  postgres:
+    <<: *service-defaults
+    image: postgres:16.3-alpine
+    container_name: lomash-postgres
+    environment:
+      <<: *db-env
+      POSTGRES_DB: lomash_auth        
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lomash_master} -d lomash_auth"]
+
+  redis:
+    <<: *service-defaults
+    image: redis:7.2-alpine
+    container_name: lomash-redis
+    command: >
+      redis-server
+      /usr/local/etc/redis/redis.conf
+      --requirepass ${REDIS_PASSWORD:-changeme_local}
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "6379:6379"
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme_local}", "ping"]
+
+  api-gateway:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/api-gateway.Dockerfile
+    container_name: lomash-api-gateway
+    image: lomash-wood/api-gateway:${IMAGE_TAG:-local}
+    env_file:
+      - ../../api-gateway/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      AUTH_SERVICE_URL: http://lomash-auth-service:3001
+      PRODUCT_SERVICE_URL: http://lomash-product-service:3002
+      ORDER_PAYMENT_SERVICE_URL: http://lomash-order-payment-service:3003
+      APPOINTMENT_SERVICE_URL: http://lomash-appointment-service:3004
+      CONTENT_SERVICE_URL: http://lomash-content-service:3005
+      CUSTOMER_SERVICE_URL: http://lomash-customer-service:3006
+      NOTIFICATION_SERVICE_URL: http://lomash-notification-service:3007
+      ANALYTICS_SERVICE_URL: http://lomash-analytics-service:3008
+    ports:
+      - "3000:3000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      order-payment-service:
+        condition: service_healthy
+      appointment-service:
+        condition: service_healthy
+      content-service:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      analytics-service:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3000/health"]
+
+  auth-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/auth-service.Dockerfile
+    container_name: lomash-auth-service
+    image: lomash-wood/auth-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/auth-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_auth?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/0
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3001/health"]
+
+  product-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/product-service.Dockerfile
+    container_name: lomash-product-service
+    image: lomash-wood/product-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/product-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_products?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/1
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3002/health"]
+
+  order-payment-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/order-payment-service.Dockerfile
+    container_name: lomash-order-payment-service
+    image: lomash-wood/order-payment-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/order-payment-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3003
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_orders?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/2
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3003/health"]
+
+  appointment-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/appointment-service.Dockerfile
+    container_name: lomash-appointment-service
+    image: lomash-wood/appointment-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/appointment-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3004
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_appointments?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/3
+    ports:
+      - "3004:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3004/health"]
+
+  content-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/content-service.Dockerfile
+    container_name: lomash-content-service
+    image: lomash-wood/content-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/content-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3005
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_content?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/4
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3005/health"]
+
+  customer-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/customer-service.Dockerfile
+    container_name: lomash-customer-service
+    image: lomash-wood/customer-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/customer-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3006
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_customers?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/5
+    ports:
+      - "3006:3006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3006/health"]
+  notification-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/notification-service.Dockerfile
+    container_name: lomash-notification-service
+    image: lomash-wood/notification-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/notification-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3007
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_notifications?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/6
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3007/health"]
+
+  analytics-service:
+    <<: *service-defaults
+    build:
+      context: ../../
+      dockerfile: infra/docker/analytics-service.Dockerfile
+    container_name: lomash-analytics-service
+    image: lomash-wood/analytics-service:${IMAGE_TAG:-local}
+    env_file:
+      - ../../services/analytics-service/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3008
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lomash_master}:${POSTGRES_PASSWORD:-changeme_local}@lomash-postgres:5432/lomash_analytics?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_local}@lomash-redis:6379/7
+    ports:
+      - "3008:3008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3008/health"]
+
+  prometheus:
+    <<: *service-defaults
+    image: prom/prometheus:v2.52.0
+    container_name: lomash-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ../../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../../observability/prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+
+  grafana:
+    <<: *service-defaults
+    image: grafana/grafana:10.4.3
+    container_name: lomash-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-changeme_local}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: http://localhost:3100
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../../observability/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ../../observability/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ../../observability/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3100:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
+
+  loki:
+    <<: *service-defaults
+    image: grafana/loki:2.9.8
+    container_name: lomash-loki
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ../../observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3200:3100"
+    healthcheck:
+      <<: *hc-defaults
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+
+  promtail:
+    <<: *service-defaults
+    image: grafana/promtail:2.9.8
+    container_name: lomash-promtail
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../../observability/loki/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+    depends_on:
+      loki:
+        condition: service_healthy

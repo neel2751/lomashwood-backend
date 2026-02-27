@@ -1,0 +1,267 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: lomash-wood
+  labels:
+    app: api-gateway
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  CORS_ORIGIN: "https://lomashwood.co.uk,https://www.lomashwood.co.uk,https://admin.lomashwood.co.uk"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  REQUEST_TIMEOUT_MS: "30000"
+  AUTH_SERVICE_URL: "http://auth-service.lomash-wood.svc.cluster.local:3001"
+  PRODUCT_SERVICE_URL: "http://product-service.lomash-wood.svc.cluster.local:3002"
+  ORDER_PAYMENT_SERVICE_URL: "http://order-payment-service.lomash-wood.svc.cluster.local:3003"
+  APPOINTMENT_SERVICE_URL: "http://appointment-service.lomash-wood.svc.cluster.local:3004"
+  CONTENT_SERVICE_URL: "http://content-service.lomash-wood.svc.cluster.local:3005"
+  CUSTOMER_SERVICE_URL: "http://customer-service.lomash-wood.svc.cluster.local:3006"
+  NOTIFICATION_SERVICE_URL: "http://notification-service.lomash-wood.svc.cluster.local:3007"
+  ANALYTICS_SERVICE_URL: "http://analytics-service.lomash-wood.svc.cluster.local:3008"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: lomash-wood
+  labels:
+    app: auth-service
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3001"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "0"
+  JWT_ACCESS_TOKEN_EXPIRES_IN: "15m"
+  JWT_REFRESH_TOKEN_EXPIRES_IN: "7d"
+  BCRYPT_SALT_ROUNDS: "12"
+  OTP_EXPIRES_IN_MINUTES: "10"
+  SESSION_COOKIE_SECURE: "true"
+  SESSION_COOKIE_HTTP_ONLY: "true"
+  SESSION_COOKIE_SAME_SITE: "strict"
+  PASSWORD_RESET_TOKEN_EXPIRES_IN_HOURS: "1"
+  MAX_LOGIN_ATTEMPTS: "5"
+  LOCKOUT_DURATION_MINUTES: "15"
+  BETTER_AUTH_SECRET_LENGTH: "64"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-service-config
+  namespace: lomash-wood
+  labels:
+    app: product-service
+    app.kubernetes.io/name: product-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3002"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "1"
+  REDIS_CACHE_TTL_SECONDS: "3600"
+  REDIS_PRODUCT_LIST_TTL_SECONDS: "300"
+  REDIS_PRODUCT_DETAIL_TTL_SECONDS: "600"
+  REDIS_CATEGORY_TTL_SECONDS: "86400"
+  REDIS_COLOUR_TTL_SECONDS: "86400"
+  PRODUCT_PAGE_SIZE_DEFAULT: "20"
+  PRODUCT_PAGE_SIZE_MAX: "100"
+  SEARCH_INDEX_REBUILD_INTERVAL_MINUTES: "60"
+  INVENTORY_SYNC_INTERVAL_MINUTES: "15"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-payment-service-config
+  namespace: lomash-wood
+  labels:
+    app: order-payment-service
+    app.kubernetes.io/name: order-payment-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3003"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "2"
+  STRIPE_API_VERSION: "2024-11-20.acacia"
+  STRIPE_WEBHOOK_TOLERANCE_SECONDS: "300"
+  ORDER_EXPIRY_MINUTES: "30"
+  ABANDONED_CHECKOUT_EXPIRY_HOURS: "24"
+  PAYMENT_RECONCILIATION_INTERVAL_HOURS: "1"
+  FAILED_WEBHOOK_RETRY_ATTEMPTS: "3"
+  FAILED_WEBHOOK_RETRY_DELAY_SECONDS: "60"
+  INVOICE_NUMBER_PREFIX: "LW"
+  REFUND_PROCESSING_DAYS: "5"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appointment-service-config
+  namespace: lomash-wood
+  labels:
+    app: appointment-service
+    app.kubernetes.io/name: appointment-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3004"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "3"
+  APPOINTMENT_TYPES: "HOME_MEASUREMENT,ONLINE,SHOWROOM"
+  DEFAULT_SLOT_DURATION_MINUTES: "60"
+  REMINDER_ADVANCE_HOURS_24: "24"
+  REMINDER_ADVANCE_HOURS_2: "2"
+  MAX_BOOKINGS_PER_SLOT: "1"
+  BOOKING_CANCELLATION_WINDOW_HOURS: "24"
+  SEND_REMINDER_JOB_INTERVAL_MINUTES: "15"
+  CLEANUP_EXPIRED_SLOTS_INTERVAL_HOURS: "6"
+  ADMIN_NOTIFICATION_EMAIL: "appointments@lomashwood.co.uk"
+  KITCHEN_TEAM_EMAIL: "kitchen@lomashwood.co.uk"
+  BEDROOM_TEAM_EMAIL: "bedroom@lomashwood.co.uk"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: content-service-config
+  namespace: lomash-wood
+  labels:
+    app: content-service
+    app.kubernetes.io/name: content-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3005"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "4"
+  AWS_REGION: "eu-west-2"
+  S3_BUCKET_NAME: "lomash-wood-media"
+  S3_SIGNED_URL_EXPIRES_IN_SECONDS: "3600"
+  CDN_BASE_URL: "https://cdn.lomashwood.co.uk"
+  MAX_UPLOAD_SIZE_MB: "50"
+  ALLOWED_IMAGE_TYPES: "image/jpeg,image/png,image/webp,image/avif"
+  ALLOWED_VIDEO_TYPES: "video/mp4,video/webm"
+  BLOG_PAGE_SIZE_DEFAULT: "12"
+  SITEMAP_REBUILD_INTERVAL_HOURS: "6"
+  SCHEDULED_POST_CHECK_INTERVAL_MINUTES: "5"
+  SEARCH_INDEX_REBUILD_INTERVAL_HOURS: "2"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: customer-service-config
+  namespace: lomash-wood
+  labels:
+    app: customer-service
+    app.kubernetes.io/name: customer-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3006"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "5"
+  LOYALTY_POINTS_EXPIRY_DAYS: "365"
+  LOYALTY_POINTS_PER_POUND: "1"
+  INACTIVE_USER_ANONYMIZE_AFTER_DAYS: "1095"
+  REVIEW_MODERATION_REQUIRED: "true"
+  MAX_WISHLIST_ITEMS: "100"
+  SUPPORT_TICKET_ESCALATION_HOURS: "24"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-service-config
+  namespace: lomash-wood
+  labels:
+    app: notification-service
+    app.kubernetes.io/name: notification-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3007"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  EMAIL_FROM_NAME: "Lomash Wood"
+  EMAIL_FROM_ADDRESS: "noreply@lomashwood.co.uk"
+  EMAIL_PROVIDER: "ses"
+  SMS_PROVIDER: "twilio"
+  PUSH_PROVIDER: "firebase"
+  AWS_REGION: "eu-west-2"
+  RETRY_MAX_ATTEMPTS: "3"
+  RETRY_INITIAL_DELAY_MS: "1000"
+  RETRY_BACKOFF_MULTIPLIER: "2"
+  FAILED_MESSAGE_RETRY_INTERVAL_MINUTES: "15"
+  OLD_LOG_PURGE_AFTER_DAYS: "90"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analytics-service-config
+  namespace: lomash-wood
+  labels:
+    app: analytics-service
+    app.kubernetes.io/name: analytics-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3008"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "6"
+  EVENT_RETENTION_DAYS: "365"
+  HISTORICAL_DATA_ARCHIVE_AFTER_DAYS: "730"
+  FUNNEL_RECOMPUTE_INTERVAL_HOURS: "1"
+  DASHBOARD_REBUILD_INTERVAL_MINUTES: "30"
+  RAW_EVENT_PURGE_AFTER_DAYS: "90"
+  GOOGLE_TAG_MANAGER_ID: "GTM-XXXXXXX"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: lomash-wood
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  REDIS_HOST: "redis-master.lomash-wood.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_TLS_ENABLED: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: lomash-wood
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: lomash-wood-platform
+data:
+  POSTGRES_HOST: "postgres-primary.lomash-wood.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_SSL_MODE: "require"

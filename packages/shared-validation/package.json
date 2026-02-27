@@ -1,0 +1,22 @@
+{
+  "name": "@lomash-wood/shared-validation",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@lomash-wood/tsconfig": "workspace:*",
+    "@lomash-wood/eslint-config": "workspace:*",
+    "typescript": "^5.3.3"
+  }
+}

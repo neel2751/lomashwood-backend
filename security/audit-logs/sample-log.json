@@ -1,0 +1,628 @@
+{
+  "entries": [
+    {
+      "id": "clxaudt10000000000000000001",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:00:00.000Z",
+      "service": "auth-service",
+      "environment": "production",
+      "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "spanId": "00f067aa0ba902b7",
+      "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+      "actor": {
+        "type": "user",
+        "id": "clxuser1000000000000000001",
+        "email": "j***@example.com",
+        "role": "USER",
+        "ip": "81.2.69.142",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "sessionId": "clxsess10000000000000000001"
+      },
+      "action": {
+        "category": "AUTH",
+        "type": "LOGIN",
+        "description": "User authenticated successfully via email and password."
+      },
+      "resource": {
+        "type": "session",
+        "id": "clxsess10000000000000000001",
+        "displayName": "Session clxsess10000000000000000001",
+        "ownerId": "clxuser1000000000000000001"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 142
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/auth/login",
+        "bodyHash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "contentType": "application/json",
+        "size": 68
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["auth"]
+    },
+    {
+      "id": "clxaudt20000000000000000002",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:01:32.000Z",
+      "service": "auth-service",
+      "environment": "production",
+      "traceId": "9d4e1f2a8b3c5d6e7f0a1b2c3d4e5f60",
+      "spanId": "1a2b3c4d5e6f7a8b",
+      "correlationId": "661f9511-f30c-52e5-b827-557766551111",
+      "actor": {
+        "type": "anonymous",
+        "ip": "185.220.101.50",
+        "userAgent": "python-requests/2.28.0"
+      },
+      "action": {
+        "category": "AUTH",
+        "type": "LOGIN_FAILED",
+        "description": "Authentication failed: invalid credentials supplied for email address 'admin@lomashwood.co.uk'."
+      },
+      "resource": {
+        "type": "user",
+        "displayName": "a***@lomashwood.co.uk"
+      },
+      "outcome": {
+        "status": "FAILURE",
+        "statusCode": 401,
+        "errorCode": "INVALID_CREDENTIALS",
+        "errorMessage": "The email address or password is incorrect.",
+        "durationMs": 1208
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/auth/login",
+        "bodyHash": "b3e9d2f1a4c5b6d8e7f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d",
+        "contentType": "application/json",
+        "size": 72
+      },
+      "geo": {
+        "country": "DE",
+        "region": "Bavaria",
+        "city": "Munich"
+      },
+      "tags": ["auth", "security:failed-login"]
+    },
+    {
+      "id": "clxaudt30000000000000000003",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:04:18.000Z",
+      "service": "auth-service",
+      "environment": "production",
+      "traceId": "1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f",
+      "spanId": "2b3c4d5e6f7a8b9c",
+      "correlationId": "772g0622-g41d-63f6-c938-668877662222",
+      "actor": {
+        "type": "anonymous",
+        "ip": "185.220.101.50",
+        "userAgent": "python-requests/2.28.0"
+      },
+      "action": {
+        "category": "SECURITY",
+        "type": "BRUTE_FORCE_DETECTED",
+        "description": "Brute-force pattern detected: 8 failed login attempts from IP 185.220.101.50 within 180 seconds. IP temporarily blocked."
+      },
+      "outcome": {
+        "status": "BLOCKED",
+        "statusCode": 429,
+        "errorCode": "RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Too many failed login attempts. Please try again in 15 minutes.",
+        "durationMs": 3
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/auth/login",
+        "bodyHash": "c4f0e3d2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e",
+        "contentType": "application/json",
+        "size": 72
+      },
+      "geo": {
+        "country": "DE",
+        "region": "Bavaria",
+        "city": "Munich"
+      },
+      "metadata": {
+        "failedAttemptCount": 8,
+        "windowSeconds": 180,
+        "blockDurationSeconds": 900
+      },
+      "tags": ["security:brute-force", "security:ip-blocked"]
+    },
+    {
+      "id": "clxaudt40000000000000000004",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:08:42.000Z",
+      "service": "user-service",
+      "environment": "production",
+      "traceId": "2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a",
+      "spanId": "3c4d5e6f7a8b9c0d",
+      "correlationId": "883h1733-h52e-74g7-d049-779988773333",
+      "actor": {
+        "type": "user",
+        "id": "clxuser1000000000000000001",
+        "email": "j***@example.com",
+        "role": "USER",
+        "ip": "81.2.69.142",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "sessionId": "clxsess10000000000000000001"
+      },
+      "action": {
+        "category": "DATA_MODIFICATION",
+        "type": "RECORD_UPDATED",
+        "description": "User updated their own account profile fields: name, phone."
+      },
+      "resource": {
+        "type": "user",
+        "id": "clxuser1000000000000000001",
+        "displayName": "John Doe",
+        "ownerId": "clxuser1000000000000000001"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 87
+      },
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/users/:id",
+        "bodyHash": "d5g1f4e3c2b1a0g9f8e7d6c5b4a3g2f1e0d9c8b7a6g5f4e3d2c1b0a9g8f7e6d",
+        "contentType": "application/json",
+        "size": 84
+      },
+      "changes": {
+        "before": {
+          "name": "J*** D***",
+          "phone": "[REDACTED]"
+        },
+        "after": {
+          "name": "J*** D***",
+          "phone": "[REDACTED]"
+        },
+        "fields": ["name", "phone", "updatedAt"]
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["pii"]
+    },
+    {
+      "id": "clxaudt50000000000000000005",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:09:15.000Z",
+      "service": "order-service",
+      "environment": "production",
+      "traceId": "3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
+      "spanId": "4d5e6f7a8b9c0d1e",
+      "correlationId": "994i2844-i63f-85h8-e150-880099884444",
+      "actor": {
+        "type": "user",
+        "id": "clxuser1000000000000000001",
+        "email": "j***@example.com",
+        "role": "USER",
+        "ip": "81.2.69.142",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "sessionId": "clxsess10000000000000000001"
+      },
+      "action": {
+        "category": "ORDER",
+        "type": "ORDER_PLACED",
+        "description": "User placed order ORD-2025-001 for £15,000.00 including 2 line items."
+      },
+      "resource": {
+        "type": "order",
+        "id": "clxorder10000000000000000001",
+        "displayName": "Order ORD-2025-001",
+        "ownerId": "clxuser1000000000000000001"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 201,
+        "durationMs": 324
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/orders",
+        "bodyHash": "e6h2g5f4d3c2b1h0g9f8e7d6c5b4a3h2g1f0e9d8c7b6a5h4g3f2e1d0c9b8a7h",
+        "contentType": "application/json",
+        "size": 412
+      },
+      "metadata": {
+        "orderReference": "ORD-2025-001",
+        "currency": "GBP",
+        "itemCount": 2,
+        "paymentMethod": "CARD"
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["high-value", "payment"]
+    },
+    {
+      "id": "clxaudt60000000000000000006",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:09:28.000Z",
+      "service": "payment-service",
+      "environment": "production",
+      "traceId": "3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
+      "spanId": "5e6f7a8b9c0d1e2f",
+      "correlationId": "994i2844-i63f-85h8-e150-880099884444",
+      "actor": {
+        "type": "service",
+        "serviceName": "order-service",
+        "role": "SERVICE"
+      },
+      "action": {
+        "category": "PAYMENT",
+        "type": "PAYMENT_COMPLETED",
+        "description": "Payment of £15,000.00 GBP completed successfully via Stripe for order ORD-2025-001."
+      },
+      "resource": {
+        "type": "payment",
+        "id": "clxpay100000000000000000001",
+        "displayName": "Payment for ORD-2025-001",
+        "ownerId": "clxuser1000000000000000001"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 1843
+      },
+      "request": {
+        "method": "POST",
+        "path": "/internal/v1/payments/charge",
+        "bodyHash": "f7i3h6g5e4d3c2i1h0g9f8e7d6c5b4a3i2h1g0f9e8d7c6b5a4i3h2g1f0e9d8c",
+        "contentType": "application/json",
+        "size": 248
+      },
+      "metadata": {
+        "provider": "stripe",
+        "paymentIntentId": "pi_3Oa0LJ2eZvKYlo2C1abc1234",
+        "currency": "GBP",
+        "last4": "4242"
+      },
+      "tags": ["high-value", "payment", "pci"]
+    },
+    {
+      "id": "clxaudt70000000000000000007",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:12:05.000Z",
+      "service": "appointment-service",
+      "environment": "production",
+      "traceId": "4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c",
+      "spanId": "6f7a8b9c0d1e2f3a",
+      "correlationId": "005j3955-j74g-96i9-f261-991100995555",
+      "actor": {
+        "type": "user",
+        "id": "clxuser1000000000000000001",
+        "email": "j***@example.com",
+        "role": "USER",
+        "ip": "81.2.69.142",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "sessionId": "clxsess10000000000000000001"
+      },
+      "action": {
+        "category": "APPOINTMENT",
+        "type": "APPOINTMENT_BOOKED",
+        "description": "User booked a Kitchen Design appointment at London Showroom for 01 February 2025 at 10:00."
+      },
+      "resource": {
+        "type": "appointment",
+        "id": "clxappt10000000000000000001",
+        "displayName": "Kitchen Design – London Showroom – 2025-02-01 10:00",
+        "ownerId": "clxuser1000000000000000001"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 201,
+        "durationMs": 198
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/appointments",
+        "bodyHash": "g8j4i7h6f5e4d3j2i1h0g9f8e7d6c5b4a3j2i1h0g9f8e7d6c5b4a3j2i1h0g9f",
+        "contentType": "application/json",
+        "size": 196
+      },
+      "metadata": {
+        "appointmentType": "Kitchen Design",
+        "showroom": "London Showroom",
+        "appointmentDate": "2025-02-01",
+        "appointmentTime": "10:00"
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["appointment"]
+    },
+    {
+      "id": "clxaudt80000000000000000008",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:15:00.000Z",
+      "service": "admin-service",
+      "environment": "production",
+      "traceId": "5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d",
+      "spanId": "7a8b9c0d1e2f3a4b",
+      "correlationId": "116k4066-k85h-07j0-g372-002211006666",
+      "actor": {
+        "type": "admin",
+        "id": "clxadmin1000000000000000001",
+        "email": "a***@lomashwood.co.uk",
+        "role": "ADMIN",
+        "ip": "192.168.10.5",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "sessionId": "clxsess20000000000000000002"
+      },
+      "action": {
+        "category": "USER_MANAGEMENT",
+        "type": "USER_SUSPENDED",
+        "description": "Administrator suspended user account clxuser2000000000000000002 due to policy violation: suspected fraudulent activity."
+      },
+      "resource": {
+        "type": "user",
+        "id": "clxuser2000000000000000002",
+        "displayName": "Jane S***",
+        "ownerId": "clxuser2000000000000000002"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 56
+      },
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/admin/users/:id/suspend",
+        "bodyHash": "h9k5j8i7g6f5e4k3j2i1h0g9f8e7d6c5b4a3k2j1i0h9g8f7e6d5c4b3a2k1j0i",
+        "contentType": "application/json",
+        "size": 112
+      },
+      "changes": {
+        "before": { "status": "ACTIVE" },
+        "after": { "status": "SUSPENDED" },
+        "fields": ["status", "suspendedAt", "suspendedReason", "updatedAt"]
+      },
+      "metadata": {
+        "reason": "suspected_fraudulent_activity",
+        "reviewTicket": "TICKET-2025-0042"
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["admin", "pii"]
+    },
+    {
+      "id": "clxaudt90000000000000000009",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:20:00.000Z",
+      "service": "admin-service",
+      "environment": "production",
+      "traceId": "6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e",
+      "spanId": "8b9c0d1e2f3a4b5c",
+      "correlationId": "227l5177-l96i-18k1-h483-113322117777",
+      "actor": {
+        "type": "admin",
+        "id": "clxadmin1000000000000000001",
+        "email": "a***@lomashwood.co.uk",
+        "role": "ADMIN",
+        "ip": "192.168.10.5",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "sessionId": "clxsess20000000000000000002"
+      },
+      "action": {
+        "category": "DATA_ACCESS",
+        "type": "PII_ACCESSED",
+        "description": "Administrator exported PII data for user clxuser3000000000000000003 in response to Subject Access Request SAR-2025-001."
+      },
+      "resource": {
+        "type": "user",
+        "id": "clxuser3000000000000000003",
+        "displayName": "Robert B***",
+        "ownerId": "clxuser3000000000000000003"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 2340
+      },
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/admin/users/:id/export",
+        "query": {
+          "format": "json",
+          "include": "all"
+        }
+      },
+      "metadata": {
+        "sarReference": "SAR-2025-001",
+        "exportFormat": "json",
+        "recordsExported": 1,
+        "legalBasis": "data_subject_request"
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["pii", "gdpr", "sar", "compliance"]
+    },
+    {
+      "id": "clxaudt10000000000000000010",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:25:00.000Z",
+      "service": "notification-service",
+      "environment": "production",
+      "traceId": "7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f",
+      "spanId": "9c0d1e2f3a4b5c6d",
+      "correlationId": "338m6288-m07j-29l2-i594-224433228888",
+      "actor": {
+        "type": "admin",
+        "id": "clxadmin1000000000000000001",
+        "email": "a***@lomashwood.co.uk",
+        "role": "ADMIN",
+        "ip": "192.168.10.5",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "sessionId": "clxsess20000000000000000002"
+      },
+      "action": {
+        "category": "NOTIFICATION",
+        "type": "CAMPAIGN_LAUNCHED",
+        "description": "Administrator launched email campaign 'Spring Kitchen Collection Launch' targeting 5,000 recipients."
+      },
+      "resource": {
+        "type": "campaign",
+        "id": "clxcamp10000000000000000001",
+        "displayName": "Spring Kitchen Collection Launch",
+        "ownerId": "clxadmin1000000000000000001"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 118
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/campaigns/:id/launch",
+        "bodyHash": "i0l6k9j8h7g6f5l4k3j2i1h0g9f8e7d6c5b4a3l2k1j0i9h8g7f6e5d4c3b2a1l",
+        "contentType": "application/json",
+        "size": 48
+      },
+      "metadata": {
+        "channel": "EMAIL",
+        "recipientCount": 5000,
+        "audienceType": "SEGMENT",
+        "scheduledAt": null
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["notification", "campaign"]
+    },
+    {
+      "id": "clxaudt11000000000000000011",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:30:00.000Z",
+      "service": "admin-service",
+      "environment": "production",
+      "traceId": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a",
+      "spanId": "0d1e2f3a4b5c6d7e",
+      "correlationId": "449n7399-n18k-30m3-j605-335544339999",
+      "actor": {
+        "type": "admin",
+        "id": "clxadmin2000000000000000002",
+        "email": "s***@lomashwood.co.uk",
+        "role": "SUPER_ADMIN",
+        "ip": "192.168.10.8",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "sessionId": "clxsess30000000000000000003"
+      },
+      "action": {
+        "category": "CONFIGURATION",
+        "type": "CONFIG_CHANGED",
+        "description": "Super-admin updated system configuration: email rate limit per minute increased from 300 to 500."
+      },
+      "resource": {
+        "type": "config",
+        "id": "config_email_rate_limits",
+        "displayName": "Email Rate Limit Configuration"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 200,
+        "durationMs": 34
+      },
+      "request": {
+        "method": "PATCH",
+        "path": "/api/v1/admin/config/email-rate-limits",
+        "bodyHash": "j1m7l0k9j8h7g6m5l4k3j2i1h0g9f8e7d6c5b4a3m2l1k0j9i8h7g6f5e4d3c2m",
+        "contentType": "application/json",
+        "size": 64
+      },
+      "changes": {
+        "before": { "rateLimitPerMinute": 300 },
+        "after": { "rateLimitPerMinute": 500 },
+        "fields": ["rateLimitPerMinute", "updatedAt"]
+      },
+      "metadata": {
+        "configKey": "email.rateLimit.perMinute",
+        "changeReason": "Increased volume for spring campaign period"
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["admin", "config"]
+    },
+    {
+      "id": "clxaudt12000000000000000012",
+      "version": "1.0.0",
+      "timestamp": "2025-01-15T10:45:00.000Z",
+      "service": "user-service",
+      "environment": "production",
+      "traceId": "9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b",
+      "spanId": "1e2f3a4b5c6d7e8f",
+      "correlationId": "550o8400-o29l-41n4-k716-446655440000",
+      "actor": {
+        "type": "user",
+        "id": "clxuser3000000000000000003",
+        "email": "r***@example.com",
+        "role": "USER",
+        "ip": "81.2.69.143",
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
+        "sessionId": "clxsess40000000000000000004"
+      },
+      "action": {
+        "category": "COMPLIANCE",
+        "type": "DATA_DELETION_REQUESTED",
+        "description": "User submitted a Right to Erasure (RTBF) request for their account and all associated personal data."
+      },
+      "resource": {
+        "type": "user",
+        "id": "clxuser3000000000000000003",
+        "displayName": "Robert B***",
+        "ownerId": "clxuser3000000000000000003"
+      },
+      "outcome": {
+        "status": "SUCCESS",
+        "statusCode": 202,
+        "durationMs": 78
+      },
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/account/deletion-request",
+        "bodyHash": "k2n8m1l0k9j8h7n6m5l4k3j2i1h0g9f8e7d6c5b4a3n2m1l0k9j8i7h6g5f4e3n",
+        "contentType": "application/json",
+        "size": 128
+      },
+      "metadata": {
+        "deletionRequestId": "RTBF-2025-0018",
+        "scheduledDeletionAt": "2025-02-14T10:45:00.000Z",
+        "gracePeriodDays": 30
+      },
+      "geo": {
+        "country": "GB",
+        "region": "England",
+        "city": "London"
+      },
+      "tags": ["gdpr", "rtbf", "compliance", "pii"]
+    }
+  ]
+}

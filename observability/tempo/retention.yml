@@ -1,0 +1,54 @@
+compactor:
+  compaction:
+    block_retention: 720h
+    compacted_block_retention: 1h
+
+per_tenant_overrides:
+  lomash-wood:
+    block_retention: 720h
+    max_bytes_per_trace: 5_000_000
+    max_search_bytes_per_trace: 50_000
+    ingestion_rate_limit_bytes: 15_000_000
+    ingestion_burst_size_bytes: 20_000_000
+    max_traces_per_user: 100_000
+
+retention_per_service:
+  order-payment-service:
+    retention: 2160h
+    reason: PCI-DSS compliance requires 90-day payment trace retention
+
+  auth-service:
+    retention: 2160h
+    reason: Security audit trail for authentication events
+
+  customer-service:
+    retention: 2160h
+    reason: GDPR compliance and customer dispute resolution
+
+  appointment-service:
+    retention: 1440h
+    reason: Booking audit trail for 60 days
+
+  api-gateway:
+    retention: 720h
+    reason: Standard 30-day request trace retention
+
+  product-service:
+    retention: 720h
+    reason: Standard 30-day trace retention
+
+  content-service:
+    retention: 360h
+    reason: 15-day trace retention for CMS operations
+
+  notification-service:
+    retention: 720h
+    reason: 30-day delivery trace retention
+
+  analytics-service:
+    retention: 360h
+    reason: 15-day trace retention for analytics pipelines
+
+  default:
+    retention: 720h
+    reason: Default 30-day retention for all other services

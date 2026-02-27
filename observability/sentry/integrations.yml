@@ -1,0 +1,340 @@
+version: 1
+
+organization: lomash-wood
+
+integrations:
+  slack:
+    enabled: true
+    workspace: lomash-wood
+    channels:
+      - name: "#alerts-critical"
+        notify_on:
+          - new_issue
+          - regression
+          - critical_error_rate
+        services:
+          - api-gateway
+          - auth-service
+          - order-payment-service
+      - name: "#alerts-payments"
+        notify_on:
+          - new_issue
+          - regression
+          - critical_error_rate
+        services:
+          - order-payment-service
+        tags:
+          - stripe
+          - payment
+          - webhook
+      - name: "#alerts-backend"
+        notify_on:
+          - new_issue
+          - high_error_rate
+        services:
+          - product-service
+          - appointment-service
+          - content-service
+          - customer-service
+          - notification-service
+          - analytics-service
+      - name: "#alerts-staging"
+        notify_on:
+          - new_issue
+        environment: staging
+    mention_users_on_critical: true
+    unfurl_issues: true
+
+  github:
+    enabled: true
+    app_id: ${SENTRY_GITHUB_APP_ID}
+    private_key: ${SENTRY_GITHUB_PRIVATE_KEY}
+    repository: lomash-wood/lomash-wood-backend
+    features:
+      - commit_tracking
+      - pull_request_comments
+      - auto_assign_issues
+      - stack_trace_linking
+    stack_trace_link:
+      source_code_root: /
+      stack_root: /
+      default_branch: main
+    auto_resolve_on_pr_merge: false
+    suspect_commits: true
+
+  pagerduty:
+    enabled: true
+    integration_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    services:
+      - name: lomash-wood-critical
+        integration_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+        severity_mapping:
+          fatal: critical
+          error: error
+          warning: warning
+          info: info
+    escalation_policy: lomash-wood-on-call
+    auto_resolve: true
+    auto_acknowledge: true
+
+  jira:
+    enabled: false
+    url: https://lomashwood.atlassian.net
+    project_key: LW
+    issue_type: Bug
+    auto_create_issues: false
+    link_issues: true
+    sync_comments: true
+
+  aws_lambda:
+    enabled: false
+    region: eu-west-1
+    account_id: ${AWS_ACCOUNT_ID}
+
+  vercel:
+    enabled: false
+
+projects:
+  - slug: lomash-wood-api-gateway
+    name: Lomash Wood - API Gateway
+    platform: node-express
+    team: platform
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      sensitive_fields:
+        - password
+        - token
+        - secret
+        - authorization
+        - cookie
+        - creditCard
+        - cardNumber
+        - cvv
+        - stripeKey
+      safe_fields:
+        - url
+        - method
+        - status_code
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.2
+        profiles_sample_rate: 0.1
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-auth-service
+    name: Lomash Wood - Auth Service
+    platform: node-express
+    team: platform
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      sensitive_fields:
+        - password
+        - token
+        - secret
+        - authorization
+        - cookie
+        - hashedPassword
+        - otp
+        - resetToken
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.5
+        profiles_sample_rate: 0.1
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-order-payment-service
+    name: Lomash Wood - Order Payment Service
+    platform: node-express
+    team: payments
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      sensitive_fields:
+        - stripeSecretKey
+        - cardNumber
+        - cvv
+        - accountNumber
+        - routingNumber
+        - paymentMethodId
+        - clientSecret
+      safe_fields:
+        - orderId
+        - paymentIntentId
+        - status
+        - amount
+        - currency
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 1.0
+        profiles_sample_rate: 0.2
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-appointment-service
+    name: Lomash Wood - Appointment Service
+    platform: node-express
+    team: backend
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      sensitive_fields:
+        - phone
+        - email
+        - address
+        - postcode
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.5
+        profiles_sample_rate: 0.1
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-product-service
+    name: Lomash Wood - Product Service
+    platform: node-express
+    team: backend
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.1
+        profiles_sample_rate: 0.05
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-content-service
+    name: Lomash Wood - Content Service
+    platform: node-express
+    team: backend
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.1
+        profiles_sample_rate: 0.05
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-customer-service
+    name: Lomash Wood - Customer Service
+    platform: node-express
+    team: backend
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      sensitive_fields:
+        - phone
+        - email
+        - address
+        - postcode
+        - dateOfBirth
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.2
+        profiles_sample_rate: 0.1
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-notification-service
+    name: Lomash Wood - Notification Service
+    platform: node-express
+    team: backend
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      sensitive_fields:
+        - phone
+        - email
+        - apiKey
+        - twilioAuthToken
+        - sesAccessKey
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.3
+        profiles_sample_rate: 0.1
+      release_tracking: true
+      source_maps: true
+
+  - slug: lomash-wood-analytics-service
+    name: Lomash Wood - Analytics Service
+    platform: node-express
+    team: backend
+    environments:
+      - production
+      - staging
+      - development
+    settings:
+      resolve_age: 720
+      scrub_data: true
+      grouping_config: newstyle:2023-01-11
+      performance:
+        traces_sample_rate: 0.05
+        profiles_sample_rate: 0.02
+      release_tracking: true
+      source_maps: true
+
+teams:
+  - slug: platform
+    name: Platform Team
+    members:
+      - role: admin
+    projects:
+      - lomash-wood-api-gateway
+      - lomash-wood-auth-service
+
+  - slug: payments
+    name: Payments Team
+    members:
+      - role: admin
+    projects:
+      - lomash-wood-order-payment-service
+
+  - slug: backend
+    name: Backend Team
+    members:
+      - role: admin
+    projects:
+      - lomash-wood-product-service
+      - lomash-wood-appointment-service
+      - lomash-wood-content-service
+      - lomash-wood-customer-service
+      - lomash-wood-notification-service
+      - lomash-wood-analytics-service

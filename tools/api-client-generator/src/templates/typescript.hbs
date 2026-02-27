@@ -1,0 +1,162 @@
+/**
+ * {{title}} — TypeScript API Client
+ * Version: {{version}}
+ * Generated: {{generatedAt}}
+ * DO NOT EDIT — regenerate with: pnpm generate
+ */
+
+import { z } from "zod";
+
+const BASE_URL = "{{baseUrl}}";
+
+export type ApiResponse<T> = {
+  data: T;
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+    totalPages?: number;
+  };
+  message?: string;
+};
+
+export type ApiError = {
+  statusCode: number;
+  message: string;
+  errors?: Record<string, string[]>;
+  timestamp: string;
+};
+
+export class LomashApiError extends Error {
+  statusCode: number;
+  errors?: Record<string, string[]>;
+
+  constructor(message: string, statusCode: number, errors?: Record<string, string[]>) {
+    super(message);
+    this.name = "LomashApiError";
+    this.statusCode = statusCode;
+    this.errors = errors;
+  }
+}
+
+let _authToken: string | null = null;
+
+export function setAuthToken(token: string | null): void {
+  _authToken = token;
+}
+
+export function getAuthToken(): string | null {
+  return _authToken;
+}
+
+async function request<T>(
+  method: string,
+  path: string,
+  options?: {
+    body?: unknown;
+    query?: Record<string, string | number | boolean | undefined | null>;
+    headers?: Record<string, string>;
+    signal?: AbortSignal;
+  }
+): Promise<T> {
+  const url = new URL(`${BASE_URL}${path}`);
+
+  if (options?.query) {
+    for (const [key, value] of Object.entries(options.query)) {
+      if (value !== undefined && value !== null) {
+        url.searchParams.set(key, String(value));
+      }
+    }
+  }
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...options?.headers,
+  };
+
+  if (_authToken) {
+    headers["Authorization"] = `Bearer ${_authToken}`;
+  }
+
+  const response = await fetch(url.toString(), {
+    method,
+    headers,
+    body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
+    signal: options?.signal,
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+  const responseData = isJson ? await response.json() : await response.text();
+
+  if (!response.ok) {
+    const err = responseData as ApiError;
+    throw new LomashApiError(
+      err?.message || `HTTP ${response.status}`,
+      response.status,
+      err?.errors
+    );
+  }
+
+  return responseData as T;
+}
+
+{{#each models}}
+export const {{name}}Schema = {{schemaToZod schema}};
+export type {{name}} = z.infer<typeof {{name}}Schema>;
+
+{{/each}}
+
+{{#each tags}}
+{{#with (operationsByTag ../operations this)}}
+{{#if this.length}}
+export const {{tagToPascal ../this}}Api = {
+  {{#each this}}
+  /**
+   * {{summary}}{{#if deprecated}} @deprecated{{/if}}
+   */
+  async {{operationId}}(
+    {{#if (hasPathParams this)}}
+    params: {
+      {{#each (pathParams this)}}
+      {{name}}: {{schemaToTs schema}};
+      {{/each}}
+    },
+    {{/if}}
+    {{#if requestBody}}
+    body: {{schemaToTs requestBody.schema}},
+    {{/if}}
+    {{#if (hasQueryParams this)}}
+    query?: {
+      {{#each (queryParams this)}}
+      {{name}}{{#unless required}}?{{/unless}}: {{schemaToTs schema}};
+      {{/each}}
+    },
+    {{/if}}
+    signal?: AbortSignal
+  ): Promise<{{#with (successResponse this)}}{{#if schema}}{{schemaToTs schema}}{{else}}void{{/if}}{{else}}void{{/with}}> {
+    const url = `{{pathToUrl path}}`{{#unless (hasPathParams this)}}.replace(/\{[^}]+\}/g, ""){{/unless}};
+    return request(
+      "{{upperFirst method}}",
+      url,
+      {
+        {{#if requestBody}}body,{{/if}}
+        {{#if (hasQueryParams this)}}query: query as Record<string, string | number | boolean | undefined | null>,{{/if}}
+        signal,
+      }
+    );
+  },
+
+  {{/each}}
+};
+{{/if}}
+{{/with}}
+{{/each}}
+
+export const LomashApi = {
+  {{#each tags}}
+  {{tagToPascal this}}: {{tagToPascal this}}Api,
+  {{/each}}
+};
+
+export default LomashApi;

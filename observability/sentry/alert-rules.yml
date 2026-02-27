@@ -1,0 +1,418 @@
+version: 1
+
+alert_rules:
+  - name: Critical Error Rate - API Gateway
+    project: lomash-wood-api-gateway
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 10
+        interval: 1m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-critical"
+        tags:
+          - service:api-gateway
+          - env:production
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    frequency: 5m
+    owner: team:platform
+
+  - name: Critical Error Rate - Auth Service
+    project: lomash-wood-auth-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 5
+        interval: 1m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-critical"
+        tags:
+          - service:auth-service
+          - env:production
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    frequency: 5m
+    owner: team:platform
+
+  - name: Critical Error Rate - Order Payment Service
+    project: lomash-wood-order-payment-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 3
+        interval: 1m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-payments"
+        tags:
+          - service:order-payment-service
+          - env:production
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+      - type: email
+        targetType: team
+        target: payments
+    frequency: 1m
+    owner: team:payments
+
+  - name: Stripe Webhook Error
+    project: lomash-wood-order-payment-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 1
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: transaction
+        value: POST /v1/webhooks/stripe
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-payments"
+        tags:
+          - service:order-payment-service
+          - transaction:stripe-webhook
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    frequency: 1m
+    owner: team:payments
+
+  - name: Payment Intent Creation Failure
+    project: lomash-wood-order-payment-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 1
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: transaction
+        value: POST /v1/payments/create-intent
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-payments"
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    frequency: 1m
+    owner: team:payments
+
+  - name: High Error Rate - Appointment Service
+    project: lomash-wood-appointment-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 5
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:appointment-service
+    frequency: 10m
+    owner: team:backend
+
+  - name: Appointment Booking Failure
+    project: lomash-wood-appointment-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 1
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: transaction
+        value: POST /v1/appointments
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+      - type: email
+        targetType: team
+        target: backend
+    frequency: 5m
+    owner: team:backend
+
+  - name: High Error Rate - Product Service
+    project: lomash-wood-product-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 10
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:product-service
+    frequency: 10m
+    owner: team:backend
+
+  - name: High Error Rate - Customer Service
+    project: lomash-wood-customer-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 5
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:customer-service
+    frequency: 10m
+    owner: team:backend
+
+  - name: Brochure Request Submission Failure
+    project: lomash-wood-customer-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 1
+        interval: 10m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: transaction
+        value: POST /v1/brochures
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+    frequency: 15m
+    owner: team:backend
+
+  - name: Notification Delivery Failure - Email
+    project: lomash-wood-notification-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 3
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: channel
+        value: email
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:notification-service
+          - channel:email
+    frequency: 10m
+    owner: team:backend
+
+  - name: Notification Delivery Failure - SMS
+    project: lomash-wood-notification-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 3
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: channel
+        value: sms
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:notification-service
+          - channel:sms
+    frequency: 10m
+    owner: team:backend
+
+  - name: High Error Rate - Content Service
+    project: lomash-wood-content-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 10
+        interval: 10m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:content-service
+    frequency: 15m
+    owner: team:backend
+
+  - name: S3 Upload Failure
+    project: lomash-wood-content-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 1
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: tagged_event
+        key: transaction
+        value: POST /v1/uploads
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+    frequency: 10m
+    owner: team:backend
+
+  - name: Analytics Service Error Spike
+    project: lomash-wood-analytics-service
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 20
+        interval: 10m
+        comparison_type: count
+    filters:
+      - type: level
+        value: error
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-backend"
+        tags:
+          - service:analytics-service
+    frequency: 15m
+    owner: team:backend
+
+  - name: New Issue - Any Service (Staging)
+    project: lomash-wood-backend
+    environment: staging
+    conditions:
+      - type: first_seen_event
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-staging"
+    frequency: 60m
+    owner: team:platform
+
+  - name: Regression - Previously Resolved Issue
+    project: lomash-wood-backend
+    environment: production
+    conditions:
+      - type: regression_event
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-critical"
+      - type: email
+        targetType: team
+        target: platform
+    frequency: 30m
+    owner: team:platform
+
+  - name: Unhandled Promise Rejection - Any Service
+    project: lomash-wood-backend
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 5
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: error_message
+        match: contains
+        value: UnhandledPromiseRejection
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-critical"
+    frequency: 5m
+    owner: team:platform
+
+  - name: Database Connection Error - Any Service
+    project: lomash-wood-backend
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 3
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: error_message
+        match: contains
+        value: PrismaClientInitializationError
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-critical"
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    frequency: 1m
+    owner: team:platform
+
+  - name: Redis Connection Error - Any Service
+    project: lomash-wood-backend
+    environment: production
+    conditions:
+      - type: error_frequency
+        value: 3
+        interval: 5m
+        comparison_type: count
+    filters:
+      - type: error_message
+        match: contains
+        value: Redis connection
+    actions:
+      - type: slack
+        workspace: lomash-wood
+        channel: "#alerts-critical"
+      - type: pagerduty
+        account: lomash-wood
+        service_key: ${SENTRY_PAGERDUTY_INTEGRATION_KEY}
+    frequency: 1m
+    owner: team:platform

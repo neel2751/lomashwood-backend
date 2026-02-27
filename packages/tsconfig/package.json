@@ -1,0 +1,24 @@
+{
+  "name": "@lomash-wood/tsconfig",
+  "version": "1.0.0",
+  "description": "Shared TypeScript configuration for Lomash Wood microservices",
+  "license": "UNLICENSED",
+  "private": true,
+  "files": [
+    "base.json",
+    "service.json",
+    "test.json",
+    "prisma.json"
+  ],
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "lomash-wood"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

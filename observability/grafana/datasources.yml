@@ -1,0 +1,279 @@
+apiVersion: 1
+
+deleteDatasources:
+  - name: Prometheus-Old
+    orgId: 1
+  - name: Loki-Old
+    orgId: 1
+
+datasources:
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    uid: prometheus-lomash-wood
+    url: http://prometheus.monitoring.svc.cluster.local:9090
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Prometheus
+      prometheusVersion: 2.48.0
+      cacheLevel: High
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: tempo-lomash-wood
+          urlDisplayLabel: View Trace in Tempo
+      timeInterval: 15s
+      queryTimeout: 60s
+      defaultEditor: code
+      manageAlerts: true
+      alertmanagerUid: alertmanager-lomash-wood
+
+  - name: Prometheus-Staging
+    type: prometheus
+    access: proxy
+    orgId: 1
+    uid: prometheus-lomash-wood-staging
+    url: http://prometheus-staging.monitoring.svc.cluster.local:9090
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Prometheus
+      prometheusVersion: 2.48.0
+      cacheLevel: Medium
+      timeInterval: 15s
+      queryTimeout: 60s
+      defaultEditor: code
+    tags:
+      - staging
+
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    uid: loki-lomash-wood
+    url: http://loki.monitoring.svc.cluster.local:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      timeout: 60
+      maxLines: 5000
+      derivedFields:
+        - datasourceUid: tempo-lomash-wood
+          matcherRegex: '"traceId":"(\w+)"'
+          name: TraceID
+          url: "$${__value.raw}"
+          urlDisplayLabel: View Trace in Tempo
+        - datasourceUid: tempo-lomash-wood
+          matcherRegex: '"requestId":"(\w+)"'
+          name: RequestID
+          url: "$${__value.raw}"
+          urlDisplayLabel: View Trace
+      alertmanagerUid: alertmanager-lomash-wood
+
+  - name: Loki-Staging
+    type: loki
+    access: proxy
+    orgId: 1
+    uid: loki-lomash-wood-staging
+    url: http://loki-staging.monitoring.svc.cluster.local:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      timeout: 60
+      maxLines: 5000
+    tags:
+      - staging
+
+  - name: Tempo
+    type: tempo
+    access: proxy
+    orgId: 1
+    uid: tempo-lomash-wood
+    url: http://tempo.monitoring.svc.cluster.local:3200
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      httpMethod: GET
+      tracesToLogs:
+        datasourceUid: loki-lomash-wood
+        filterByTraceID: true
+        filterBySpanID: false
+        lokiSearch: true
+        mapTagNamesEnabled: true
+        mappedTags:
+          - key: service.name
+            value: service
+          - key: k8s.pod.name
+            value: pod
+        spanStartTimeShift: -1m
+        spanEndTimeShift: 1m
+        tags:
+          - key: service.name
+            value: service
+          - key: k8s.namespace.name
+            value: namespace
+      tracesToMetrics:
+        datasourceUid: prometheus-lomash-wood
+        spanStartTimeShift: -1m
+        spanEndTimeShift: 1m
+        tags:
+          - key: service.name
+            value: service
+        queries:
+          - name: Request Rate
+            query: sum(rate(http_requests_total{service="${__tags.service}"}[$__rate_interval]))
+          - name: Error Rate
+            query: sum(rate(http_requests_total{service="${__tags.service}",status=~"5.."}[$__rate_interval]))
+          - name: P95 Latency
+            query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="${__tags.service}"}[$__rate_interval])) by (le))
+      serviceMap:
+        datasourceUid: prometheus-lomash-wood
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      lokiSearch:
+        datasourceUid: loki-lomash-wood
+      traceQuery:
+        timeShiftEnabled: true
+        spanStartTimeShift: -1m
+        spanEndTimeShift: 1m
+
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    orgId: 1
+    uid: alertmanager-lomash-wood
+    url: http://alertmanager.monitoring.svc.cluster.local:9093
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: false
+
+  - name: PostgreSQL-Orders
+    type: postgres
+    access: proxy
+    orgId: 1
+    uid: postgres-orders
+    url: lomash-orders-prod.cluster.eu-west-1.rds.amazonaws.com:5432
+    user: grafana_readonly
+    secureJsonData:
+      password: ${GF_DATASOURCE_POSTGRES_ORDERS_PASSWORD}
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      database: lomash_orders
+      sslmode: require
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    tags:
+      - database
+      - orders
+      - readonly
+
+  - name: PostgreSQL-Auth
+    type: postgres
+    access: proxy
+    orgId: 1
+    uid: postgres-auth
+    url: lomash-auth-prod.cluster.eu-west-1.rds.amazonaws.com:5432
+    user: grafana_readonly
+    secureJsonData:
+      password: ${GF_DATASOURCE_POSTGRES_AUTH_PASSWORD}
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      database: lomash_auth
+      sslmode: require
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    tags:
+      - database
+      - auth
+      - readonly
+
+  - name: PostgreSQL-Appointments
+    type: postgres
+    access: proxy
+    orgId: 1
+    uid: postgres-appointments
+    url: lomash-appointments-prod.cluster.eu-west-1.rds.amazonaws.com:5432
+    user: grafana_readonly
+    secureJsonData:
+      password: ${GF_DATASOURCE_POSTGRES_APPOINTMENTS_PASSWORD}
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      database: lomash_appointments
+      sslmode: require
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    tags:
+      - database
+      - appointments
+      - readonly
+
+  - name: PostgreSQL-Analytics
+    type: postgres
+    access: proxy
+    orgId: 1
+    uid: postgres-analytics
+    url: lomash-analytics-prod.cluster.eu-west-1.rds.amazonaws.com:5432
+    user: grafana_readonly
+    secureJsonData:
+      password: ${GF_DATASOURCE_POSTGRES_ANALYTICS_PASSWORD}
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      database: lomash_analytics
+      sslmode: require
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    tags:
+      - database
+      - analytics
+      - readonly
+
+  - name: TestData
+    type: testdata
+    access: proxy
+    orgId: 1
+    uid: testdata-lomash-wood
+    isDefault: false
+    version: 1
+    editable: false

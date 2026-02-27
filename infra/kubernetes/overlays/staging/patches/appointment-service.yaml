@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  namespace: lomash-wood-staging
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: appointment-service
+          image: lomashwood/appointment-service:staging
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "75m"
+              memory: "192Mi"
+            limits:
+              cpu: "400m"
+              memory: "384Mi"
+          env:
+            - name: NODE_ENV
+              value: staging
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_FORMAT
+              value: json
+            - name: SEND_REMINDER_JOB_INTERVAL_MINUTES
+              value: "15"
+            - name: CLEANUP_EXPIRED_SLOTS_INTERVAL_HOURS
+              value: "6"
+            - name: ADMIN_NOTIFICATION_EMAIL
+              value: "appointments-staging@lomashwood.co.uk"
+            - name: KITCHEN_TEAM_EMAIL
+              value: "kitchen-staging@lomashwood.co.uk"
+            - name: BEDROOM_TEAM_EMAIL
+              value: "bedroom-staging@lomashwood.co.uk"

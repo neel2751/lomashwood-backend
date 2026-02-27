@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: lomash-wood-dev
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: product-service
+          image: lomashwood/product-service:dev
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: NODE_ENV
+              value: development
+            - name: LOG_LEVEL
+              value: debug
+            - name: REDIS_CACHE_TTL_SECONDS
+              value: "60"

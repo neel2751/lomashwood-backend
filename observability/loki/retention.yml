@@ -1,0 +1,51 @@
+auth_enabled: false
+
+compactor:
+  working_directory: /var/loki/compactor
+  shared_store: filesystem
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+  delete_request_store: filesystem
+
+limits_config:
+  retention_period: 744h
+
+per_tenant_retention:
+  - tenant: lomash-wood
+    retention_period: 744h
+    stream_retention:
+      - selector: '{service="api-gateway"}'
+        priority: 10
+        period: 744h
+      - selector: '{service="auth-service"}'
+        priority: 10
+        period: 744h
+      - selector: '{service="order-payment-service"}'
+        priority: 10
+        period: 2160h
+      - selector: '{service="appointment-service"}'
+        priority: 10
+        period: 1440h
+      - selector: '{service="product-service"}'
+        priority: 5
+        period: 744h
+      - selector: '{service="content-service"}'
+        priority: 5
+        period: 360h
+      - selector: '{service="customer-service"}'
+        priority: 10
+        period: 2160h
+      - selector: '{service="notification-service"}'
+        priority: 5
+        period: 720h
+      - selector: '{service="analytics-service"}'
+        priority: 5
+        period: 2160h
+      - selector: '{level="error"}'
+        priority: 20
+        period: 2160h
+      - selector: '{level="warn"}'
+        priority: 15
+        period: 1440h

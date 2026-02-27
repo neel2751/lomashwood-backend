@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: lomash-wood-staging
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: notification-service
+          image: lomashwood/notification-service:staging
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "75m"
+              memory: "192Mi"
+            limits:
+              cpu: "400m"
+              memory: "384Mi"
+          env:
+            - name: NODE_ENV
+              value: staging
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_FORMAT
+              value: json
+            - name: EMAIL_PROVIDER
+              value: ses
+            - name: SMS_PROVIDER
+              value: twilio
+            - name: PUSH_PROVIDER
+              value: firebase
+            - name: EMAIL_FROM_NAME
+              value: "Lomash Wood Staging"
+            - name: EMAIL_FROM_ADDRESS
+              value: "noreply-staging@lomashwood.co.uk"
+            - name: RETRY_MAX_ATTEMPTS
+              value: "3"
+            - name: RETRY_INITIAL_DELAY_MS
+              value: "1000"
+            - name: RETRY_BACKOFF_MULTIPLIER
+              value: "2"
+            - name: FAILED_MESSAGE_RETRY_INTERVAL_MINUTES
+              value: "15"

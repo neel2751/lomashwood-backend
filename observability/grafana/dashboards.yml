@@ -1,0 +1,357 @@
+apiVersion: 1
+
+providers:
+
+  - name: lomash-wood-core
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/core
+      foldersFromFilesStructure: false
+    folder: Core Services
+    folderUid: core-services
+
+  - name: lomash-wood-infrastructure
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/infrastructure
+      foldersFromFilesStructure: false
+    folder: Infrastructure
+    folderUid: infrastructure
+
+  - name: lomash-wood-business
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/business
+      foldersFromFilesStructure: false
+    folder: Business Metrics
+    folderUid: business-metrics
+
+  - name: lomash-wood-slo
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 60
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/slo
+      foldersFromFilesStructure: false
+    folder: SLO & SLA
+    folderUid: slo-sla
+
+  - name: lomash-wood-security
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 60
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/security
+      foldersFromFilesStructure: false
+    folder: Security
+    folderUid: security
+
+  - name: lomash-wood-staging
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/staging
+      foldersFromFilesStructure: false
+    folder: Staging
+    folderUid: staging
+
+dashboard_config:
+
+  core_dashboards:
+
+    - uid: api-gateway-dashboard
+      title: API Gateway
+      file: core/api-gateway-dashboard.json
+      tags:
+        - api-gateway
+        - tier1
+        - http
+      description: >
+        Incoming request rate, error rate, P50/P95/P99 latency breakdown per route,
+        active connections, rate limit breaches, and upstream service health.
+      refresh: 30s
+      time_range: last 1 hour
+
+    - uid: auth-service-dashboard
+      title: Auth Service
+      file: core/auth-service-dashboard.json
+      tags:
+        - auth
+        - tier1
+        - security
+      description: >
+        Login attempts, registration rate, active sessions, token refresh rate,
+        failed login heatmap, account lockouts, and Redis session store health.
+      refresh: 30s
+      time_range: last 1 hour
+
+    - uid: product-service-dashboard
+      title: Product Service
+      file: core/product-service-dashboard.json
+      tags:
+        - products
+        - tier1
+        - catalogue
+      description: >
+        Product catalogue size by category (kitchen/bedroom), page view rate,
+        search request volume, filter usage, cache hit rate, and pricing API latency.
+      refresh: 30s
+      time_range: last 1 hour
+
+    - uid: order-payment-service-dashboard
+      title: Order & Payment Service
+      file: core/order-payment-service-dashboard.json
+      tags:
+        - orders
+        - payments
+        - stripe
+        - tier1
+      description: >
+        Payment intent creation rate, success/failure rate by failure code, order state
+        distribution, webhook processing latency and queue depth, refund rate,
+        Stripe API response time, and revenue throughput (GBP/hour).
+      refresh: 10s
+      time_range: last 1 hour
+
+    - uid: appointment-service-dashboard
+      title: Appointment Service
+      file: core/appointment-service-dashboard.json
+      tags:
+        - appointments
+        - bookings
+        - tier1
+      description: >
+        Booking rate by type (home/online/showroom), available slots per showroom,
+        cancellation rate, reminder delivery rate, and booking conversion funnel.
+      refresh: 30s
+      time_range: last 3 hours
+
+    - uid: content-service-dashboard
+      title: Content Service
+      file: core/content-service-dashboard.json
+      tags:
+        - content
+        - cms
+        - tier2
+      description: >
+        Blog publish rate, media upload throughput, CMS page view rate,
+        S3 upload success rate, and sitemap generation job status.
+      refresh: 60s
+      time_range: last 3 hours
+
+    - uid: customer-service-dashboard
+      title: Customer Service
+      file: core/customer-service-dashboard.json
+      tags:
+        - customers
+        - profiles
+        - tier2
+      description: >
+        Profile update rate, wishlist activity, review submission rate,
+        support ticket volume, and loyalty points transaction rate.
+      refresh: 60s
+      time_range: last 3 hours
+
+    - uid: notification-service-dashboard
+      title: Notification Service
+      file: core/notification-service-dashboard.json
+      tags:
+        - notifications
+        - email
+        - sms
+        - tier2
+      description: >
+        Email/SMS/push delivery rate and failure rate per provider,
+        template usage breakdown, retry queue depth, and provider latency comparison.
+      refresh: 60s
+      time_range: last 3 hours
+
+    - uid: analytics-service-dashboard
+      title: Analytics Service
+      file: core/analytics-service-dashboard.json
+      tags:
+        - analytics
+        - tracking
+        - tier3
+      description: >
+        Event ingestion rate, session tracking volume, funnel completion rates,
+        dashboard query latency, and export job status.
+      refresh: 60s
+      time_range: last 6 hours
+
+  infrastructure_dashboards:
+
+    - uid: infra-dashboard
+      title: Infrastructure Overview
+      file: infrastructure/infra-dashboard.json
+      tags:
+        - infrastructure
+        - kubernetes
+        - nodes
+      description: >
+        EKS node CPU/memory/disk utilisation, pod count and restart rates,
+        HPA scaling events, PVC usage, and cluster-level network I/O.
+      refresh: 30s
+      time_range: last 1 hour
+
+    - uid: database-dashboard
+      title: Database Overview
+      file: infrastructure/database-dashboard.json
+      tags:
+        - postgresql
+        - rds
+        - database
+      description: >
+        Per-database connection utilisation, transaction rate, cache hit rate,
+        deadlock rate, replication lag, slow query count, and disk usage for all
+        8 Lomash Wood PostgreSQL databases.
+      refresh: 30s
+      time_range: last 1 hour
+
+    - uid: redis-dashboard
+      title: Redis Cache
+      file: infrastructure/redis-dashboard.json
+      tags:
+        - redis
+        - cache
+        - sessions
+      description: >
+        Redis memory usage, hit/miss rate, ops/sec, connected clients,
+        keyspace size breakdown (sessions vs product cache vs auth blacklist),
+        eviction rate, and replication health.
+      refresh: 15s
+      time_range: last 1 hour
+
+    - uid: kafka-dashboard
+      title: Event Bus / Messaging
+      file: infrastructure/kafka-dashboard.json
+      tags:
+        - kafka
+        - events
+        - messaging
+      description: >
+        Event producer throughput per topic, consumer lag per service,
+        failed event rate, dead-letter queue depth, and per-topic partition health.
+      refresh: 30s
+      time_range: last 1 hour
+
+  business_dashboards:
+
+    - uid: business-metrics-dashboard
+      title: Business Metrics
+      file: business/business-metrics-dashboard.json
+      tags:
+        - business
+        - revenue
+        - kpi
+      description: >
+        Daily/weekly/monthly revenue (GBP), orders placed, average order value,
+        appointments booked by type, brochure requests, newsletter signups,
+        new user registrations, and top-performing product categories.
+      refresh: 5m
+      time_range: last 7 days
+
+  slo_dashboards:
+
+    - uid: sla-slo-dashboard
+      title: SLO / SLA Tracker
+      file: slo/sla-slo-dashboard.json
+      tags:
+        - slo
+        - sla
+        - availability
+        - error-budget
+      description: >
+        Per-service availability over 7d/30d windows, error budget consumption rate,
+        SLO burn rate alerts, payment success rate SLO (99.95% target),
+        and historical SLO breaches log.
+      refresh: 5m
+      time_range: last 30 days
+
+    - uid: error-rate-dashboard
+      title: Error Rate
+      file: slo/error-rate-dashboard.json
+      tags:
+        - errors
+        - http
+        - 5xx
+      description: >
+        Per-service 5xx error rate, 4xx breakdown, error spike timeline,
+        top error routes, and error rate vs deployment marker overlay.
+      refresh: 30s
+      time_range: last 3 hours
+
+    - uid: latency-dashboard
+      title: Latency
+      file: slo/latency-dashboard.json
+      tags:
+        - latency
+        - performance
+        - p95
+        - p99
+      description: >
+        P50/P95/P99 latency per service and per route, latency heatmaps,
+        slow request log, Stripe API latency, database query latency,
+        and Redis operation latency.
+      refresh: 30s
+      time_range: last 1 hour
+
+  security_dashboards:
+
+    - uid: security-overview-dashboard
+      title: Security Overview
+      file: security/security-overview-dashboard.json
+      tags:
+        - security
+        - auth
+        - waf
+      description: >
+        Login failure rate, failed login IP heatmap, WAF block events,
+        account lockouts, token revocations, and rate limit breaches.
+      refresh: 1m
+      time_range: last 24 hours
+
+folder_config:
+
+  - uid: core-services
+    title: Core Services
+    description: Dashboards for all Lomash Wood microservices
+
+  - uid: infrastructure
+    title: Infrastructure
+    description: Kubernetes, PostgreSQL, Redis, and event bus monitoring
+
+  - uid: business-metrics
+    title: Business Metrics
+    description: Revenue, bookings, registrations, and KPI tracking
+
+  - uid: slo-sla
+    title: SLO & SLA
+    description: Service level objectives, error budgets, and availability tracking
+
+  - uid: security
+    title: Security
+    description: Auth anomalies, WAF, and access monitoring
+
+  - uid: staging
+    title: Staging
+    description: Staging environment dashboards (editable)

@@ -1,0 +1,110 @@
+{
+  "type": "baseline",
+  "description": "Baseline load test — normal expected traffic, steady VU count",
+  "run_config": {
+    "vus": 10,
+    "duration": "2m",
+    "ramp_up": "none",
+    "think_time": "1-3s"
+  },
+  "acceptance_criteria": {
+    "http_req_duration_p95_ms": 500,
+    "http_req_duration_p99_ms": 1000,
+    "http_req_failed_rate": 0.01,
+    "error_rate": 0.05
+  },
+  "endpoints_under_test": [
+    "POST /v1/auth/login",
+    "GET  /v1/auth/me",
+    "GET  /v1/products",
+    "GET  /v1/products/:id",
+    "GET  /v1/appointments/availability",
+    "POST /v1/appointments",
+    "POST /v1/payments/create-intent",
+    "POST /v1/analytics/track"
+  ],
+  "results": {
+    "run_date": null,
+    "environment": null,
+    "duration_seconds": null,
+    "vus": null,
+    "total_requests": null,
+    "requests_per_second": null,
+    "metrics": {
+      "http_req_duration": {
+        "avg_ms": null,
+        "min_ms": null,
+        "med_ms": null,
+        "max_ms": null,
+        "p90_ms": null,
+        "p95_ms": null,
+        "p99_ms": null
+      },
+      "http_req_failed": {
+        "count": null,
+        "rate": null
+      },
+      "http_reqs": {
+        "count": null,
+        "rate": null
+      },
+      "data_received_mb": null,
+      "data_sent_mb": null,
+      "iterations": null,
+      "iteration_duration_avg_ms": null
+    },
+    "endpoint_breakdown": {
+      "auth_login": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      },
+      "product_list": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      },
+      "product_detail": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      },
+      "appointment_availability": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      },
+      "appointment_create": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      },
+      "payment_intent": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      },
+      "analytics_track": {
+        "avg_ms": null,
+        "p95_ms": null,
+        "error_rate": null
+      }
+    },
+    "thresholds": {
+      "http_req_duration_p95": {
+        "threshold": "p(95)<500",
+        "passed": null
+      },
+      "http_req_duration_p99": {
+        "threshold": "p(99)<1000",
+        "passed": null
+      },
+      "http_req_failed": {
+        "threshold": "rate<0.01",
+        "passed": null
+      }
+    },
+    "passed": null,
+    "notes": null
+  }
+}

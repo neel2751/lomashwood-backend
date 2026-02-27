@@ -1,0 +1,4 @@
+export const WISHLIST_CONSTANTS = {
+  MAX_ITEMS: 100,
+  CACHE_TTL_SECONDS: 1800,
+} as const;

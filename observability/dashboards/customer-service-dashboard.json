@@ -1,0 +1,77 @@
+{
+  "__inputs": [{ "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }],
+  "title": "Lomash Wood — Customer Service",
+  "uid": "lw-customer",
+  "tags": ["lomash-wood", "customer-service"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "60s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "New Profiles (24h)",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(customer_profiles_created_total{service=\"customer-service\"}[24h]))", "legendFormat": "Profiles" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Brochure Requests (24h)",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(brochure_requests_total{service=\"customer-service\"}[24h]))", "legendFormat": "Requests" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Reviews Submitted (24h)",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(reviews_created_total{service=\"customer-service\"}[24h]))", "legendFormat": "Reviews" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Newsletter Subscriptions (24h)",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(newsletter_subscriptions_total{service=\"customer-service\"}[24h]))", "legendFormat": "Subscriptions" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Support Tickets (24h)",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(support_tickets_total{service=\"customer-service\"}[24h]))", "legendFormat": "Tickets" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 50 }] } } }
+    },
+    {
+      "id": 6, "type": "stat", "title": "Business Enquiries (24h)",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(business_enquiries_total{service=\"customer-service\"}[24h]))", "legendFormat": "Enquiries" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Customer Activity Rate",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(brochure_requests_total{service=\"customer-service\"}[5m]))", "legendFormat": "Brochure Requests" },
+        { "expr": "sum(rate(reviews_created_total{service=\"customer-service\"}[5m]))", "legendFormat": "Reviews" },
+        { "expr": "sum(rate(newsletter_subscriptions_total{service=\"customer-service\"}[5m]))", "legendFormat": "Newsletters" },
+        { "expr": "sum(rate(business_enquiries_total{service=\"customer-service\"}[5m]))", "legendFormat": "Business Enquiries" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Customer Service API Latency (P99)",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"customer-service\",route=\"/v1/brochures\"}[2m])) by (le))", "legendFormat": "POST /v1/brochures P99" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"customer-service\",route=\"/v1/newsletter\"}[2m])) by (le))", "legendFormat": "POST /v1/newsletter P99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 9, "type": "timeseries", "title": "Wishlist & Loyalty Activity",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(wishlist_items_added_total{service=\"customer-service\"}[5m]))", "legendFormat": "Wishlist Adds" },
+        { "expr": "sum(rate(loyalty_points_earned_total{service=\"customer-service\"}[5m]))", "legendFormat": "Loyalty Points Earned" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    }
+  ]
+}

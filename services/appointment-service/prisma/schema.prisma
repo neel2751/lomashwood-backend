@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+   
+}
+
+
+
+enum AppointmentType {
+  HOME_MEASUREMENT
+  ONLINE
+  SHOWROOM
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum BookingCategory {
+  KITCHEN
+  BEDROOM
+  BOTH
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ReminderType {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Booking {
+  id                String            @id @default(uuid())
+  appointmentType   AppointmentType
+  status            AppointmentStatus @default(PENDING)
+  category          BookingCategory
+  
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  customerPostcode  String
+  customerAddress   String
+  
+  consultantId      String?
+  consultant        Consultant?       @relation(fields: [consultantId], references: [id], onDelete: SetNull)
+  
+  showroomId        String?
+  showroom          Showroom?         @relation(fields: [showroomId], references: [id], onDelete: SetNull)
+  
+  scheduledDate     DateTime
+  scheduledTime     String
+  duration          Int               @default(60)
+  endTime           String?
+  
+  notes             String?
+  internalNotes     String?
+  cancellationReason String?
+  
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  completedAt       DateTime?
+  
+  reminders         Reminder[]
+  
+  createdBy         String?
+  updatedBy         String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([appointmentType])
+  @@index([status])
+  @@index([category])
+  @@index([scheduledDate])
+  @@index([consultantId])
+  @@index([showroomId])
+  @@index([customerEmail])
+  @@index([customerPhone])
+  @@map("bookings")
+}
+
+model Consultant {
+  id                String              @id @default(uuid())
+  userId            String?             @unique
+  name              String
+  email             String              @unique
+  phone             String
+  specialization    String[]
+  bio               String?
+  profileImage      String?
+  
+  isActive          Boolean             @default(true)
+  isAvailable       Boolean             @default(true)
+  
+  bookings          Booking[]
+  availability      Availability[]
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([email])
+  @@index([isActive])
+  @@index([isAvailable])
+  @@map("consultants")
+}
+
+model Availability {
+  id                String              @id @default(uuid())
+  consultantId      String
+  consultant        Consultant          @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  
+  dayOfWeek         DayOfWeek
+  startTime         String
+  endTime           String
+  
+  isRecurring       Boolean             @default(true)
+  specificDate      DateTime?
+  
+  isBlocked         Boolean             @default(false)
+  blockReason       String?
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([consultantId])
+  @@index([dayOfWeek])
+  @@index([specificDate])
+  @@map("availability")
+}
+
+model Showroom {
+  id                String              @id @default(uuid())
+  name              String
+  address           String
+  city              String
+  postcode          String
+  country           String              @default("United Kingdom")
+  
+  email             String
+  phone             String
+  
+  latitude          Float?
+  longitude         Float?
+  mapLink           String?
+  
+  image             String?
+  images            String[]
+  
+  openingHours      Json
+  timezone          String              @default("Europe/London")
+  
+  capacity          Int                 @default(5)
+  
+  isActive          Boolean             @default(true)
+  
+  bookings          Booking[]
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([city])
+  @@index([postcode])
+  @@index([isActive])
+  @@map("showrooms")
+}
+
+model Reminder {
+  id                String              @id @default(uuid())
+  bookingId         String
+  booking           Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  
+  type              ReminderType
+  status            ReminderStatus      @default(PENDING)
+  
+  scheduledFor      DateTime
+  sentAt            DateTime?
+  
+  recipientEmail    String?
+  recipientPhone    String?
+  
+  subject           String?
+  message           String
+  
+  errorMessage      String?
+  retryCount        Int                 @default(0)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([bookingId])
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([type])
+  @@map("reminders")
+}
+
+model TimeSlot {
+  id                String              @id @default(uuid())
+  date              DateTime
+  startTime         String
+  endTime           String
+  duration          Int                 @default(60)
+  
+  consultantId      String?
+  showroomId        String?
+  
+  isAvailable       Boolean             @default(true)
+  isBlocked         Boolean             @default(false)
+  blockReason       String?
+  
+  maxBookings       Int                 @default(1)
+  currentBookings   Int                 @default(0)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([date])
+  @@index([consultantId])
+  @@index([showroomId])
+  @@index([isAvailable])
+  @@map("time_slots")
+}
+
+model CalendarIntegration {
+  id                String              @id @default(uuid())
+  consultantId      String              @unique
+  
+  provider          String
+  accessToken       String
+  refreshToken      String?
+  expiresAt         DateTime?
+  
+  calendarId        String
+  syncEnabled       Boolean             @default(true)
+  lastSyncedAt      DateTime?
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([consultantId])
+  @@map("calendar_integrations")
+}

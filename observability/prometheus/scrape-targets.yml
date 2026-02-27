@@ -1,0 +1,390 @@
+scrape_configs:
+
+  - job_name: lomash-wood-services-static
+    static_configs:
+
+      - targets:
+          - api-gateway.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: api-gateway
+          tier: tier1
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - auth-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: auth-service
+          tier: tier1
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - product-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: product-service
+          tier: tier1
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - order-payment-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: order-payment-service
+          tier: tier1
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - appointment-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: appointment-service
+          tier: tier1
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - content-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: content-service
+          tier: tier2
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - customer-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: customer-service
+          tier: tier2
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - notification-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: notification-service
+          tier: tier2
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+      - targets:
+          - analytics-service.lomash-wood.svc.cluster.local:9100
+        labels:
+          service: analytics-service
+          tier: tier3
+          team: backend
+          namespace: lomash-wood
+          environment: production
+
+  - job_name: lomash-wood-databases
+    static_configs:
+
+      - targets:
+          - postgres-exporter-auth.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_auth
+          service: auth-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-products.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_products
+          service: product-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-orders.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_orders
+          service: order-payment-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-appointments.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_appointments
+          service: appointment-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-content.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_content
+          service: content-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-customers.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_customers
+          service: customer-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-notifications.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_notifications
+          service: notification-service
+          db_role: primary
+          environment: production
+
+      - targets:
+          - postgres-exporter-analytics.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_analytics
+          service: analytics-service
+          db_role: primary
+          environment: production
+
+  - job_name: lomash-wood-databases-replica
+    static_configs:
+
+      - targets:
+          - postgres-replica-exporter-orders.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_orders
+          service: order-payment-service
+          db_role: replica
+          region: eu-west-2
+          environment: production
+
+      - targets:
+          - postgres-replica-exporter-auth.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_auth
+          service: auth-service
+          db_role: replica
+          region: eu-west-2
+          environment: production
+
+      - targets:
+          - postgres-replica-exporter-appointments.lomash-wood.svc.cluster.local:9187
+        labels:
+          database: lomash_appointments
+          service: appointment-service
+          db_role: replica
+          region: eu-west-2
+          environment: production
+
+  - job_name: lomash-wood-redis
+    static_configs:
+
+      - targets:
+          - redis-exporter.lomash-wood.svc.cluster.local:9121
+        labels:
+          role: cache
+          environment: production
+
+      - targets:
+          - redis-replica-exporter.lomash-wood.svc.cluster.local:9121
+        labels:
+          role: replica
+          environment: production
+
+  - job_name: lomash-wood-blackbox
+    metrics_path: /probe
+    params:
+      module:
+        - http_2xx
+    static_configs:
+
+      - targets:
+          - https://api.lomashwood.com/health
+        labels:
+          endpoint: global-health
+          tier: tier1
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/auth/health
+        labels:
+          endpoint: auth-health
+          tier: tier1
+          service: auth-service
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/products/health
+        labels:
+          endpoint: products-health
+          tier: tier1
+          service: product-service
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/orders/health
+        labels:
+          endpoint: orders-health
+          tier: tier1
+          service: order-payment-service
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/appointments/health
+        labels:
+          endpoint: appointments-health
+          tier: tier1
+          service: appointment-service
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/content/health
+        labels:
+          endpoint: content-health
+          tier: tier2
+          service: content-service
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/customers/health
+        labels:
+          endpoint: customers-health
+          tier: tier2
+          service: customer-service
+          environment: production
+
+      - targets:
+          - https://api.lomashwood.com/v1/notifications/health
+        labels:
+          endpoint: notifications-health
+          tier: tier2
+          service: notification-service
+          environment: production
+
+      - targets:
+          - https://www.lomashwood.com
+        labels:
+          endpoint: frontend-homepage
+          tier: frontend
+          environment: production
+
+      - targets:
+          - https://www.lomashwood.com/kitchens
+        labels:
+          endpoint: frontend-kitchens
+          tier: frontend
+          environment: production
+
+      - targets:
+          - https://www.lomashwood.com/bedrooms
+        labels:
+          endpoint: frontend-bedrooms
+          tier: frontend
+          environment: production
+
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+  - job_name: lomash-wood-blackbox-ssl
+    metrics_path: /probe
+    params:
+      module:
+        - tcp_connect
+    static_configs:
+
+      - targets:
+          - api.lomashwood.com:443
+        labels:
+          endpoint: api-ssl
+          environment: production
+
+      - targets:
+          - www.lomashwood.com:443
+        labels:
+          endpoint: www-ssl
+          environment: production
+
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
+
+  - job_name: lomash-wood-node-exporter
+    kubernetes_sd_configs:
+      - role: node
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "^(.*):(.*)$"
+        target_label: __address__
+        replacement: "${1}:9100"
+      - source_labels: [__meta_kubernetes_node_name]
+        target_label: node
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+    scrape_interval: 15s
+
+  - job_name: lomash-wood-kube-state-metrics
+    static_configs:
+      - targets:
+          - kube-state-metrics.monitoring.svc.cluster.local:8080
+    scrape_interval: 30s
+
+  - job_name: lomash-wood-staging-services
+    static_configs:
+
+      - targets:
+          - api-gateway.lomash-wood-staging.svc.cluster.local:9100
+        labels:
+          service: api-gateway
+          environment: staging
+
+      - targets:
+          - auth-service.lomash-wood-staging.svc.cluster.local:9100
+        labels:
+          service: auth-service
+          environment: staging
+
+      - targets:
+          - product-service.lomash-wood-staging.svc.cluster.local:9100
+        labels:
+          service: product-service
+          environment: staging
+
+      - targets:
+          - order-payment-service.lomash-wood-staging.svc.cluster.local:9100
+        labels:
+          service: order-payment-service
+          environment: staging
+
+      - targets:
+          - appointment-service.lomash-wood-staging.svc.cluster.local:9100
+        labels:
+          service: appointment-service
+          environment: staging
+
+  - job_name: lomash-wood-alertmanager
+    static_configs:
+      - targets:
+          - alertmanager.monitoring.svc.cluster.local:9093
+        labels:
+          environment: production
+
+  - job_name: lomash-wood-prometheus-self
+    static_configs:
+      - targets:
+          - localhost:9090
+        labels:
+          environment: production

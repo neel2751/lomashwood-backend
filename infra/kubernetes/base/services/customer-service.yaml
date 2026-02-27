@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+  namespace: lomash-wood
+  labels:
+    app: customer-service
+    app.kubernetes.io/name: customer-service
+    app.kubernetes.io/part-of: lomash-wood-platform
+    app.kubernetes.io/component: service
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3006"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  selector:
+    app: customer-service
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3006
+      targetPort: 3006
+    - name: metrics
+      protocol: TCP
+      port: 9096
+      targetPort: 3006

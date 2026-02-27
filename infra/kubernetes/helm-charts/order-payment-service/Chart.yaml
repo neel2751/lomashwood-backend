@@ -1,0 +1,16 @@
+apiVersion: v2
+name: order-payment-service
+description: Lomash Wood Order & Payment Service Helm Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - lomash-wood
+  - order
+  - payment
+  - microservice
+home: https://github.com/lomash-wood/lomash-wood-backend
+maintainers:
+  - name: Lomash Wood Engineering
+    email: engineering@lomashwood.com
+dependencies: []

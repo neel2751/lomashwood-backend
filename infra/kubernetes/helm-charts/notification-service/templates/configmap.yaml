@@ -1,0 +1,18 @@
+{{- if .Values.configMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "notification-service.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "notification-service.labels" . | nindent 4 }}
+data:
+  APP_NAME: "notification-service"
+  APP_VERSION: {{ .Chart.AppVersion | quote }}
+  CHART_VERSION: {{ .Chart.Version | quote }}
+  RELEASE_NAME: {{ .Release.Name | quote }}
+  RELEASE_NAMESPACE: {{ .Release.Namespace | quote }}
+  {{- with .Values.configMap.data }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}

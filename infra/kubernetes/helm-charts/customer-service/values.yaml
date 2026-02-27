@@ -1,0 +1,128 @@
+replicaCount: 2
+
+image:
+  repository: lomashwood/customer-service
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  - name: lomash-wood-registry-secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: "customer-service-sa"
+  annotations: {}
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3006"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 3006
+  metricsPort: 9096
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+  scaleUpStabilizationWindowSeconds: 30
+  scaleDownStabilizationWindowSeconds: 300
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 3006
+  initialDelaySeconds: 20
+  periodSeconds: 20
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 3006
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 3
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - customer-service
+          topologyKey: kubernetes.io/hostname
+
+topologySpreadConstraints: []
+
+terminationGracePeriodSeconds: 30
+
+env:
+  NODE_ENV: production
+  PORT: "3006"
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "5"
+  LOYALTY_POINTS_EXPIRY_DAYS: "365"
+  LOYALTY_POINTS_PER_POUND: "1"
+  INACTIVE_USER_ANONYMIZE_AFTER_DAYS: "1095"
+  REVIEW_MODERATION_REQUIRED: "true"
+  MAX_WISHLIST_ITEMS: "100"
+  SUPPORT_TICKET_ESCALATION_HOURS: "24"
+  EXPIRE_LOYALTY_JOB_INTERVAL_HOURS: "24"
+  SYNC_CUSTOMER_JOB_INTERVAL_MINUTES: "60"
+  ANONYMIZE_INACTIVE_JOB_INTERVAL_HOURS: "168"
+  REBUILD_CUSTOMER_INDEX_INTERVAL_HOURS: "6"
+
+secretEnv:
+  DATABASE_URL: ""
+  REDIS_URL: ""
+  ENCRYPTION_KEY: ""
+  INTERNAL_SERVICE_API_KEY: ""
+
+existingSecret: ""
+
+volumes:
+  - name: tmp
+    emptyDir: {}
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+namespace: lomash-wood

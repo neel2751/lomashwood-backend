@@ -1,0 +1,235 @@
+groups:
+  - name: lomash-wood-tempo-latency
+    interval: 1m
+    rules:
+      - alert: HighP99LatencyApiGateway
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_spanmetrics_duration_seconds_bucket{service="api-gateway"}[5m])) by (le, service)
+          ) > 3
+        for: 2m
+        labels:
+          severity: critical
+          service: api-gateway
+          team: platform
+        annotations:
+          summary: API Gateway P99 latency exceeds 3s
+          description: 99th percentile latency for api-gateway is above the 3 second SLA threshold.
+          runbook: https://docs.lomashwood.internal/runbooks/high-latency.md
+
+      - alert: HighP99LatencyOrderPaymentService
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_spanmetrics_duration_seconds_bucket{service="order-payment-service"}[5m])) by (le, service)
+          ) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: order-payment-service
+          team: payments
+        annotations:
+          summary: Order/Payment Service P99 latency exceeds 5s
+          description: Payment processing is taking too long. Possible Stripe API degradation or DB slowness.
+          runbook: https://docs.lomashwood.internal/runbooks/payment-incident.md
+
+      - alert: HighP99LatencyAuthService
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_spanmetrics_duration_seconds_bucket{service="auth-service"}[5m])) by (le, service)
+          ) > 2
+        for: 2m
+        labels:
+          severity: warning
+          service: auth-service
+          team: platform
+        annotations:
+          summary: Auth Service P99 latency exceeds 2s
+          description: Authentication is taking too long which may impact user login experience.
+          runbook: https://docs.lomashwood.internal/runbooks/auth-failure.md
+
+      - alert: HighP99LatencyAppointmentService
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_spanmetrics_duration_seconds_bucket{service="appointment-service"}[5m])) by (le, service)
+          ) > 3
+        for: 2m
+        labels:
+          severity: warning
+          service: appointment-service
+          team: backend
+        annotations:
+          summary: Appointment Service P99 latency exceeds 3s
+          description: Appointment booking is experiencing high latency.
+
+      - alert: HighP99LatencyProductService
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_spanmetrics_duration_seconds_bucket{service="product-service"}[5m])) by (le, service)
+          ) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: product-service
+          team: backend
+        annotations:
+          summary: Product Service P99 latency exceeds 2s
+          description: Product catalog browsing is experiencing degraded performance.
+
+  - name: lomash-wood-tempo-error-rates
+    interval: 1m
+    rules:
+      - alert: HighSpanErrorRateOrderPayment
+        expr: |
+          sum(rate(traces_spanmetrics_calls_total{service="order-payment-service", status_code="STATUS_CODE_ERROR"}[5m]))
+          /
+          sum(rate(traces_spanmetrics_calls_total{service="order-payment-service"}[5m]))
+          > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: order-payment-service
+          team: payments
+        annotations:
+          summary: Order/Payment Service span error rate above 5%
+          description: More than 5% of payment traces are reporting errors.
+          runbook: https://docs.lomashwood.internal/runbooks/payment-incident.md
+
+      - alert: HighSpanErrorRateAuthService
+        expr: |
+          sum(rate(traces_spanmetrics_calls_total{service="auth-service", status_code="STATUS_CODE_ERROR"}[5m]))
+          /
+          sum(rate(traces_spanmetrics_calls_total{service="auth-service"}[5m]))
+          > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: auth-service
+          team: platform
+        annotations:
+          summary: Auth Service span error rate above 5%
+          description: More than 5% of auth traces are reporting errors.
+          runbook: https://docs.lomashwood.internal/runbooks/auth-failure.md
+
+      - alert: HighSpanErrorRateApiGateway
+        expr: |
+          sum(rate(traces_spanmetrics_calls_total{service="api-gateway", status_code="STATUS_CODE_ERROR"}[5m]))
+          /
+          sum(rate(traces_spanmetrics_calls_total{service="api-gateway"}[5m]))
+          > 0.02
+        for: 2m
+        labels:
+          severity: warning
+          service: api-gateway
+          team: platform
+        annotations:
+          summary: API Gateway span error rate above 2%
+          description: More than 2% of API Gateway traces are reporting errors.
+
+      - alert: HighSpanErrorRateNotificationService
+        expr: |
+          sum(rate(traces_spanmetrics_calls_total{service="notification-service", status_code="STATUS_CODE_ERROR"}[10m]))
+          /
+          sum(rate(traces_spanmetrics_calls_total{service="notification-service"}[10m]))
+          > 0.10
+        for: 3m
+        labels:
+          severity: warning
+          service: notification-service
+          team: backend
+        annotations:
+          summary: Notification Service span error rate above 10%
+          description: High failure rate for notification delivery operations.
+
+  - name: lomash-wood-tempo-service-graph
+    interval: 1m
+    rules:
+      - alert: ServiceGraphEdgeHighErrorRate
+        expr: |
+          sum(rate(traces_service_graph_request_failed_total[5m])) by (client, server)
+          /
+          sum(rate(traces_service_graph_request_total[5m])) by (client, server)
+          > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: High error rate between services
+          description: More than 5% of requests between {{ $labels.client }} and {{ $labels.server }} are failing.
+          runbook: https://docs.lomashwood.internal/runbooks/outage.md
+
+      - alert: ServiceGraphEdgeHighLatency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_service_graph_request_duration_seconds_bucket[5m])) by (le, client, server)
+          ) > 3
+        for: 3m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: High latency between services
+          description: P99 latency between {{ $labels.client }} and {{ $labels.server }} exceeds 3 seconds.
+
+      - alert: DatabaseSpanHighLatency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(traces_spanmetrics_duration_seconds_bucket{span_kind="SPAN_KIND_CLIENT", db_system=~"postgresql|redis"}[5m])) by (le, service, db_system)
+          ) > 1
+        for: 2m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: High database span latency detected
+          description: P99 latency for {{ $labels.db_system }} queries in {{ $labels.service }} exceeds 1 second.
+          runbook: https://docs.lomashwood.internal/runbooks/database-failure.md
+
+  - name: lomash-wood-tempo-throughput
+    interval: 1m
+    rules:
+      - alert: LowTraceThroughputOrderPayment
+        expr: |
+          sum(rate(traces_spanmetrics_calls_total{service="order-payment-service"}[10m])) < 0.01
+        for: 15m
+        labels:
+          severity: warning
+          service: order-payment-service
+          team: payments
+        annotations:
+          summary: Very low trace throughput for Order/Payment Service
+          description: Order/Payment Service is receiving an unusually low number of requests. Possible service down or routing issue.
+
+      - alert: TraceIngestionBackpressure
+        expr: |
+          sum(rate(tempo_distributor_ingester_appends_total[5m])) > 50000
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: Tempo ingestion rate is very high
+          description: Trace ingestion may be under backpressure. Consider scaling Tempo ingester replicas.
+
+      - alert: TempoIngesterUnhealthy
+        expr: |
+          tempo_ring_members{state="Unhealthy", name="ingester"} > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: Tempo ingester member is unhealthy
+          description: One or more Tempo ingester ring members are reporting as unhealthy.
+          runbook: https://docs.lomashwood.internal/runbooks/outage.md
+
+      - alert: TempoCompactorNotRunning
+        expr: |
+          sum(rate(tempodb_compaction_objects_written_total[15m])) == 0
+        for: 30m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: Tempo compactor has not run recently
+          description: No compaction activity has been detected in the last 30 minutes. Block retention may be affected.

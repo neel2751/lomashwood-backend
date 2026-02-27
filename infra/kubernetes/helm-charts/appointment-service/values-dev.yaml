@@ -1,0 +1,38 @@
+replicaCount: 1
+
+image:
+  tag: "dev"
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "128Mi"
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
+
+autoscaling:
+  enabled: false
+
+topologySpreadConstraints: []
+
+env:
+  NODE_ENV: development
+  LOG_LEVEL: debug
+  LOG_FORMAT: pretty
+  DATABASE_POOL_MIN: "1"
+  DATABASE_POOL_MAX: "5"
+  APPOINTMENT_TYPES: "HOME_MEASUREMENT,ONLINE,SHOWROOM"
+  DEFAULT_SLOT_DURATION_MINUTES: "60"
+  REMINDER_ADVANCE_HOURS_24: "24"
+  REMINDER_ADVANCE_HOURS_2: "2"
+  MAX_BOOKINGS_PER_SLOT: "1"
+  BOOKING_CANCELLATION_WINDOW_HOURS: "24"
+  SEND_REMINDER_JOB_INTERVAL_MINUTES: "60"
+  CLEANUP_EXPIRED_SLOTS_INTERVAL_HOURS: "24"
+  ADMIN_NOTIFICATION_EMAIL: "dev-appointments@lomashwood.co.uk"
+  KITCHEN_TEAM_EMAIL: "dev-kitchen@lomashwood.co.uk"
+  BEDROOM_TEAM_EMAIL: "dev-bedroom@lomashwood.co.uk"
+
+namespace: lomash-wood-dev

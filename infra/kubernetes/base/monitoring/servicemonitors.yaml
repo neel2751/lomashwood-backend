@@ -1,0 +1,278 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: api-gateway-monitor
+  namespace: lomash-wood
+  labels:
+    app: api-gateway
+    app.kubernetes.io/name: api-gateway-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: api-gateway
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: auth-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: auth-service
+    app.kubernetes.io/name: auth-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: auth-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: auth-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: product-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: product-service
+    app.kubernetes.io/name: product-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: product-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: product-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: order-payment-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: order-payment-service
+    app.kubernetes.io/name: order-payment-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: order-payment-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: order-payment-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: appointment-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: appointment-service
+    app.kubernetes.io/name: appointment-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: appointment-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: appointment-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: content-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: content-service
+    app.kubernetes.io/name: content-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: content-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: content-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: customer-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: customer-service
+    app.kubernetes.io/name: customer-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: customer-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: customer-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: notification-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: notification-service
+    app.kubernetes.io/name: notification-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: notification-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: notification-service
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: analytics-service-monitor
+  namespace: lomash-wood
+  labels:
+    app: analytics-service
+    app.kubernetes.io/name: analytics-service-monitor
+    app.kubernetes.io/part-of: lomash-wood-platform
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: analytics-service
+  namespaceSelector:
+    matchNames:
+      - lomash-wood
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+        - targetLabel: service
+          replacement: analytics-service

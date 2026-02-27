@@ -1,0 +1,85 @@
+{
+  "__inputs": [{ "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }],
+  "title": "Lomash Wood — Appointment Service",
+  "uid": "lw-appointment",
+  "tags": ["lomash-wood", "appointment-service"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Bookings Created (24h)",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(bookings_created_total{service=\"appointment-service\"}[24h]))", "legendFormat": "Bookings" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Cancellation Rate %",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * sum(rate(bookings_cancelled_total{service=\"appointment-service\"}[1h])) / sum(rate(bookings_created_total{service=\"appointment-service\"}[1h]))", "legendFormat": "Cancel %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 25 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Home Visit Bookings (24h)",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(bookings_created_total{service=\"appointment-service\",type=\"home\"}[24h]))", "legendFormat": "Home" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "blue", "value": null }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Online Bookings (24h)",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(bookings_created_total{service=\"appointment-service\",type=\"online\"}[24h]))", "legendFormat": "Online" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "purple", "value": null }] } } }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Showroom Bookings (24h)",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(bookings_created_total{service=\"appointment-service\",type=\"showroom\"}[24h]))", "legendFormat": "Showroom" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "orange", "value": null }] } } }
+    },
+    {
+      "id": 6, "type": "stat", "title": "Reminders Sent (24h)",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(reminders_sent_total{service=\"appointment-service\"}[24h]))", "legendFormat": "Reminders" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Booking Volume by Type",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(bookings_created_total{service=\"appointment-service\"}[1h])) by (type)", "legendFormat": "{{ type }}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Booking Status Distribution",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(bookings_created_total{service=\"appointment-service\"}[2m]))", "legendFormat": "Created" },
+        { "expr": "sum(rate(bookings_confirmed_total{service=\"appointment-service\"}[2m]))", "legendFormat": "Confirmed" },
+        { "expr": "sum(rate(bookings_cancelled_total{service=\"appointment-service\"}[2m]))", "legendFormat": "Cancelled" },
+        { "expr": "sum(rate(bookings_completed_total{service=\"appointment-service\"}[2m]))", "legendFormat": "Completed" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 9, "type": "timeseries", "title": "Appointment API Latency (P99)",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"appointment-service\",route=\"/v1/appointments\"}[2m])) by (le))", "legendFormat": "POST /v1/appointments P99" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"appointment-service\",route=\"/v1/appointments/availability\"}[2m])) by (le))", "legendFormat": "GET /availability P99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Slot Availability Fill Rate",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(appointment_slots_available{service=\"appointment-service\"})", "legendFormat": "Available Slots" },
+        { "expr": "sum(appointment_slots_booked{service=\"appointment-service\"})", "legendFormat": "Booked Slots" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    }
+  ]
+}

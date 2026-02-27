@@ -1,0 +1,408 @@
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  ACCEPTED: 202,
+  NO_CONTENT: 204,
+  PARTIAL_CONTENT: 206,
+  MOVED_PERMANENTLY: 301,
+  FOUND: 302,
+  SEE_OTHER: 303,
+  NOT_MODIFIED: 304,
+  TEMPORARY_REDIRECT: 307,
+  PERMANENT_REDIRECT: 308,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  PAYMENT_REQUIRED: 402,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  METHOD_NOT_ALLOWED: 405,
+  NOT_ACCEPTABLE: 406,
+  REQUEST_TIMEOUT: 408,
+  CONFLICT: 409,
+  GONE: 410,
+  PAYLOAD_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_IMPLEMENTED: 501,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+} as const;
+
+export const ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  AUTHENTICATION_ERROR: 'AUTHENTICATION_ERROR',
+  AUTHORIZATION_ERROR: 'AUTHORIZATION_ERROR',
+  NOT_FOUND: 'NOT_FOUND',
+  DUPLICATE_ENTRY: 'DUPLICATE_ENTRY',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  TOKEN_INVALID: 'TOKEN_INVALID',
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  RESOURCE_CONFLICT: 'RESOURCE_CONFLICT',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  BAD_REQUEST: 'BAD_REQUEST',
+  FORBIDDEN: 'FORBIDDEN',
+  PAYMENT_REQUIRED: 'PAYMENT_REQUIRED',
+  PAYMENT_FAILED: 'PAYMENT_FAILED',
+  BOOKING_CONFLICT: 'BOOKING_CONFLICT',
+  SLOT_UNAVAILABLE: 'SLOT_UNAVAILABLE',
+  INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
+  FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+  UPLOAD_FAILED: 'UPLOAD_FAILED',
+  DATABASE_ERROR: 'DATABASE_ERROR',
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
+  CIRCUIT_BREAKER_OPEN: 'CIRCUIT_BREAKER_OPEN',
+  MAINTENANCE_MODE: 'MAINTENANCE_MODE',
+  INVALID_REQUEST: 'INVALID_REQUEST',
+  MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD',
+  INVALID_EMAIL: 'INVALID_EMAIL',
+  INVALID_PHONE: 'INVALID_PHONE',
+  INVALID_POSTCODE: 'INVALID_POSTCODE',
+  INVALID_DATE: 'INVALID_DATE',
+  INVALID_TIME: 'INVALID_TIME',
+  INVALID_AMOUNT: 'INVALID_AMOUNT',
+  INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  ACCOUNT_SUSPENDED: 'ACCOUNT_SUSPENDED',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+  PASSWORD_TOO_WEAK: 'PASSWORD_TOO_WEAK',
+  PASSWORD_MISMATCH: 'PASSWORD_MISMATCH',
+  OLD_PASSWORD_INCORRECT: 'OLD_PASSWORD_INCORRECT',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  INVALID_SESSION: 'INVALID_SESSION',
+  MAX_LOGIN_ATTEMPTS: 'MAX_LOGIN_ATTEMPTS',
+  PRODUCT_NOT_AVAILABLE: 'PRODUCT_NOT_AVAILABLE',
+  PRODUCT_OUT_OF_STOCK: 'PRODUCT_OUT_OF_STOCK',
+  INVALID_QUANTITY: 'INVALID_QUANTITY',
+  ORDER_NOT_FOUND: 'ORDER_NOT_FOUND',
+  ORDER_ALREADY_CANCELLED: 'ORDER_ALREADY_CANCELLED',
+  ORDER_CANNOT_BE_CANCELLED: 'ORDER_CANNOT_BE_CANCELLED',
+  BOOKING_NOT_FOUND: 'BOOKING_NOT_FOUND',
+  BOOKING_ALREADY_CANCELLED: 'BOOKING_ALREADY_CANCELLED',
+  BOOKING_CANNOT_BE_CANCELLED: 'BOOKING_CANNOT_BE_CANCELLED',
+  SHOWROOM_NOT_FOUND: 'SHOWROOM_NOT_FOUND',
+  CONSULTANT_NOT_AVAILABLE: 'CONSULTANT_NOT_AVAILABLE',
+  INVALID_TIME_SLOT: 'INVALID_TIME_SLOT',
+  BROCHURE_REQUEST_FAILED: 'BROCHURE_REQUEST_FAILED',
+  NEWSLETTER_ALREADY_SUBSCRIBED: 'NEWSLETTER_ALREADY_SUBSCRIBED',
+  REVIEW_ALREADY_EXISTS: 'REVIEW_ALREADY_EXISTS',
+  WISHLIST_ITEM_EXISTS: 'WISHLIST_ITEM_EXISTS',
+  LOYALTY_INSUFFICIENT_POINTS: 'LOYALTY_INSUFFICIENT_POINTS',
+  COUPON_INVALID: 'COUPON_INVALID',
+  COUPON_EXPIRED: 'COUPON_EXPIRED',
+  COUPON_USAGE_LIMIT_REACHED: 'COUPON_USAGE_LIMIT_REACHED',
+} as const;
+
+export const USER_ROLES = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  STAFF: 'STAFF',
+  CUSTOMER: 'CUSTOMER',
+  GUEST: 'GUEST',
+} as const;
+
+export const PERMISSIONS = {
+  USERS_READ: 'users:read',
+  USERS_WRITE: 'users:write',
+  USERS_DELETE: 'users:delete',
+  PRODUCTS_READ: 'products:read',
+  PRODUCTS_WRITE: 'products:write',
+  PRODUCTS_DELETE: 'products:delete',
+  ORDERS_READ: 'orders:read',
+  ORDERS_WRITE: 'orders:write',
+  ORDERS_DELETE: 'orders:delete',
+  BOOKINGS_READ: 'bookings:read',
+  BOOKINGS_WRITE: 'bookings:write',
+  BOOKINGS_DELETE: 'bookings:delete',
+  CONTENT_READ: 'content:read',
+  CONTENT_WRITE: 'content:write',
+  CONTENT_DELETE: 'content:delete',
+  ANALYTICS_READ: 'analytics:read',
+  SETTINGS_READ: 'settings:read',
+  SETTINGS_WRITE: 'settings:write',
+} as const;
+
+export const APPOINTMENT_TYPES = {
+  HOME_MEASUREMENT: 'HOME_MEASUREMENT',
+  ONLINE_CONSULTATION: 'ONLINE_CONSULTATION',
+  SHOWROOM_VISIT: 'SHOWROOM_VISIT',
+} as const;
+
+export const APPOINTMENT_STATUS = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED',
+  COMPLETED: 'COMPLETED',
+  NO_SHOW: 'NO_SHOW',
+  RESCHEDULED: 'RESCHEDULED',
+} as const;
+
+export const PRODUCT_CATEGORIES = {
+  KITCHEN: 'KITCHEN',
+  BEDROOM: 'BEDROOM',
+} as const;
+
+export const ORDER_STATUS = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  PROCESSING: 'PROCESSING',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+  REFUNDED: 'REFUNDED',
+  FAILED: 'FAILED',
+} as const;
+
+export const PAYMENT_STATUS = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  REFUNDED: 'REFUNDED',
+  PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',
+} as const;
+
+export const PAYMENT_METHODS = {
+  CARD: 'CARD',
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CASH: 'CASH',
+  FINANCE: 'FINANCE',
+} as const;
+
+export const NOTIFICATION_TYPES = {
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+  PUSH: 'PUSH',
+  IN_APP: 'IN_APP',
+} as const;
+
+export const NOTIFICATION_STATUS = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  DELIVERED: 'DELIVERED',
+  FAILED: 'FAILED',
+  BOUNCED: 'BOUNCED',
+} as const;
+
+export const EMAIL_TEMPLATES = {
+  WELCOME: 'welcome',
+  EMAIL_VERIFICATION: 'email-verification',
+  PASSWORD_RESET: 'password-reset',
+  APPOINTMENT_CONFIRMATION: 'appointment-confirmation',
+  APPOINTMENT_REMINDER: 'appointment-reminder',
+  APPOINTMENT_CANCELLATION: 'appointment-cancellation',
+  ORDER_CONFIRMATION: 'order-confirmation',
+  ORDER_SHIPPED: 'order-shipped',
+  ORDER_DELIVERED: 'order-delivered',
+  ORDER_CANCELLED: 'order-cancelled',
+  PAYMENT_RECEIPT: 'payment-receipt',
+  BROCHURE_CONFIRMATION: 'brochure-confirmation',
+  NEWSLETTER_SUBSCRIPTION: 'newsletter-subscription',
+  CONTACT_FORM: 'contact-form',
+  BUSINESS_INQUIRY: 'business-inquiry',
+} as const;
+
+export const CONTENT_STATUS = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED',
+  SCHEDULED: 'SCHEDULED',
+} as const;
+
+export const REVIEW_STATUS = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export const FILE_TYPES = {
+  IMAGE: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  DOCUMENT: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  VIDEO: ['video/mp4', 'video/webm', 'video/ogg'],
+} as const;
+
+export const IMAGE_MIME_TYPES = FILE_TYPES.IMAGE;
+export const DOCUMENT_MIME_TYPES = FILE_TYPES.DOCUMENT;
+export const VIDEO_MIME_TYPES = FILE_TYPES.VIDEO;
+
+export const MAX_FILE_SIZES = {
+  IMAGE: 5 * 1024 * 1024,
+  DOCUMENT: 10 * 1024 * 1024,
+  VIDEO: 50 * 1024 * 1024,
+} as const;
+
+export const CACHE_KEYS = {
+  USER: 'user',
+  PRODUCT: 'product',
+  CATEGORY: 'category',
+  SHOWROOM: 'showroom',
+  BLOG: 'blog',
+  PAGE: 'page',
+  SETTINGS: 'settings',
+  AVAILABILITY: 'availability',
+} as const;
+
+export const CACHE_TTL = {
+  SHORT: 300,
+  MEDIUM: 1800,
+  LONG: 3600,
+  VERY_LONG: 86400,
+} as const;
+
+export const RATE_LIMIT_WINDOWS = {
+  MINUTE: 60000,
+  HOUR: 3600000,
+  DAY: 86400000,
+} as const;
+
+export const PAGINATION = {
+  DEFAULT_PAGE: 1,
+  DEFAULT_LIMIT: 20,
+  MAX_LIMIT: 100,
+} as const;
+
+export const SORTING = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const;
+
+export const DATE_FORMATS = {
+  ISO: 'YYYY-MM-DD',
+  UK: 'DD/MM/YYYY',
+  US: 'MM/DD/YYYY',
+  DATETIME: 'YYYY-MM-DD HH:mm:ss',
+  TIME: 'HH:mm:ss',
+} as const;
+
+export const REGEX_PATTERNS = {
+  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  UK_PHONE: /^(\+44|0)7\d{9}$/,
+  UK_POSTCODE: /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i,
+  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+  SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+  HEX_COLOR: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+  UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+} as const;
+
+export const CURRENCY = {
+  CODE: 'GBP',
+  SYMBOL: '£',
+  LOCALE: 'en-GB',
+} as const;
+
+export const TIMEZONE = {
+  DEFAULT: 'Europe/London',
+} as const;
+
+export const BUSINESS_HOURS = {
+  MONDAY: { open: '09:00', close: '17:00' },
+  TUESDAY: { open: '09:00', close: '17:00' },
+  WEDNESDAY: { open: '09:00', close: '17:00' },
+  THURSDAY: { open: '09:00', close: '17:00' },
+  FRIDAY: { open: '09:00', close: '17:00' },
+  SATURDAY: { open: '10:00', close: '16:00' },
+  SUNDAY: { open: '10:00', close: '16:00' },
+} as const;
+
+export const BOOKING_SLOTS = {
+  DURATION_MINUTES: 60,
+  ADVANCE_BOOKING_DAYS: 30,
+  CANCELLATION_HOURS: 24,
+} as const;
+
+export const EVENTS = {
+  USER_REGISTERED: 'user.registered',
+  USER_LOGGED_IN: 'user.logged_in',
+  USER_LOGGED_OUT: 'user.logged_out',
+  PASSWORD_RESET: 'password.reset',
+  EMAIL_VERIFIED: 'email.verified',
+  BOOKING_CREATED: 'booking.created',
+  BOOKING_CONFIRMED: 'booking.confirmed',
+  BOOKING_CANCELLED: 'booking.cancelled',
+  BOOKING_RESCHEDULED: 'booking.rescheduled',
+  BOOKING_COMPLETED: 'booking.completed',
+  ORDER_CREATED: 'order.created',
+  ORDER_CONFIRMED: 'order.confirmed',
+  ORDER_CANCELLED: 'order.cancelled',
+  ORDER_SHIPPED: 'order.shipped',
+  ORDER_DELIVERED: 'order.delivered',
+  PAYMENT_INITIATED: 'payment.initiated',
+  PAYMENT_SUCCEEDED: 'payment.succeeded',
+  PAYMENT_FAILED: 'payment.failed',
+  PAYMENT_REFUNDED: 'payment.refunded',
+  REVIEW_SUBMITTED: 'review.submitted',
+  REVIEW_APPROVED: 'review.approved',
+  BROCHURE_REQUESTED: 'brochure.requested',
+  NEWSLETTER_SUBSCRIBED: 'newsletter.subscribed',
+  CONTACT_FORM_SUBMITTED: 'contact.submitted',
+  BUSINESS_INQUIRY_SUBMITTED: 'business_inquiry.submitted',
+} as const;
+
+export const FEATURE_FLAGS = {
+  APPOINTMENTS: 'appointments',
+  BROCHURE: 'brochure',
+  NEWSLETTER: 'newsletter',
+  REVIEWS: 'reviews',
+  LOYALTY: 'loyalty',
+  SHOWROOM_BOOKING: 'showroom_booking',
+  HOME_MEASUREMENT: 'home_measurement',
+  ONLINE_CONSULTATION: 'online_consultation',
+} as const;
+
+export const API_VERSIONS = {
+  V1: 'v1',
+} as const;
+
+export const DEFAULT_LANGUAGE = 'en';
+
+export const SUPPORTED_LANGUAGES = ['en', 'en-GB'] as const;
+
+export const SESSION_COOKIE_NAME = 'lomash_session';
+
+export const CSRF_COOKIE_NAME = 'lomash_csrf';
+
+export const ALLOWED_ORIGINS = process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'];
+
+export default {
+  HTTP_STATUS,
+  ERROR_CODES,
+  USER_ROLES,
+  PERMISSIONS,
+  APPOINTMENT_TYPES,
+  APPOINTMENT_STATUS,
+  PRODUCT_CATEGORIES,
+  ORDER_STATUS,
+  PAYMENT_STATUS,
+  PAYMENT_METHODS,
+  NOTIFICATION_TYPES,
+  NOTIFICATION_STATUS,
+  EMAIL_TEMPLATES,
+  CONTENT_STATUS,
+  REVIEW_STATUS,
+  FILE_TYPES,
+  MAX_FILE_SIZES,
+  CACHE_KEYS,
+  CACHE_TTL,
+  RATE_LIMIT_WINDOWS,
+  PAGINATION,
+  SORTING,
+  DATE_FORMATS,
+  REGEX_PATTERNS,
+  CURRENCY,
+  TIMEZONE,
+  BUSINESS_HOURS,
+  BOOKING_SLOTS,
+  EVENTS,
+  FEATURE_FLAGS,
+  API_VERSIONS,
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
+};

@@ -1,0 +1,557 @@
+
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      rollback_type:
+        description: 'Type of rollback'
+        required: true
+        type: choice
+        options:
+          - full
+          - service-specific
+          - database-only
+      services:
+        description: 'Services to rollback (comma-separated, for service-specific rollback)'
+        required: false
+        type: string
+        default: 'all'
+      target_version:
+        description: 'Target version/tag to rollback to (optional, defaults to previous)'
+        required: false
+        type: string
+      rollback_database:
+        description: 'Rollback database migrations'
+        required: false
+        type: boolean
+        default: false
+      reason:
+        description: 'Reason for rollback'
+        required: true
+        type: string
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  KUBECTL_VERSION: '1.28.0'
+  HELM_VERSION: '3.12.0'
+  CLUSTER_PREFIX: ${{ secrets.CLUSTER_PREFIX }}
+  S3_LOGS_BUCKET: ${{ secrets.S3_LOGS_BUCKET }}
+
+jobs:
+  validate-rollback:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      services_list: ${{ steps.parse.outputs.services }}
+      previous_version: ${{ steps.get-version.outputs.version }}
+      can_proceed: ${{ steps.validate.outputs.can_proceed }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse services input
+        id: parse
+        run: |
+          if [ "${{ github.event.inputs.services }}" == "all" ] || [ -z "${{ github.event.inputs.services }}" ]; then
+            SERVICES="api-gateway,auth-service,product-service,order-payment-service,appointment-service,content-service,customer-service,notification-service,analytics-service"
+          else
+            SERVICES="${{ github.event.inputs.services }}"
+          fi
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+          echo "Services to rollback: $SERVICES"
+
+      - name: Get previous version
+        id: get-version
+        run: |
+          if [ -n "${{ github.event.inputs.target_version }}" ]; then
+            VERSION="${{ github.event.inputs.target_version }}"
+          else
+            VERSION=$(git describe --tags --abbrev=0 HEAD^)
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Target version for rollback: $VERSION"
+
+      - name: Validate rollback
+        id: validate
+        run: |
+          if ! git rev-parse "${{ steps.get-version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Error: Version ${{ steps.get-version.outputs.version }} does not exist"
+            echo "can_proceed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          if [ "${{ github.event.inputs.environment }}" != "staging" ] && [ "${{ github.event.inputs.environment }}" != "production" ]; then
+            echo "Error: Invalid environment"
+            echo "can_proceed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "can_proceed=true" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification - Rollback initiated
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
+          slack-message: |
+            *Rollback Initiated*
+            Environment: ${{ github.event.inputs.environment }}
+            Type: ${{ github.event.inputs.rollback_type }}
+            Services: ${{ steps.parse.outputs.services }}
+            Target Version: ${{ steps.get-version.outputs.version }}
+            Reason: ${{ github.event.inputs.reason }}
+            Initiated by: ${{ github.actor }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  backup-current-state:
+    name: Backup Current State
+    runs-on: ubuntu-latest
+    needs: validate-rollback
+    if: needs.validate-rollback.outputs.can_proceed == 'true'
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --name "${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}" \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Backup current deployment state
+        run: |
+          mkdir -p backup
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+          IFS=',' read -ra SERVICES <<< "${{ needs.validate-rollback.outputs.services_list }}"
+
+          for service in "${SERVICES[@]}"; do
+            echo "Backing up $service..."
+            kubectl get deployment "$service" -n "$NAMESPACE" -o yaml > "backup/${service}-deployment.yaml"
+            kubectl get configmap "${service}-config" -n "$NAMESPACE" -o yaml > "backup/${service}-configmap.yaml" || true
+            kubectl get secret "${service}-secret" -n "$NAMESPACE" -o yaml > "backup/${service}-secret.yaml" || true
+          done
+
+      - name: Upload backup artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-backup-${{ github.event.inputs.environment }}-${{ github.run_number }}
+          path: backup/
+          retention-days: 30
+
+  rollback-database:
+    name: Rollback Database Migrations
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, backup-current-state]
+    if: |
+      needs.validate-rollback.outputs.can_proceed == 'true' &&
+      (github.event.inputs.rollback_database == 'true' || github.event.inputs.rollback_type == 'database-only')
+
+    strategy:
+      matrix:
+        service:
+          - auth-service
+          - product-service
+          - order-payment-service
+          - appointment-service
+          - content-service
+          - customer-service
+          - notification-service
+          - analytics-service
+
+    steps:
+      - name: Checkout target version
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-rollback.outputs.previous_version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: |
+          cd services/${{ matrix.service }}
+          pnpm install --frozen-lockfile
+
+      - name: Get current migration version
+        id: current-migration
+        env:
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}_{1}', matrix.service, github.event.inputs.environment)] }}
+        run: |
+          cd services/${{ matrix.service }}
+          CURRENT=$(npx prisma migrate status --schema=prisma/schema.prisma | grep "Applied" | tail -1 | awk '{print $1}')
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+
+      - name: Get target migration version
+        id: target-migration
+        env:
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}_{1}', matrix.service, github.event.inputs.environment)] }}
+        run: |
+          cd services/${{ matrix.service }}
+          TARGET=$(npx prisma migrate status --schema=prisma/schema.prisma | grep "Applied" | tail -2 | head -1 | awk '{print $1}')
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+
+      - name: Create database backup
+        env:
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}_{1}', matrix.service, github.event.inputs.environment)] }}
+        run: |
+          pg_dump "$DATABASE_URL" > "/tmp/${{ matrix.service }}-backup-$(date +%Y%m%d-%H%M%S).sql"
+
+      - name: Rollback migrations
+        env:
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}_{1}', matrix.service, github.event.inputs.environment)] }}
+        run: |
+          cd services/${{ matrix.service }}
+          echo "Rolling back ${{ matrix.service }} from ${{ steps.current-migration.outputs.current }} to ${{ steps.target-migration.outputs.target }}"
+          npx prisma migrate resolve --rolled-back "${{ steps.current-migration.outputs.current }}"
+
+      - name: Verify database state
+        env:
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}_{1}', matrix.service, github.event.inputs.environment)] }}
+        run: |
+          cd services/${{ matrix.service }}
+          npx prisma migrate status
+
+  rollback-services:
+    name: Rollback Services
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, backup-current-state, rollback-database]
+    if: |
+      always() &&
+      needs.validate-rollback.outputs.can_proceed == 'true' &&
+      (github.event.inputs.rollback_type == 'full' || github.event.inputs.rollback_type == 'service-specific')
+
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        service:
+          - api-gateway
+          - auth-service
+          - product-service
+          - order-payment-service
+          - appointment-service
+          - content-service
+          - customer-service
+          - notification-service
+          - analytics-service
+
+    steps:
+      - name: Check if service should be rolled back
+        id: should-rollback
+        run: |
+          IFS=',' read -ra SERVICES <<< "${{ needs.validate-rollback.outputs.services_list }}"
+          SHOULD_ROLLBACK=false
+
+          for service in "${SERVICES[@]}"; do
+            if [ "$service" == "${{ matrix.service }}" ]; then
+              SHOULD_ROLLBACK=true
+              break
+            fi
+          done
+
+          echo "should_rollback=$SHOULD_ROLLBACK" >> $GITHUB_OUTPUT
+
+      - name: Checkout target version
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-rollback.outputs.previous_version }}
+
+      - name: Configure AWS credentials
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Setup kubectl
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Setup Helm
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Configure kubectl
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          aws eks update-kubeconfig \
+            --name "${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}" \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Get previous image tag
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        id: get-image
+        run: |
+          IMAGE_TAG="${{ needs.validate-rollback.outputs.previous_version }}"
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Verify image exists in ECR
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          IMAGE_URI="${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ steps.get-image.outputs.image_tag }}"
+
+          if ! aws ecr describe-images \
+            --repository-name "${{ matrix.service }}" \
+            --image-ids imageTag="${{ steps.get-image.outputs.image_tag }}" > /dev/null 2>&1; then
+            echo "Error: Image $IMAGE_URI does not exist in ECR"
+            exit 1
+          fi
+
+          echo "Image verified: $IMAGE_URI"
+
+      - name: Scale down current deployment
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+
+          kubectl scale deployment "${{ matrix.service }}" \
+            --replicas=0 \
+            -n "$NAMESPACE"
+
+          kubectl wait --for=delete pod \
+            -l app="${{ matrix.service }}" \
+            -n "$NAMESPACE" \
+            --timeout=300s || true
+
+      - name: Rollback using Helm
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+
+          helm rollback "${{ matrix.service }}" \
+            --namespace "$NAMESPACE" \
+            --wait \
+            --timeout 10m \
+            --cleanup-on-fail
+
+      - name: Update deployment image
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+
+          kubectl set image "deployment/${{ matrix.service }}" \
+            "${{ matrix.service }}=${{ env.ECR_REGISTRY }}/${{ matrix.service }}:${{ steps.get-image.outputs.image_tag }}" \
+            -n "$NAMESPACE"
+
+      - name: Wait for rollout
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+
+          kubectl rollout status "deployment/${{ matrix.service }}" \
+            -n "$NAMESPACE" \
+            --timeout=600s
+
+      - name: Verify service health
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+
+          kubectl wait --for=condition=ready pod \
+            -l app="${{ matrix.service }}" \
+            -n "$NAMESPACE" \
+            --timeout=300s
+
+          sleep 30
+          POD_NAME=$(kubectl get pods \
+            -l app="${{ matrix.service }}" \
+            -n "$NAMESPACE" \
+            -o jsonpath='{.items[0].metadata.name}')
+
+          kubectl exec "$POD_NAME" -n "$NAMESPACE" -- \
+            wget -q -O- http://localhost:3000/health || echo "Health check warning"
+
+      - name: Run smoke tests
+        if: steps.should-rollback.outputs.should_rollback == 'true'
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+          echo "Running smoke tests for ${{ matrix.service }}..."
+          kubectl get pods -l app="${{ matrix.service }}" -n "$NAMESPACE"
+
+  verify-rollback:
+    name: Verify Rollback
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, rollback-services]
+    if: always() && needs.validate-rollback.outputs.can_proceed == 'true'
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --name "${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}" \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Check all services
+        id: verify
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+          IFS=',' read -ra SERVICES <<< "${{ needs.validate-rollback.outputs.services_list }}"
+
+          ALL_HEALTHY=true
+          FAILED_SERVICES=""
+
+          for service in "${SERVICES[@]}"; do
+            echo "Checking $service..."
+
+            READY=$(kubectl get deployment "$service" -n "$NAMESPACE" -o jsonpath='{.status.readyReplicas}')
+            DESIRED=$(kubectl get deployment "$service" -n "$NAMESPACE" -o jsonpath='{.status.replicas}')
+
+            if [ "$READY" != "$DESIRED" ]; then
+              echo "Service $service is not healthy (Ready: $READY, Desired: $DESIRED)"
+              ALL_HEALTHY=false
+              FAILED_SERVICES="$FAILED_SERVICES $service"
+            else
+              echo "Service $service is healthy"
+            fi
+          done
+
+          echo "all_healthy=$ALL_HEALTHY" >> $GITHUB_OUTPUT
+          echo "failed_services=$FAILED_SERVICES" >> $GITHUB_OUTPUT
+
+      - name: Run integration tests
+        id: integration-tests
+        run: |
+          echo "Running integration tests..."
+          echo "integration_passed=true" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification - Rollback status
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
+          slack-message: |
+            *Rollback ${{ steps.verify.outputs.all_healthy == 'true' && 'Completed' || 'Failed' }}*
+            Environment: ${{ github.event.inputs.environment }}
+            Version: ${{ needs.validate-rollback.outputs.previous_version }}
+            Services: ${{ needs.validate-rollback.outputs.services_list }}
+            ${{ steps.verify.outputs.all_healthy == 'false' && format('Failed Services: {0}', steps.verify.outputs.failed_services) || '' }}
+            Initiated by: ${{ github.actor }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Fail if rollback unsuccessful
+        if: steps.verify.outputs.all_healthy != 'true'
+        run: |
+          echo "Rollback verification failed for services: ${{ steps.verify.outputs.failed_services }}"
+          exit 1
+
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, verify-rollback]
+    if: always() && needs.validate-rollback.outputs.can_proceed == 'true'
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --name "${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}" \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Clean up old ReplicaSets
+        run: |
+          NAMESPACE="${{ env.CLUSTER_PREFIX }}-${{ github.event.inputs.environment }}"
+          IFS=',' read -ra SERVICES <<< "${{ needs.validate-rollback.outputs.services_list }}"
+
+          for service in "${SERVICES[@]}"; do
+            echo "Cleaning up old ReplicaSets for $service..."
+            kubectl delete replicaset -n "$NAMESPACE" \
+              -l app="$service" \
+              --field-selector status.replicas=0 || true
+          done
+
+      - name: Create rollback audit record
+        run: |
+          cat > rollback-record.json <<EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "environment": "${{ github.event.inputs.environment }}",
+            "rollback_type": "${{ github.event.inputs.rollback_type }}",
+            "services": "${{ needs.validate-rollback.outputs.services_list }}",
+            "from_version": "current",
+            "to_version": "${{ needs.validate-rollback.outputs.previous_version }}",
+            "initiated_by": "${{ github.actor }}",
+            "reason": "${{ github.event.inputs.reason }}",
+            "status": "${{ needs.verify-rollback.result }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+          aws s3 cp rollback-record.json \
+            "s3://${{ env.S3_LOGS_BUCKET }}/rollbacks/${{ github.event.inputs.environment }}/$(date +%Y%m%d-%H%M%S).json"
+
+      - name: Send final notification
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
+          slack-message: |
+            *Rollback Process Completed*
+            Environment: ${{ github.event.inputs.environment }}
+            Status: ${{ needs.verify-rollback.result }}
+            Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

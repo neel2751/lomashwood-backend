@@ -1,0 +1,541 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  QUEUED
+  PROCESSING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+  BOUNCED
+  UNSUBSCRIBED
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum TemplateType {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum TemplateCategory {
+
+  ACCOUNT_WELCOME
+  ACCOUNT_PASSWORD_RESET
+  ACCOUNT_EMAIL_VERIFICATION
+  ACCOUNT_PASSWORD_CHANGED
+  ACCOUNT_DEACTIVATED
+
+  APPOINTMENT_CONFIRMATION
+  APPOINTMENT_REMINDER
+  APPOINTMENT_CANCELLATION
+  APPOINTMENT_RESCHEDULED
+  APPOINTMENT_INTERNAL_ALERT
+
+  ORDER_CONFIRMATION
+  ORDER_UPDATED
+  ORDER_CANCELLED
+  PAYMENT_RECEIPT
+  PAYMENT_FAILED
+  REFUND_ISSUED
+
+  BROCHURE_REQUEST_CONFIRMATION
+  BROCHURE_DELIVERY
+  BROCHURE_INTERNAL_ALERT
+
+  BUSINESS_ENQUIRY_CONFIRMATION
+  BUSINESS_ENQUIRY_INTERNAL_ALERT
+
+  NEWSLETTER_WELCOME
+  NEWSLETTER_UNSUBSCRIBE_CONFIRMATION
+  NEWSLETTER_CAMPAIGN
+
+  CONTACT_ACKNOWLEDGEMENT
+  CONTACT_INTERNAL_ALERT
+
+  REVIEW_REQUEST
+  REVIEW_PUBLISHED
+
+  LOYALTY_POINTS_EARNED
+  LOYALTY_POINTS_EXPIRING
+  LOYALTY_TIER_UPGRADED
+
+  SYSTEM_ALERT
+  CUSTOM
+}
+
+enum TemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProviderType {
+  SMTP
+  AWS_SES
+  TWILIO
+  MSG91
+  FIREBASE_FCM
+  WEB_PUSH
+}
+
+enum ProviderStatus {
+  ACTIVE
+  INACTIVE
+  DEGRADED
+  FAILED
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum CampaignAudienceType {
+  ALL_USERS
+  SEGMENT
+  CUSTOM_LIST
+}
+
+enum DeliveryReportStatus {
+  ACCEPTED
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+  COMPLAINED
+  UNSUBSCRIBED
+  REJECTED
+}
+
+enum RetryPolicyStrategy {
+  EXPONENTIAL_BACKOFF
+  LINEAR_BACKOFF
+  FIXED_DELAY
+  IMMEDIATE
+}
+
+enum SubscriptionStatus {
+  SUBSCRIBED
+  UNSUBSCRIBED
+  PENDING
+  BOUNCED
+}
+
+enum WebhookEventType {
+  DELIVERED
+  BOUNCED
+  COMPLAINED
+  UNSUBSCRIBED
+  OPENED
+  CLICKED
+  FAILED
+}
+
+model NotificationTemplate {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  slug        String           @unique
+  description String?
+  category    TemplateCategory
+  type        TemplateType
+  status      TemplateStatus   @default(DRAFT)
+
+  subject     String?
+  preheader   String?
+  htmlBody    String?          @map("html_body")
+  textBody    String?          @map("text_body")
+
+  smsBody     String?          @map("sms_body")
+  smsFrom     String?          @map("sms_from")
+
+  pushTitle   String?          @map("push_title")
+  pushBody    String?          @map("push_body")
+  pushIcon    String?          @map("push_icon")
+  pushImage   String?          @map("push_image")
+  pushData    Json?            @map("push_data")
+
+  variables   Json? 
+
+  engine      String           @default("handlebars")
+
+  version     Int              @default(1)
+  publishedAt DateTime?        @map("published_at")
+  archivedAt  DateTime?        @map("archived_at")
+
+  createdBy   String?          @map("created_by")
+  updatedBy   String?          @map("updated_by")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  deletedAt   DateTime?        @map("deleted_at")
+
+  notifications Notification[]
+  campaignTemplates CampaignTemplate[]
+
+  @@index([category])
+  @@index([type])
+  @@index([status])
+  @@index([slug])
+  @@index([deletedAt])
+  @@map("notification_templates")
+}
+
+model NotificationProvider {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  type         ProviderType
+  channel      NotificationChannel
+  status       ProviderStatus @default(ACTIVE)
+  isDefault    Boolean        @default(false) @map("is_default")
+  priority     Int            @default(1)    
+
+  config       Json  
+
+  rateLimitPerSecond  Int?    @map("rate_limit_per_second")
+  rateLimitPerMinute  Int?    @map("rate_limit_per_minute")
+  rateLimitPerHour    Int?    @map("rate_limit_per_hour")
+  rateLimitPerDay     Int?    @map("rate_limit_per_day")
+
+  lastHealthCheckAt   DateTime? @map("last_health_check_at")
+  lastHealthStatus    Boolean?  @map("last_health_status")
+  consecutiveFailures Int       @default(0) @map("consecutive_failures")
+  failoverAt          DateTime? @map("failover_at")
+
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  deletedAt    DateTime?      @map("deleted_at")
+
+  notifications Notification[]
+  deliveryReports DeliveryReport[]
+
+  @@index([channel])
+  @@index([status])
+  @@index([isDefault])
+  @@index([deletedAt])
+  @@map("notification_providers")
+}
+
+
+model Notification {
+  id               String               @id @default(cuid())
+  channel          NotificationChannel
+  status           NotificationStatus   @default(PENDING)
+  priority         NotificationPriority @default(NORMAL)
+
+  recipientId      String?              @map("recipient_id")  
+  recipientEmail   String?              @map("recipient_email")
+  recipientPhone   String?              @map("recipient_phone")
+  recipientDevice  String?              @map("recipient_device") 
+
+  fromName         String?              @map("from_name")
+  fromAddress      String?              @map("from_address")
+  replyTo          String?              @map("reply_to")
+
+  templateId       String?              @map("template_id")
+  subject          String?
+  body             String?
+  htmlBody         String?              @map("html_body")
+  metadata         Json?          
+  attachments      Json?           
+
+  providerId       String?              @map("provider_id")
+  providerMessageId String?             @map("provider_message_id") 
+  providerResponse Json?                @map("provider_response")
+
+  jobId            String?              @map("job_id")
+  queueName        String?              @map("queue_name")
+  scheduledAt      DateTime?            @map("scheduled_at")
+  processedAt      DateTime?            @map("processed_at")
+  sentAt           DateTime?            @map("sent_at")
+  deliveredAt      DateTime?            @map("delivered_at")
+  failedAt         DateTime?            @map("failed_at")
+
+  retryCount       Int                  @default(0) @map("retry_count")
+  maxRetries       Int                  @default(3) @map("max_retries")
+  nextRetryAt      DateTime?            @map("next_retry_at")
+  lastError        String?              @map("last_error")
+  lastErrorAt      DateTime?            @map("last_error_at")
+
+  campaignId       String?              @map("campaign_id")
+  batchId          String?              @map("batch_id")  // For bulk sends
+
+  idempotencyKey   String?              @unique @map("idempotency_key")
+
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+  deletedAt        DateTime?            @map("deleted_at")
+
+  template         NotificationTemplate? @relation(fields: [templateId], references: [id])
+  provider         NotificationProvider? @relation(fields: [providerId], references: [id])
+  campaign         Campaign?             @relation(fields: [campaignId], references: [id])
+  deliveryReports  DeliveryReport[]
+  webhookEvents    WebhookEvent[]
+
+  @@index([channel])
+  @@index([status])
+  @@index([priority])
+  @@index([recipientId])
+  @@index([recipientEmail])
+  @@index([recipientPhone])
+  @@index([templateId])
+  @@index([providerId])
+  @@index([campaignId])
+  @@index([batchId])
+  @@index([scheduledAt])
+  @@index([sentAt])
+  @@index([idempotencyKey])
+  @@index([jobId])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model DeliveryReport {
+  id                 String               @id @default(cuid())
+  notificationId     String               @map("notification_id")
+  providerId         String?              @map("provider_id")
+
+  status             DeliveryReportStatus
+  providerMessageId  String?              @map("provider_message_id")
+  providerTimestamp  DateTime?            @map("provider_timestamp")
+  providerRaw        Json?                @map("provider_raw")  
+
+  openedAt           DateTime?            @map("opened_at")
+  clickedAt          DateTime?            @map("clicked_at")
+  bouncedAt          DateTime?            @map("bounced_at")
+  bounceType         String?              @map("bounce_type")   
+  bounceReason       String?              @map("bounce_reason")
+  complainedAt       DateTime?            @map("complained_at")
+  unsubscribedAt     DateTime?            @map("unsubscribed_at")
+
+  segments           Int?           
+  units              Int?             
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+
+  notification       Notification         @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  provider           NotificationProvider? @relation(fields: [providerId], references: [id])
+
+  @@index([notificationId])
+  @@index([providerId])
+  @@index([status])
+  @@index([providerMessageId])
+  @@index([createdAt])
+  @@map("delivery_reports")
+}
+
+model WebhookEvent {
+  id             String            @id @default(cuid())
+  notificationId String?           @map("notification_id")
+  provider       String      
+  eventType      WebhookEventType
+  payload        Json     
+  processed      Boolean           @default(false)
+  processedAt    DateTime?         @map("processed_at")
+  error          String?
+
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  notification   Notification?     @relation(fields: [notificationId], references: [id], onDelete: SetNull)
+
+  @@index([notificationId])
+  @@index([provider])
+  @@index([eventType])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("webhook_events")
+}
+
+model Campaign {
+  id              String               @id @default(cuid())
+  name            String
+  description     String?
+  channel         NotificationChannel
+  status          CampaignStatus       @default(DRAFT)
+  audienceType    CampaignAudienceType @default(ALL_USERS) @map("audience_type")
+  audienceFilter  Json?                @map("audience_filter") 
+  audienceList    Json?                @map("audience_list")  
+
+
+  scheduledAt     DateTime?            @map("scheduled_at")
+  startedAt       DateTime?            @map("started_at")
+  completedAt     DateTime?            @map("completed_at")
+  cancelledAt     DateTime?            @map("cancelled_at")
+
+  totalRecipients Int                  @default(0) @map("total_recipients")
+  totalSent       Int                  @default(0) @map("total_sent")
+  totalDelivered  Int                  @default(0) @map("total_delivered")
+  totalFailed     Int                  @default(0) @map("total_failed")
+  totalOpened     Int                  @default(0) @map("total_opened")
+  totalClicked    Int                  @default(0) @map("total_clicked")
+  totalBounced    Int                  @default(0) @map("total_bounced")
+  totalUnsubscribed Int               @default(0) @map("total_unsubscribed")
+
+  createdBy       String?              @map("created_by")
+  updatedBy       String?              @map("updated_by")
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+  deletedAt       DateTime?            @map("deleted_at")
+
+  notifications   Notification[]
+  campaignTemplates CampaignTemplate[]
+
+  @@index([channel])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([deletedAt])
+  @@map("campaigns")
+}
+
+model CampaignTemplate {
+  id          String                @id @default(cuid())
+  campaignId  String                @map("campaign_id")
+  templateId  String                @map("template_id")
+  sortOrder   Int                   @default(0) @map("sort_order")
+  variables   Json?               
+  createdAt   DateTime              @default(now()) @map("created_at")
+
+  campaign    Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  template    NotificationTemplate  @relation(fields: [templateId], references: [id])
+
+  @@unique([campaignId, templateId])
+  @@index([campaignId])
+  @@index([templateId])
+  @@map("campaign_templates")
+}
+
+
+model NotificationSubscription {
+  id           String              @id @default(cuid())
+  userId       String              @map("user_id")        
+  channel      NotificationChannel
+  status       SubscriptionStatus  @default(SUBSCRIBED)
+  address      String             
+
+  deviceId     String?             @map("device_id")
+  deviceType   String?             @map("device_type")   
+  pushToken    String?             @map("push_token")
+
+  confirmedAt     DateTime?        @map("confirmed_at")
+  unsubscribedAt  DateTime?        @map("unsubscribed_at")
+  bouncedAt       DateTime?        @map("bounced_at")
+
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  preferences  NotificationPreference[]
+
+  @@unique([userId, channel, address])
+  @@index([userId])
+  @@index([channel])
+  @@index([status])
+  @@index([address])
+  @@map("notification_subscriptions")
+}
+
+model NotificationPreference {
+  id               String                    @id @default(cuid())
+  userId           String                    @map("user_id")
+  subscriptionId   String?                   @map("subscription_id")
+  category         TemplateCategory
+  channel          NotificationChannel
+  enabled          Boolean                   @default(true)
+
+  // Quiet hours
+  quietHoursEnabled Boolean                  @default(false) @map("quiet_hours_enabled")
+  quietHoursStart   String?                  @map("quiet_hours_start") 
+  quietHoursEnd     String?                  @map("quiet_hours_end")   
+  timezone          String?                  @default("Europe/London")
+
+  createdAt        DateTime                  @default(now()) @map("created_at")
+  updatedAt        DateTime                  @updatedAt @map("updated_at")
+
+  subscription     NotificationSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, category, channel])
+  @@index([userId])
+  @@index([category])
+  @@index([channel])
+  @@map("notification_preferences")
+}
+
+model RetryPolicy {
+  id              String              @id @default(cuid())
+  name            String              @unique
+  channel         NotificationChannel
+  strategy        RetryPolicyStrategy @default(EXPONENTIAL_BACKOFF)
+  maxAttempts     Int                 @default(3)  @map("max_attempts")
+  initialDelayMs  Int                 @default(3000) @map("initial_delay_ms")
+  maxDelayMs      Int                 @default(300000) @map("max_delay_ms")
+  multiplier      Float               @default(2.0)
+  isDefault       Boolean             @default(false) @map("is_default")
+
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  @@index([channel])
+  @@index([isDefault])
+  @@map("retry_policies")
+}
+
+model NotificationLog {
+  id             String   @id @default(cuid())
+  notificationId String   @map("notification_id")
+  event          String  
+  status         String
+  message        String?
+  metadata       Json?
+  occurredAt     DateTime @default(now()) @map("occurred_at")
+
+  @@index([notificationId])
+  @@index([event])
+  @@index([occurredAt])
+  @@map("notification_logs")
+}
+
+model NotificationRateLimit {
+  id           String              @id @default(cuid())
+  key          String              @unique 
+  channel      NotificationChannel
+  count        Int                 @default(0)
+  windowStart  DateTime            @map("window_start")
+  windowEnd    DateTime            @map("window_end")
+
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@index([channel])
+  @@index([windowEnd])
+  @@map("notification_rate_limits")
+}

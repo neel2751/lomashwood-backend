@@ -1,0 +1,4 @@
+export const REVIEW_CONSTANTS = {
+  MAX_PER_PRODUCT_PER_USER: 1,
+  CACHE_TTL_SECONDS: 900,
+} as const;

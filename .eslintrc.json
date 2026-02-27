@@ -1,0 +1,270 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": ["./tsconfig.json", "./apps/*/tsconfig.json", "./packages/*/tsconfig.json"],
+    "tsconfigRootDir": "."
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "import",
+    "unicorn",
+    "security",
+    "promise",
+    "n"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:security/recommended",
+    "plugin:promise/recommended",
+    "plugin:n/recommended",
+    "prettier"
+  ],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": ["./tsconfig.json", "./apps/*/tsconfig.json", "./packages/*/tsconfig.json"]
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    }
+  },
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "caughtErrorsIgnorePattern": "^_"
+    }],
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/explicit-function-return-type": ["warn", {
+      "allowExpressions": true,
+      "allowTypedFunctionExpressions": true,
+      "allowHigherOrderFunctions": true
+    }],
+    "@typescript-eslint/explicit-module-boundary-types": "warn",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/prefer-optional-chain": "error",
+    "@typescript-eslint/consistent-type-imports": ["error", {
+      "prefer": "type-imports",
+      "fixStyle": "inline-type-imports"
+    }],
+    "@typescript-eslint/consistent-type-exports": "error",
+    "@typescript-eslint/no-import-type-side-effects": "error",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/strict-boolean-expressions": ["error", {
+      "allowString": false,
+      "allowNumber": false,
+      "allowNullableObject": true,
+      "allowNullableBoolean": false,
+      "allowNullableString": false,
+      "allowNullableNumber": false,
+      "allowAny": false
+    }],
+    "@typescript-eslint/switch-exhaustiveness-check": "error",
+    "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "interface",
+        "format": ["PascalCase"],
+        "prefix": ["I"]
+      },
+      {
+        "selector": "typeAlias",
+        "format": ["PascalCase"]
+      },
+      {
+        "selector": "enum",
+        "format": ["PascalCase"]
+      },
+      {
+        "selector": "enumMember",
+        "format": ["UPPER_CASE"]
+      },
+      {
+        "selector": "variable",
+        "modifiers": ["const", "global"],
+        "format": ["UPPER_CASE", "camelCase", "PascalCase"]
+      }
+    ],
+
+    "import/order": ["error", {
+      "groups": [
+        "builtin",
+        "external",
+        "internal",
+        ["parent", "sibling", "index"],
+        "type"
+      ],
+      "pathGroups": [
+        {
+          "pattern": "@lomash-wood/**",
+          "group": "internal",
+          "position": "before"
+        }
+      ],
+      "pathGroupsExcludedImportTypes": ["type"],
+      "newlines-between": "always",
+      "alphabetize": {
+        "order": "asc",
+        "caseInsensitive": true
+      }
+    }],
+    "import/no-duplicates": "error",
+    "import/no-cycle": ["error", { "maxDepth": 3 }],
+    "import/no-self-import": "error",
+    "import/no-useless-path-segments": "error",
+    "import/no-extraneous-dependencies": ["error", {
+      "devDependencies": [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/vitest.config.*",
+        "**/scripts/**",
+        "**/*.seed.ts"
+      ]
+    }],
+    "import/first": "error",
+    "import/newline-after-import": "error",
+
+    "security/detect-object-injection": "off",
+    "security/detect-non-literal-fs-filename": "warn",
+    "security/detect-non-literal-regexp": "warn",
+
+    "promise/always-return": "error",
+    "promise/no-return-wrap": "error",
+    "promise/param-names": "error",
+    "promise/catch-or-return": ["error", { "allowFinally": true }],
+    "promise/no-native": "off",
+    "promise/no-promise-in-callback": "warn",
+    "promise/no-callback-in-promise": "warn",
+
+    "n/no-missing-import": "off",
+    "n/no-unpublished-import": "off",
+
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-debugger": "error",
+    "no-alert": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "prefer-template": "error",
+    "object-shorthand": "error",
+    "no-useless-concat": "error",
+    "no-duplicate-imports": "off",
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "curly": ["error", "all"],
+    "no-throw-literal": "error",
+    "prefer-promise-reject-errors": "error",
+    "no-return-await": "off",
+    "@typescript-eslint/return-await": ["error", "always"],
+    "require-await": "off",
+    "@typescript-eslint/require-await": "error",
+    "no-restricted-imports": ["error", {
+      "patterns": [
+        {
+          "group": ["../../../*"],
+          "message": "Avoid deep relative imports — use path aliases (@lomash-wood/*) instead"
+        }
+      ],
+      "paths": [
+        {
+          "name": "lodash",
+          "message": "Import specific lodash functions instead: import debounce from 'lodash/debounce'"
+        }
+      ]
+    }],
+    "max-depth": ["warn", 4],
+    "max-params": ["warn", 5],
+    "complexity": ["warn", 15]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.spec.ts", "**/tests/**/*.ts"],
+      "env": {
+        "jest": false
+      },
+      "plugins": ["vitest"],
+      "extends": ["plugin:vitest/recommended"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "import/no-extraneous-dependencies": "off",
+        "security/detect-non-literal-fs-filename": "off",
+        "max-params": "off"
+      }
+    },
+    {
+      "files": ["**/*.seed.ts", "**/seeds/**/*.ts"],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "import/no-extraneous-dependencies": "off"
+      }
+    },
+    {
+      "files": ["**/scripts/**/*.ts", "**/scripts/**/*.js"],
+      "rules": {
+        "no-console": "off",
+        "security/detect-non-literal-fs-filename": "off",
+        "n/no-process-exit": "off"
+      }
+    },
+    {
+      "files": ["**/migrations/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "import/no-extraneous-dependencies": "off"
+      }
+    },
+    {
+      "files": ["**/*.config.ts", "**/*.config.js", "**/*.config.mjs"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off",
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
+    },
+    {
+      "files": ["infra/**/*.ts", "infra/**/*.js"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off",
+        "n/no-unpublished-import": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".turbo/",
+    "coverage/",
+    "generated/",
+    "*.generated.ts",
+    "pnpm-lock.yaml",
+    "infra/terraform/",
+    "packages/shared-db/node_modules/"
+  ]
+}

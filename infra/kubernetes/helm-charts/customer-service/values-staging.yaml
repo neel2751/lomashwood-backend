@@ -1,0 +1,42 @@
+replicaCount: 2
+
+image:
+  tag: "staging"
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: "75m"
+    memory: "192Mi"
+  limits:
+    cpu: "400m"
+    memory: "384Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+
+topologySpreadConstraints: []
+
+env:
+  NODE_ENV: staging
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "8"
+  REDIS_DB: "5"
+  LOYALTY_POINTS_EXPIRY_DAYS: "365"
+  LOYALTY_POINTS_PER_POUND: "1"
+  INACTIVE_USER_ANONYMIZE_AFTER_DAYS: "9999"
+  REVIEW_MODERATION_REQUIRED: "true"
+  MAX_WISHLIST_ITEMS: "100"
+  SUPPORT_TICKET_ESCALATION_HOURS: "24"
+  EXPIRE_LOYALTY_JOB_INTERVAL_HOURS: "24"
+  SYNC_CUSTOMER_JOB_INTERVAL_MINUTES: "60"
+  ANONYMIZE_INACTIVE_JOB_INTERVAL_HOURS: "9999"
+  REBUILD_CUSTOMER_INDEX_INTERVAL_HOURS: "6"
+
+namespace: lomash-wood-staging

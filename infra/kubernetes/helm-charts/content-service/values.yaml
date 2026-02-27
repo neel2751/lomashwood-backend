@@ -1,0 +1,134 @@
+replicaCount: 2
+
+image:
+  repository: lomashwood/content-service
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  - name: lomash-wood-registry-secret
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: "content-service-sa"
+  annotations: {}
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3005"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 3005
+  metricsPort: 9095
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "768Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+  scaleUpStabilizationWindowSeconds: 30
+  scaleDownStabilizationWindowSeconds: 300
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 3005
+  initialDelaySeconds: 20
+  periodSeconds: 20
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 3005
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 3
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - content-service
+          topologyKey: kubernetes.io/hostname
+
+topologySpreadConstraints: []
+
+terminationGracePeriodSeconds: 30
+
+env:
+  NODE_ENV: production
+  PORT: "3005"
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "4"
+  AWS_REGION: "eu-west-2"
+  S3_BUCKET_NAME: "lomash-wood-media"
+  S3_SIGNED_URL_EXPIRES_IN_SECONDS: "3600"
+  CDN_BASE_URL: "https://cdn.lomashwood.co.uk"
+  MAX_UPLOAD_SIZE_MB: "50"
+  ALLOWED_IMAGE_TYPES: "image/jpeg,image/png,image/webp,image/avif"
+  ALLOWED_VIDEO_TYPES: "video/mp4,video/webm"
+  BLOG_PAGE_SIZE_DEFAULT: "12"
+  SITEMAP_REBUILD_INTERVAL_HOURS: "6"
+  SCHEDULED_POST_CHECK_INTERVAL_MINUTES: "5"
+  SEARCH_INDEX_REBUILD_INTERVAL_HOURS: "2"
+  CLEANUP_UNUSED_MEDIA_INTERVAL_HOURS: "24"
+
+secretEnv:
+  DATABASE_URL: ""
+  REDIS_URL: ""
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  CLOUDFRONT_DISTRIBUTION_ID: ""
+  CLOUDFRONT_KEY_PAIR_ID: ""
+  CLOUDFRONT_PRIVATE_KEY: ""
+  INTERNAL_SERVICE_API_KEY: ""
+
+existingSecret: ""
+
+volumes:
+  - name: tmp
+    emptyDir: {}
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+namespace: lomash-wood

@@ -1,0 +1,250 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: lomash-wood
+
+namePrefix: ""
+
+commonLabels:
+  environment: production
+  app.kubernetes.io/managed-by: kustomize
+
+commonAnnotations:
+  deployment.lomashwood.co.uk/environment: production
+  deployment.lomashwood.co.uk/managed-by: kustomize
+
+resources:
+  - ../../base/namespace.yaml
+  - ../../base/configmap.yaml
+  - ../../base/secrets.yaml
+  - ../../base/deployments/api-gateway.yaml
+  - ../../base/deployments/auth-service.yaml
+  - ../../base/deployments/product-service.yaml
+  - ../../base/deployments/order-payment-service.yaml
+  - ../../base/deployments/appointment-service.yaml
+  - ../../base/deployments/content-service.yaml
+  - ../../base/deployments/customer-service.yaml
+  - ../../base/deployments/notification-service.yaml
+  - ../../base/deployments/analytics-service.yaml
+  - ../../base/services/api-gateway.yaml
+  - ../../base/services/auth-service.yaml
+  - ../../base/services/product-service.yaml
+  - ../../base/services/order-payment-service.yaml
+  - ../../base/services/appointment-service.yaml
+  - ../../base/services/content-service.yaml
+  - ../../base/services/customer-service.yaml
+  - ../../base/services/notification-service.yaml
+  - ../../base/services/analytics-service.yaml
+  - ../../base/ingress/api-gateway-ingress.yaml
+  - ../../base/ingress/internal-services-ingress.yaml
+  - ../../base/autoscaling/api-gateway-hpa.yaml
+  - ../../base/autoscaling/auth-service-hpa.yaml
+  - ../../base/autoscaling/product-service-hpa.yaml
+  - ../../base/autoscaling/order-payment-service-hpa.yaml
+  - ../../base/autoscaling/appointment-service-hpa.yaml
+  - ../../base/autoscaling/content-service-hpa.yaml
+  - ../../base/autoscaling/customer-service-hpa.yaml
+  - ../../base/autoscaling/notification-service-hpa.yaml
+  - ../../base/autoscaling/analytics-service-hpa.yaml
+  - ../../base/monitoring/servicemonitors.yaml
+  - ../../base/monitoring/prometheus-rules.yaml
+  - ../../base/monitoring/alertmanager.yaml
+
+patches:
+  - path: patches/api-gateway.yaml
+    target:
+      kind: Deployment
+      name: api-gateway
+  - path: patches/auth-service.yaml
+    target:
+      kind: Deployment
+      name: auth-service
+  - path: patches/product-service.yaml
+    target:
+      kind: Deployment
+      name: product-service
+  - path: patches/order-payment-service.yaml
+    target:
+      kind: Deployment
+      name: order-payment-service
+  - path: patches/appointment-service.yaml
+    target:
+      kind: Deployment
+      name: appointment-service
+  - path: patches/content-service.yaml
+    target:
+      kind: Deployment
+      name: content-service
+  - path: patches/customer-service.yaml
+    target:
+      kind: Deployment
+      name: customer-service
+  - path: patches/notification-service.yaml
+    target:
+      kind: Deployment
+      name: notification-service
+  - path: patches/analytics-service.yaml
+    target:
+      kind: Deployment
+      name: analytics-service
+
+configMapGenerator:
+  - name: api-gateway-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - CORS_ORIGIN=https://lomashwood.co.uk,https://www.lomashwood.co.uk,https://admin.lomashwood.co.uk
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - REQUEST_TIMEOUT_MS=30000
+      - AUTH_SERVICE_URL=http://auth-service.lomash-wood.svc.cluster.local:3001
+      - PRODUCT_SERVICE_URL=http://product-service.lomash-wood.svc.cluster.local:3002
+      - ORDER_PAYMENT_SERVICE_URL=http://order-payment-service.lomash-wood.svc.cluster.local:3003
+      - APPOINTMENT_SERVICE_URL=http://appointment-service.lomash-wood.svc.cluster.local:3004
+      - CONTENT_SERVICE_URL=http://content-service.lomash-wood.svc.cluster.local:3005
+      - CUSTOMER_SERVICE_URL=http://customer-service.lomash-wood.svc.cluster.local:3006
+      - NOTIFICATION_SERVICE_URL=http://notification-service.lomash-wood.svc.cluster.local:3007
+      - ANALYTICS_SERVICE_URL=http://analytics-service.lomash-wood.svc.cluster.local:3008
+  - name: auth-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - SESSION_COOKIE_SECURE=true
+      - SESSION_COOKIE_HTTP_ONLY=true
+      - SESSION_COOKIE_SAME_SITE=strict
+      - BCRYPT_SALT_ROUNDS=12
+      - JWT_ACCESS_TOKEN_EXPIRES_IN=15m
+      - JWT_REFRESH_TOKEN_EXPIRES_IN=7d
+      - MAX_LOGIN_ATTEMPTS=5
+      - LOCKOUT_DURATION_MINUTES=15
+      - OTP_EXPIRES_IN_MINUTES=10
+      - PASSWORD_RESET_TOKEN_EXPIRES_IN_HOURS=1
+  - name: product-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - REDIS_CACHE_TTL_SECONDS=3600
+      - REDIS_PRODUCT_LIST_TTL_SECONDS=300
+      - REDIS_PRODUCT_DETAIL_TTL_SECONDS=600
+      - REDIS_CATEGORY_TTL_SECONDS=86400
+      - REDIS_COLOUR_TTL_SECONDS=86400
+      - PRODUCT_PAGE_SIZE_DEFAULT=20
+      - PRODUCT_PAGE_SIZE_MAX=100
+      - SEARCH_INDEX_REBUILD_INTERVAL_MINUTES=60
+      - INVENTORY_SYNC_INTERVAL_MINUTES=15
+  - name: order-payment-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - STRIPE_API_VERSION=2024-11-20.acacia
+      - STRIPE_WEBHOOK_TOLERANCE_SECONDS=300
+      - ORDER_EXPIRY_MINUTES=30
+      - ABANDONED_CHECKOUT_EXPIRY_HOURS=24
+      - PAYMENT_RECONCILIATION_INTERVAL_HOURS=1
+      - FAILED_WEBHOOK_RETRY_ATTEMPTS=3
+      - FAILED_WEBHOOK_RETRY_DELAY_SECONDS=60
+      - INVOICE_NUMBER_PREFIX=LW
+      - REFUND_PROCESSING_DAYS=5
+  - name: appointment-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - APPOINTMENT_TYPES=HOME_MEASUREMENT,ONLINE,SHOWROOM
+      - DEFAULT_SLOT_DURATION_MINUTES=60
+      - REMINDER_ADVANCE_HOURS_24=24
+      - REMINDER_ADVANCE_HOURS_2=2
+      - MAX_BOOKINGS_PER_SLOT=1
+      - BOOKING_CANCELLATION_WINDOW_HOURS=24
+      - SEND_REMINDER_JOB_INTERVAL_MINUTES=15
+      - CLEANUP_EXPIRED_SLOTS_INTERVAL_HOURS=6
+      - ADMIN_NOTIFICATION_EMAIL=appointments@lomashwood.co.uk
+      - KITCHEN_TEAM_EMAIL=kitchen@lomashwood.co.uk
+      - BEDROOM_TEAM_EMAIL=bedroom@lomashwood.co.uk
+  - name: content-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - AWS_REGION=eu-west-2
+      - S3_BUCKET_NAME=lomash-wood-media
+      - S3_SIGNED_URL_EXPIRES_IN_SECONDS=3600
+      - CDN_BASE_URL=https://cdn.lomashwood.co.uk
+      - MAX_UPLOAD_SIZE_MB=50
+      - ALLOWED_IMAGE_TYPES=image/jpeg,image/png,image/webp,image/avif
+      - ALLOWED_VIDEO_TYPES=video/mp4,video/webm
+      - BLOG_PAGE_SIZE_DEFAULT=12
+      - SITEMAP_REBUILD_INTERVAL_HOURS=6
+      - SCHEDULED_POST_CHECK_INTERVAL_MINUTES=5
+      - SEARCH_INDEX_REBUILD_INTERVAL_HOURS=2
+  - name: customer-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - LOYALTY_POINTS_EXPIRY_DAYS=365
+      - LOYALTY_POINTS_PER_POUND=1
+      - INACTIVE_USER_ANONYMIZE_AFTER_DAYS=1095
+      - REVIEW_MODERATION_REQUIRED=true
+      - MAX_WISHLIST_ITEMS=100
+      - SUPPORT_TICKET_ESCALATION_HOURS=24
+  - name: notification-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - EMAIL_FROM_NAME=Lomash Wood
+      - EMAIL_FROM_ADDRESS=noreply@lomashwood.co.uk
+      - EMAIL_PROVIDER=ses
+      - SMS_PROVIDER=twilio
+      - PUSH_PROVIDER=firebase
+      - AWS_REGION=eu-west-2
+      - RETRY_MAX_ATTEMPTS=3
+      - RETRY_INITIAL_DELAY_MS=1000
+      - RETRY_BACKOFF_MULTIPLIER=2
+      - FAILED_MESSAGE_RETRY_INTERVAL_MINUTES=15
+      - OLD_LOG_PURGE_AFTER_DAYS=90
+  - name: analytics-service-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - EVENT_RETENTION_DAYS=365
+      - HISTORICAL_DATA_ARCHIVE_AFTER_DAYS=730
+      - FUNNEL_RECOMPUTE_INTERVAL_HOURS=1
+      - DASHBOARD_REBUILD_INTERVAL_MINUTES=30
+      - RAW_EVENT_PURGE_AFTER_DAYS=90
+      - GOOGLE_TAG_MANAGER_ID=GTM-XXXXXXX
+
+images:
+  - name: lomashwood/api-gateway
+    newTag: latest
+  - name: lomashwood/auth-service
+    newTag: latest
+  - name: lomashwood/product-service
+    newTag: latest
+  - name: lomashwood/order-payment-service
+    newTag: latest
+  - name: lomashwood/appointment-service
+    newTag: latest
+  - name: lomashwood/content-service
+    newTag: latest
+  - name: lomashwood/customer-service
+    newTag: latest
+  - name: lomashwood/notification-service
+    newTag: latest
+  - name: lomashwood/analytics-service
+    newTag: latest

@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  tag: "dev"
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "128Mi"
+  limits:
+    cpu: "250m"
+    memory: "384Mi"
+
+autoscaling:
+  enabled: false
+
+topologySpreadConstraints: []
+
+env:
+  NODE_ENV: development
+  LOG_LEVEL: debug
+  LOG_FORMAT: pretty
+  DATABASE_POOL_MIN: "1"
+  DATABASE_POOL_MAX: "5"
+  REDIS_DB: "4"
+  AWS_REGION: "eu-west-2"
+  S3_BUCKET_NAME: "lomash-wood-media-dev"
+  S3_SIGNED_URL_EXPIRES_IN_SECONDS: "3600"
+  CDN_BASE_URL: "http://localhost:9000"
+  MAX_UPLOAD_SIZE_MB: "50"
+  ALLOWED_IMAGE_TYPES: "image/jpeg,image/png,image/webp,image/avif"
+  ALLOWED_VIDEO_TYPES: "video/mp4,video/webm"
+  BLOG_PAGE_SIZE_DEFAULT: "12"
+  SITEMAP_REBUILD_INTERVAL_HOURS: "24"
+  SCHEDULED_POST_CHECK_INTERVAL_MINUTES: "60"
+  SEARCH_INDEX_REBUILD_INTERVAL_HOURS: "12"
+  CLEANUP_UNUSED_MEDIA_INTERVAL_HOURS: "168"
+
+namespace: lomash-wood-dev

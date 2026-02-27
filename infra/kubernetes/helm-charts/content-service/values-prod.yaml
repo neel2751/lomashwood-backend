@@ -1,0 +1,52 @@
+replicaCount: 2
+
+image:
+  tag: "latest"
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "768Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+  scaleUpStabilizationWindowSeconds: 30
+  scaleDownStabilizationWindowSeconds: 300
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app: content-service
+
+env:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "10"
+  REDIS_DB: "4"
+  AWS_REGION: "eu-west-2"
+  S3_BUCKET_NAME: "lomash-wood-media"
+  S3_SIGNED_URL_EXPIRES_IN_SECONDS: "3600"
+  CDN_BASE_URL: "https://cdn.lomashwood.co.uk"
+  MAX_UPLOAD_SIZE_MB: "50"
+  ALLOWED_IMAGE_TYPES: "image/jpeg,image/png,image/webp,image/avif"
+  ALLOWED_VIDEO_TYPES: "video/mp4,video/webm"
+  BLOG_PAGE_SIZE_DEFAULT: "12"
+  SITEMAP_REBUILD_INTERVAL_HOURS: "6"
+  SCHEDULED_POST_CHECK_INTERVAL_MINUTES: "5"
+  SEARCH_INDEX_REBUILD_INTERVAL_HOURS: "2"
+  CLEANUP_UNUSED_MEDIA_INTERVAL_HOURS: "24"
+
+namespace: lomash-wood

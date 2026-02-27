@@ -1,0 +1,78 @@
+{
+  "__inputs": [{ "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }],
+  "title": "Lomash Wood — Kafka Event Bus",
+  "uid": "lw-kafka",
+  "tags": ["lomash-wood", "kafka", "event-bus"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Messages In/s",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(rate(kafka_server_brokertopicmetrics_messagesin_total[2m]))", "legendFormat": "Messages/s" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Consumer Lag (Max)",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "max(kafka_consumer_group_lag)", "legendFormat": "Max Lag" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 10000 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Active Partitions",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "count(kafka_topic_partition_current_offset)", "legendFormat": "Partitions" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Under Replicated Partitions",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(kafka_server_replicamanager_underreplicatedpartitions)", "legendFormat": "Under-replicated" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Bytes In/s",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(rate(kafka_server_brokertopicmetrics_bytesin_total[2m]))", "legendFormat": "Bytes/s" }],
+      "fieldConfig": { "defaults": { "unit": "binBps" } }
+    },
+    {
+      "id": 6, "type": "stat", "title": "Offline Partitions",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(kafka_controller_kafkacontroller_offlinepartitionscount)", "legendFormat": "Offline" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Message Throughput by Topic",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [{ "expr": "sum(rate(kafka_server_brokertopicmetrics_messagesin_total[2m])) by (topic)", "legendFormat": "{{ topic }}" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Consumer Lag by Consumer Group",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [{ "expr": "sum(kafka_consumer_group_lag) by (consumergroup, topic)", "legendFormat": "{{ consumergroup }} - {{ topic }}" }],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 9, "type": "timeseries", "title": "Lomash Wood Event Topics — Produce Rate",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"order.created\"}[2m])", "legendFormat": "order.created" },
+        { "expr": "rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"payment.succeeded\"}[2m])", "legendFormat": "payment.succeeded" },
+        { "expr": "rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"booking.created\"}[2m])", "legendFormat": "booking.created" },
+        { "expr": "rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"user.created\"}[2m])", "legendFormat": "user.created" },
+        { "expr": "rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"notification.send\"}[2m])", "legendFormat": "notification.send" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Broker Disk Usage",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [{ "expr": "sum(kafka_log_log_size) by (topic)", "legendFormat": "{{ topic }}" }],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-payment-service
+  namespace: lomash-wood
+spec:
+  replicas: 2
+  template:
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: order-payment-service
+      containers:
+        - name: order-payment-service
+          image: lomashwood/order-payment-service:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "600m"
+              memory: "512Mi"
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_FORMAT
+              value: json
+            - name: STRIPE_API_VERSION
+              value: "2024-11-20.acacia"
+            - name: STRIPE_WEBHOOK_TOLERANCE_SECONDS
+              value: "300"
+            - name: ORDER_EXPIRY_MINUTES
+              value: "30"
+            - name: ABANDONED_CHECKOUT_EXPIRY_HOURS
+              value: "24"
+            - name: PAYMENT_RECONCILIATION_INTERVAL_HOURS
+              value: "1"
+            - name: FAILED_WEBHOOK_RETRY_ATTEMPTS
+              value: "3"
+            - name: FAILED_WEBHOOK_RETRY_DELAY_SECONDS
+              value: "60"
+            - name: INVOICE_NUMBER_PREFIX
+              value: "LW"
+            - name: REFUND_PROCESSING_DAYS
+              value: "5"

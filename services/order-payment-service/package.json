@@ -1,0 +1,235 @@
+{
+  "name": "@lomash-wood/order-payment-service",
+  "version": "1.0.0",
+  "description": "Order processing and payment management service for Lomash Wood",
+  "main": "dist/main.js",
+  "author": "Lomash Wood Team",
+  "license": "PROPRIETARY",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "start:prod": "NODE_ENV=production node dist/main.js",
+    "clean": "rimraf dist",
+    "prebuild": "pnpm run clean",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch --runInBand",
+    "test:coverage": "jest --coverage --runInBand",
+    "test:unit": "jest --testPathPattern=tests/unit --runInBand",
+    "test:integration": "jest --testPathPattern=tests/integration --runInBand",
+    "test:e2e": "jest --testPathPattern=tests/e2e --runInBand",
+    "test:ci": "jest --ci --coverage --runInBand",
+    "prisma:generate": "prisma generate --config prisma.config.ts",
+    "prisma:migrate": "prisma migrate dev --config prisma.config.ts",
+    "prisma:migrate:deploy": "prisma migrate deploy --config prisma.config.ts",
+    "prisma:migrate:reset": "prisma migrate reset --config prisma.config.ts",
+    "prisma:studio": "prisma studio --config prisma.config.ts",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:push": "prisma db push --config prisma.config.ts",
+    "db:migrate": "pnpm run prisma:migrate",
+    "db:seed": "pnpm run prisma:seed",
+    "db:reset": "pnpm run prisma:migrate:reset && pnpm run prisma:seed",
+    "docker:build": "docker build -t lomash-wood/order-payment-service .",
+    "docker:run": "docker run -p 3003:3003 lomash-wood/order-payment-service",
+    "typecheck": "tsc --noEmit",
+    "validate": "pnpm run typecheck && pnpm run lint && pnpm run format:check",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.1",
+    "axios": "^1.6.5",
+    "bcryptjs": "^2.4.3",
+    "better-auth": "^1.0.0",
+    "bull": "^4.12.0",
+    "bullmq": "^5.1.5",
+    "celebrate": "^15.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "date-fns": "^3.0.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "handlebars": "^4.7.8",
+    "helmet": "^7.1.0",
+    "http-errors": "^2.0.0",
+    "http-status-codes": "^2.3.0",
+    "inversify": "^6.0.2",
+    "ioredis": "^5.3.2",
+    "joi": "^17.12.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "morgan": "^1.10.0",
+    "nanoid": "^5.0.4",
+    "node-cron": "^3.0.3",
+    "numeral": "^2.0.6",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.14.0",
+    "pg": "^8.13.0",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "prisma": "^7.4.1",
+    "redis": "^4.6.12",
+    "reflect-metadata": "^0.2.1",
+    "slugify": "^1.6.6",
+    "stripe": "^14.10.0",
+    "tsyringe": "^4.8.0",
+    "uuid": "^9.0.1",
+    "validator": "^13.11.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.4",
+    "@commitlint/config-conventional": "^18.4.4",
+    "@faker-js/faker": "^8.3.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/bull": "^4.10.0",
+    "@types/compression": "^1.7.5",
+    "@types/cookie-parser": "^1.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/http-errors": "^2.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/lodash": "^4.14.202",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.10.6",
+    "@types/node-cron": "^3.0.11",
+    "@types/numeral": "^2.0.5",
+    "@types/pdfkit": "^0.13.3",
+    "@types/pg": "^8.11.0",
+    "@types/supertest": "^6.0.2",
+    "@types/uuid": "^9.0.7",
+    "@types/validator": "^13.11.8",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "commitlint": "^18.4.4",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jest": "^27.6.1",
+    "eslint-plugin-prettier": "^5.1.2",
+    "husky": "^8.0.3",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.0",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/**/*.interface.ts",
+      "!src/**/*.types.ts",
+      "!src/main.ts"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "^@app/(.*)$": "<rootDir>/src/app/$1",
+      "^@infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
+      "^@config/(.*)$": "<rootDir>/src/config/$1",
+      "^@shared/(.*)$": "<rootDir>/src/shared/$1",
+      "^@tests/(.*)$": "<rootDir>/tests/$1"
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.ts"
+    ],
+    "testTimeout": 30000,
+    "verbose": true,
+    "forceExit": true,
+    "clearMocks": true,
+    "resetMocks": true,
+    "restoreMocks": true
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/main.ts",
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "ignore": [
+      "src/**/*.test.ts",
+      "src/**/*.spec.ts"
+    ],
+    "delay": "2000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lomash-wood/backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lomash-wood/backend/issues"
+  },
+  "homepage": "https://github.com/lomash-wood/backend#readme",
+  "keywords": [
+    "lomash-wood",
+    "order-service",
+    "payment-service",
+    "e-commerce",
+    "stripe",
+    "microservice",
+    "nodejs",
+    "typescript",
+    "express",
+    "prisma",
+    "postgresql"
+  ]
+}

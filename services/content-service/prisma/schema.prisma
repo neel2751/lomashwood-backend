@@ -1,0 +1,672 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  SCHEDULED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum PageType {
+  STATIC
+  DYNAMIC
+  LANDING
+}
+
+enum BlogCategory {
+  KITCHEN
+  BEDROOM
+  DESIGN
+  TIPS
+  NEWS
+  INSPIRATION
+}
+
+enum SeoIndexStatus {
+  INDEX
+  NOINDEX
+}
+
+enum SliderTarget {
+  HOME
+  KITCHEN
+  BEDROOM
+  SALE
+  FINANCE
+}
+
+enum MediaWallLayout {
+  FULL_WIDTH
+  GRID_2
+  GRID_3
+  MASONRY
+}
+
+enum FaqCategory {
+  GENERAL
+  PRODUCTS
+  DELIVERY
+  INSTALLATION
+  FINANCE
+  APPOINTMENTS
+  RETURNS
+}
+
+enum CareerType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum CareerDepartment {
+  DESIGN
+  SALES
+  INSTALLATION
+  MARKETING
+  TECHNOLOGY
+  OPERATIONS
+  CUSTOMER_SERVICE
+}
+
+enum ProcessStepType {
+  CONSULTATION
+  DESIGN
+  MANUFACTURING
+  DELIVERY
+  INSTALLATION
+  AFTERCARE
+}
+
+enum AccreditationType {
+  AWARD
+  CERTIFICATION
+  PARTNERSHIP
+  MEMBERSHIP
+}
+
+enum BusinessType {
+  AGENT
+  BUILDER
+  ARCHITECT
+  INTERIOR_DESIGNER
+  CONTRACTOR
+  DEVELOPER
+  OTHER
+}
+
+enum ContactSubject {
+  GENERAL
+  PRODUCTS
+  APPOINTMENTS
+  COMPLAINTS
+  TRADE
+  PRESS
+  OTHER
+}
+
+model Blog {
+  id              String        @id @default(uuid())
+  title           String        @db.VarChar(200)
+  slug            String        @unique @db.VarChar(220)
+  excerpt         String        @db.VarChar(500)
+  content         String        @db.Text
+  coverImageUrl   String?       @db.Text
+  coverImageKey   String?       @db.Text
+  category        BlogCategory
+  tags            Json          @default("[]")
+  authorName      String        @db.VarChar(100)
+  authorImageUrl  String?       @db.Text
+  status          ContentStatus @default(DRAFT)
+  isFeatured      Boolean       @default(false)
+  readTimeMinutes Int           @default(5)
+  viewCount       Int           @default(0)
+  metaTitle       String?       @db.VarChar(60)
+  metaDescription String?       @db.VarChar(160)
+  publishedAt     DateTime?
+  scheduledAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+  @@index([isFeatured])
+  @@index([publishedAt])
+  @@index([deletedAt])
+  @@map("blogs")
+}
+
+model MediaItem {
+  id           String    @id @default(uuid())
+  title        String    @db.VarChar(200)
+  description  String?   @db.VarChar(1000)
+  type         MediaType
+  url          String    @db.Text
+  key          String    @db.Text
+  thumbnailUrl String?   @db.Text
+  altText      String?   @db.VarChar(200)
+  size         Int
+  mimeType     String    @db.VarChar(100)
+  width        Int?
+  height       Int?
+  duration     Float?
+  tags         Json      @default("[]")
+  isPublic     Boolean   @default(true)
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  mediaWallItems MediaWallItem[]
+
+  @@index([type])
+  @@index([isPublic])
+  @@index([deletedAt])
+  @@map("media_items")
+}
+
+model MediaWallContent {
+  id                 String          @id @default(uuid())
+  title              String          @db.VarChar(200)
+  description        String?         @db.Text
+  backgroundImageUrl String?         @db.Text
+  backgroundImageKey String?         @db.Text
+  backgroundVideoUrl String?         @db.Text
+  backgroundVideoKey String?         @db.Text
+  layout             MediaWallLayout @default(GRID_3)
+  ctaText            String?         @db.VarChar(100)
+  ctaUrl             String?         @db.VarChar(500)
+  status             ContentStatus   @default(DRAFT)
+  sortOrder          Int             @default(0)
+  publishedAt        DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  deletedAt          DateTime?
+
+  items MediaWallItem[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("media_wall_contents")
+}
+
+model MediaWallItem {
+  id           String           @id @default(uuid())
+  mediaWallId  String
+  mediaItemId  String
+  sortOrder    Int              @default(0)
+  captionTitle String?          @db.VarChar(200)
+  captionBody  String?          @db.VarChar(500)
+  linkUrl      String?          @db.VarChar(500)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  mediaWall  MediaWallContent @relation(fields: [mediaWallId], references: [id], onDelete: Cascade)
+  mediaItem  MediaItem        @relation(fields: [mediaItemId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaWallId, mediaItemId])
+  @@index([mediaWallId])
+  @@index([mediaItemId])
+  @@map("media_wall_items")
+}
+
+model CmsPage {
+  id              String        @id @default(uuid())
+  title           String        @db.VarChar(200)
+  slug            String        @unique @db.VarChar(220)
+  description     String?       @db.VarChar(500)
+  content         String?
+  type            PageType      @default(DYNAMIC)
+  status          ContentStatus @default(DRAFT)
+  blocks          Json          @default("[]")
+  coverImageUrl   String?       @db.Text
+  metaTitle       String?       @db.VarChar(60)
+  metaDescription String?       @db.VarChar(160)
+  isIndexable     Boolean       @default(true)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  @@index([slug])
+  @@index([status])
+  @@index([type])
+  @@index([isIndexable])
+  @@index([deletedAt])
+  @@map("cms_pages")
+}
+
+model SeoMeta {
+  id                 String         @id @default(uuid())
+  pagePath           String         @unique @db.VarChar(500)
+  title              String         @db.VarChar(60)
+  description        String?        @db.VarChar(160)
+  keywords           Json           @default("[]")
+  ogTitle            String?        @db.VarChar(60)
+  ogDescription      String?        @db.VarChar(160)
+  ogImageUrl         String?        @db.Text
+  twitterTitle       String?        @db.VarChar(60)
+  twitterDescription String?        @db.VarChar(160)
+  twitterImageUrl    String?        @db.Text
+  canonicalUrl       String?        @db.Text
+  indexStatus        SeoIndexStatus @default(INDEX)
+  structuredData     Json?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([pagePath])
+  @@index([indexStatus])
+  @@map("seo_meta")
+}
+
+model LandingPage {
+  id                 String        @id @default(uuid())
+  title              String        @db.VarChar(200)
+  slug               String        @unique @db.VarChar(220)
+  headline           String        @db.VarChar(300)
+  subheadline        String?       @db.VarChar(500)
+  status             ContentStatus @default(DRAFT)
+  sections           Json          @default("[]")
+  coverImageUrl      String?       @db.Text
+  backgroundImageUrl String?       @db.Text
+  metaTitle          String?       @db.VarChar(60)
+  metaDescription    String?       @db.VarChar(160)
+  publishedAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+
+  @@index([slug])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("landing_pages")
+}
+
+model HomeSlider {
+  id          String       @id @default(uuid())
+  title       String       @db.VarChar(200)
+  description String?      @db.VarChar(500)
+  imageUrl    String       @db.Text
+  imageKey    String       @db.Text
+  videoUrl    String?      @db.Text
+  videoKey    String?      @db.Text
+  buttonText  String?      @db.VarChar(100)
+  buttonUrl   String?      @db.VarChar(500)
+  target      SliderTarget @default(HOME)
+  isActive    Boolean      @default(true)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@index([target])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([deletedAt])
+  @@map("home_sliders")
+}
+
+model FinanceContent {
+  id              String        @id @default(uuid())
+  title           String        @db.VarChar(200)
+  description     String        @db.VarChar(1000)
+  content         String        @db.Text
+  heroImageUrl    String?       @db.Text
+  heroImageKey    String?       @db.Text
+  ctaText         String?       @db.VarChar(100)
+  ctaUrl          String?       @db.VarChar(500)
+  status          ContentStatus @default(DRAFT)
+  metaTitle       String?       @db.VarChar(60)
+  metaDescription String?       @db.VarChar(160)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  features FinanceFeature[]
+
+  @@index([status])
+  @@map("finance_contents")
+}
+
+model FinanceFeature {
+  id               String         @id @default(uuid())
+  financeContentId String
+  title            String         @db.VarChar(200)
+  description      String         @db.VarChar(500)
+  iconUrl          String?        @db.Text
+  sortOrder        Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  financeContent FinanceContent @relation(fields: [financeContentId], references: [id], onDelete: Cascade)
+
+  @@index([financeContentId])
+  @@map("finance_features")
+}
+
+model ProcessStep {
+  id          String          @id @default(uuid())
+  stepNumber  Int             @unique
+  type        ProcessStepType
+  title       String          @db.VarChar(200)
+  description String          @db.VarChar(1000)
+  iconUrl     String?         @db.Text
+  imageUrl    String?         @db.Text
+  imageKey    String?         @db.Text
+  ctaText     String?         @db.VarChar(100)
+  ctaUrl      String?         @db.VarChar(500)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([stepNumber])
+  @@index([isActive])
+  @@map("process_steps")
+}
+
+model WhyChooseUsItem {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(200)
+  description String   @db.VarChar(500)
+  iconUrl     String?  @db.Text
+  imageUrl    String?  @db.Text
+  imageKey    String?  @db.Text
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("why_choose_us_items")
+}
+
+model Faq {
+  id        String      @id @default(uuid())
+  question  String      @db.VarChar(500)
+  answer    String      @db.Text
+  category  FaqCategory @default(GENERAL)
+  sortOrder Int         @default(0)
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+
+  @@index([category])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([deletedAt])
+  @@map("faqs")
+}
+
+model Testimonial {
+  id           String        @id @default(uuid())
+  customerName String        @db.VarChar(100)
+  customerCity String?       @db.VarChar(100)
+  rating       Int           @default(5)
+  title        String?       @db.VarChar(200)
+  body         String        @db.Text
+  imageUrl     String?       @db.Text
+  imageKey     String?       @db.Text
+  videoUrl     String?       @db.Text
+  videoKey     String?       @db.Text
+  projectType  String?       @db.VarChar(100)
+  status       ContentStatus @default(DRAFT)
+  isFeatured   Boolean       @default(false)
+  source       String?       @db.VarChar(100)
+  sourceUrl    String?       @db.Text
+  publishedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  @@index([status])
+  @@index([isFeatured])
+  @@index([rating])
+  @@index([deletedAt])
+  @@map("testimonials")
+}
+
+model NewsletterSubscription {
+  id             String    @id @default(uuid())
+  email          String    @unique @db.VarChar(255)
+  firstName      String?   @db.VarChar(100)
+  lastName       String?   @db.VarChar(100)
+  source         String?   @db.VarChar(100)
+  isActive       Boolean   @default(true)
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  ipAddress      String?   @db.VarChar(45)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([email])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("newsletter_subscriptions")
+}
+
+model Logo {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(200)
+  imageUrl  String    @db.Text
+  imageKey  String    @db.Text
+  altText   String?   @db.VarChar(200)
+  linkUrl   String?   @db.VarChar(500)
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([deletedAt])
+  @@map("logos")
+}
+
+model Accreditation {
+  id          String            @id @default(uuid())
+  name        String            @db.VarChar(200)
+  type        AccreditationType @default(CERTIFICATION)
+  description String?           @db.VarChar(500)
+  imageUrl    String            @db.Text
+  imageKey    String            @db.Text
+  altText     String?           @db.VarChar(200)
+  linkUrl     String?           @db.VarChar(500)
+  issuedAt    DateTime?
+  expiresAt   DateTime?
+  sortOrder   Int               @default(0)
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deletedAt   DateTime?
+
+  @@index([type])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([deletedAt])
+  @@map("accreditations")
+}
+
+model Banner {
+  id             String        @id @default(uuid())
+  title          String        @db.VarChar(200)
+  description    String?       @db.VarChar(500)
+  imageUrl       String        @db.Text
+  imageKey       String        @db.Text
+  mobileImageUrl String?       @db.Text
+  mobileImageKey String?       @db.Text
+  altText        String?       @db.VarChar(200)
+  linkUrl        String?       @db.VarChar(500)
+  linkText       String?       @db.VarChar(100)
+  placement      String        @db.VarChar(100)
+  status         ContentStatus @default(DRAFT)
+  sortOrder      Int           @default(0)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  @@index([placement])
+  @@index([status])
+  @@index([sortOrder])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@index([deletedAt])
+  @@map("banners")
+}
+
+model Menu {
+  id        String   @id @default(uuid())
+  name      String   @unique @db.VarChar(100)
+  location  String   @db.VarChar(100)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items MenuItem[]
+
+  @@index([location])
+  @@index([isActive])
+  @@map("menus")
+}
+
+model MenuItem {
+  id        String   @id @default(uuid())
+  menuId    String
+  parentId  String?
+  label     String   @db.VarChar(200)
+  url       String?  @db.VarChar(500)
+  target    String?  @db.VarChar(20)
+  iconUrl   String?  @db.Text
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menu     Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent   MenuItem?  @relation("MenuItemChildren", fields: [parentId], references: [id])
+  children MenuItem[] @relation("MenuItemChildren")
+
+  @@index([menuId])
+  @@index([parentId])
+  @@index([sortOrder])
+  @@map("menu_items")
+}
+
+model Career {
+  id             String           @id @default(uuid())
+  title          String           @db.VarChar(200)
+  slug           String           @unique @db.VarChar(220)
+  department     CareerDepartment
+  type           CareerType
+  location       String           @db.VarChar(200)
+  isRemote       Boolean          @default(false)
+  description    String           @db.Text
+  requirements   String           @db.Text
+  benefits       String?          @db.Text
+  salaryMin      Float?
+  salaryMax      Float?
+  salaryCurrency String?          @db.VarChar(10)
+  status         ContentStatus    @default(DRAFT)
+  publishedAt    DateTime?
+  closingAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  @@index([slug])
+  @@index([department])
+  @@index([type])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([closingAt])
+  @@index([deletedAt])
+  @@map("careers")
+}
+
+model BrochureRequest {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(200)
+  email     String    @db.VarChar(255)
+  phone     String    @db.VarChar(30)
+  postcode  String    @db.VarChar(20)
+  address   String?   @db.VarChar(500)
+  ipAddress String?   @db.VarChar(45)
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("brochure_requests")
+}
+
+model BusinessInquiry {
+  id           String       @id @default(uuid())
+  name         String       @db.VarChar(200)
+  email        String       @db.VarChar(255)
+  phone        String       @db.VarChar(30)
+  businessType BusinessType
+  companyName  String?      @db.VarChar(200)
+  message      String?      @db.Text
+  ipAddress    String?      @db.VarChar(45)
+  notifiedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([email])
+  @@index([businessType])
+  @@index([createdAt])
+  @@map("business_inquiries")
+}
+
+model ContactMessage {
+  id        String         @id @default(uuid())
+  name      String         @db.VarChar(200)
+  email     String         @db.VarChar(255)
+  phone     String?        @db.VarChar(30)
+  subject   ContactSubject @default(GENERAL)
+  message   String         @db.Text
+  ipAddress String?        @db.VarChar(45)
+  readAt    DateTime?
+  repliedAt DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([email])
+  @@index([subject])
+  @@index([readAt])
+  @@index([createdAt])
+  @@map("contact_messages")
+}
+
+model SiteSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique @db.VarChar(200)
+  value       Json
+  description String?  @db.VarChar(500)
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([isPublic])
+  @@map("site_settings")
+}

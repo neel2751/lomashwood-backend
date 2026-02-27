@@ -1,0 +1,42 @@
+replicaCount: 2
+
+image:
+  tag: "staging"
+  pullPolicy: Always
+
+resources:
+  requests:
+    cpu: "75m"
+    memory: "192Mi"
+  limits:
+    cpu: "400m"
+    memory: "384Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+
+topologySpreadConstraints: []
+
+env:
+  NODE_ENV: staging
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  DATABASE_POOL_MIN: "2"
+  DATABASE_POOL_MAX: "8"
+  APPOINTMENT_TYPES: "HOME_MEASUREMENT,ONLINE,SHOWROOM"
+  DEFAULT_SLOT_DURATION_MINUTES: "60"
+  REMINDER_ADVANCE_HOURS_24: "24"
+  REMINDER_ADVANCE_HOURS_2: "2"
+  MAX_BOOKINGS_PER_SLOT: "1"
+  BOOKING_CANCELLATION_WINDOW_HOURS: "24"
+  SEND_REMINDER_JOB_INTERVAL_MINUTES: "15"
+  CLEANUP_EXPIRED_SLOTS_INTERVAL_HOURS: "6"
+  ADMIN_NOTIFICATION_EMAIL: "appointments-staging@lomashwood.co.uk"
+  KITCHEN_TEAM_EMAIL: "kitchen-staging@lomashwood.co.uk"
+  BEDROOM_TEAM_EMAIL: "bedroom-staging@lomashwood.co.uk"
+
+namespace: lomash-wood-staging

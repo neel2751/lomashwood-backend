@@ -1,0 +1,93 @@
+{
+  "__inputs": [{ "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }],
+  "title": "Lomash Wood — Order & Payment Service",
+  "uid": "lw-order-payment",
+  "tags": ["lomash-wood", "order-payment"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Orders Created (1h)",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(orders_created_total{service=\"order-payment-service\"}[1h]))", "legendFormat": "Orders" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Payment Success Rate %",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * sum(rate(payments_total{service=\"order-payment-service\",result=\"success\"}[5m])) / sum(rate(payments_total{service=\"order-payment-service\"}[5m]))", "legendFormat": "Success %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "green", "value": 99 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Revenue (1h)",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(payment_amount_total{service=\"order-payment-service\",result=\"success\"}[1h]))", "legendFormat": "Revenue" }],
+      "fieldConfig": { "defaults": { "unit": "currencyGBP", "thresholds": { "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Stripe Webhook Processing Rate",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(rate(stripe_webhooks_total{service=\"order-payment-service\"}[5m]))", "legendFormat": "Webhooks/s" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Refunds Issued (1h)",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(refunds_total{service=\"order-payment-service\"}[1h]))", "legendFormat": "Refunds" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 20 }] } } }
+    },
+    {
+      "id": 6, "type": "stat", "title": "Failed Payments (5m)",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "sum(increase(payments_total{service=\"order-payment-service\",result=\"failure\"}[5m]))", "legendFormat": "Failed" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] } } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Order Volume Over Time",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(orders_created_total{service=\"order-payment-service\"}[5m]))", "legendFormat": "Orders Created" },
+        { "expr": "sum(rate(orders_completed_total{service=\"order-payment-service\"}[5m]))", "legendFormat": "Orders Completed" },
+        { "expr": "sum(rate(orders_cancelled_total{service=\"order-payment-service\"}[5m]))", "legendFormat": "Orders Cancelled" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Payment Success vs Failure Rate",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "sum(rate(payments_total{service=\"order-payment-service\",result=\"success\"}[2m]))", "legendFormat": "Success" },
+        { "expr": "sum(rate(payments_total{service=\"order-payment-service\",result=\"failure\"}[2m]))", "legendFormat": "Failure" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Success" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "Failure" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      }
+    },
+    {
+      "id": 9, "type": "timeseries", "title": "Stripe Webhook Events by Type",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [{ "expr": "sum(rate(stripe_webhooks_total{service=\"order-payment-service\"}[2m])) by (event_type)", "legendFormat": "{{ event_type }}" }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 10, "type": "timeseries", "title": "Payment Processing Latency (P99)",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"order-payment-service\",route=\"/v1/payments/create-intent\"}[2m])) by (le))", "legendFormat": "Create Intent P99" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"order-payment-service\",route=\"/v1/orders\"}[2m])) by (le))", "legendFormat": "Create Order P99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Revenue Over Time",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
+      "targets": [{ "expr": "sum(rate(payment_amount_total{service=\"order-payment-service\",result=\"success\"}[5m])) * 300", "legendFormat": "Revenue/5m" }],
+      "fieldConfig": { "defaults": { "unit": "currencyGBP" } }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "__inputs": [{ "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }],
+  "title": "Lomash Wood — SLA / SLO",
+  "uid": "lw-sla-slo",
+  "tags": ["lomash-wood", "sla", "slo"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "5m",
+  "time": { "from": "now-30d", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "API Gateway Availability (30d)",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * (1 - (sum(increase(http_requests_total{service=\"api-gateway\",status_code=~\"5..\"}[30d])) / sum(increase(http_requests_total{service=\"api-gateway\"}[30d]))))", "legendFormat": "Availability %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 3, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 99 }, { "color": "green", "value": 99.9 }] } } }
+    },
+    {
+      "id": 2, "type": "stat", "title": "Payment Service Availability (30d)",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * (1 - (sum(increase(http_requests_total{service=\"order-payment-service\",status_code=~\"5..\"}[30d])) / sum(increase(http_requests_total{service=\"order-payment-service\"}[30d]))))", "legendFormat": "Availability %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 3, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 99.5 }, { "color": "green", "value": 99.9 }] } } }
+    },
+    {
+      "id": 3, "type": "stat", "title": "Auth Service Availability (30d)",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * (1 - (sum(increase(http_requests_total{service=\"auth-service\",status_code=~\"5..\"}[30d])) / sum(increase(http_requests_total{service=\"auth-service\"}[30d]))))", "legendFormat": "Availability %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 3, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 99.5 }, { "color": "green", "value": 99.9 }] } } }
+    },
+    {
+      "id": 4, "type": "stat", "title": "Error Budget Remaining — API GW",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * (1 - ((sum(increase(http_requests_total{service=\"api-gateway\",status_code=~\"5..\"}[30d])) / sum(increase(http_requests_total{service=\"api-gateway\"}[30d]))) / 0.001))", "legendFormat": "Budget %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 25 }, { "color": "green", "value": 50 }] } } }
+    },
+    {
+      "id": 5, "type": "stat", "title": "Error Budget Remaining — Payments",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * (1 - ((sum(increase(http_requests_total{service=\"order-payment-service\",status_code=~\"5..\"}[30d])) / sum(increase(http_requests_total{service=\"order-payment-service\"}[30d]))) / 0.0005))", "legendFormat": "Budget %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 25 }, { "color": "green", "value": 50 }] } } }
+    },
+    {
+      "id": 6, "type": "stat", "title": "P99 Latency SLO Compliance — API GW",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "targets": [{ "expr": "100 * (sum(rate(http_request_duration_seconds_bucket{service=\"api-gateway\",le=\"3\"}[30d])) / sum(rate(http_request_duration_seconds_bucket{service=\"api-gateway\",le=\"+Inf\"}[30d])))", "legendFormat": "< 3s SLO %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 99 }, { "color": "green", "value": 99.9 }] } } }
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Availability Trend by Service (7d)",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "targets": [
+        { "expr": "100 * (1 - (sum(rate(http_requests_total{service=\"api-gateway\",status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total{service=\"api-gateway\"}[1h]))))", "legendFormat": "api-gateway" },
+        { "expr": "100 * (1 - (sum(rate(http_requests_total{service=\"auth-service\",status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total{service=\"auth-service\"}[1h]))))", "legendFormat": "auth-service" },
+        { "expr": "100 * (1 - (sum(rate(http_requests_total{service=\"order-payment-service\",status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total{service=\"order-payment-service\"}[1h]))))", "legendFormat": "order-payment-service" },
+        { "expr": "100 * (1 - (sum(rate(http_requests_total{service=\"appointment-service\",status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total{service=\"appointment-service\"}[1h]))))", "legendFormat": "appointment-service" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 95, "max": 100, "custom": { "thresholdsStyle": { "mode": "line" } }, "thresholds": { "steps": [{ "color": "transparent", "value": null }, { "color": "red", "value": 99 }] } } }
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Error Budget Burn Rate (6h window)",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "(sum(rate(http_requests_total{service=\"api-gateway\",status_code=~\"5..\"}[6h])) / sum(rate(http_requests_total{service=\"api-gateway\"}[6h]))) / 0.001", "legendFormat": "api-gateway burn rate" },
+        { "expr": "(sum(rate(http_requests_total{service=\"order-payment-service\",status_code=~\"5..\"}[6h])) / sum(rate(http_requests_total{service=\"order-payment-service\"}[6h]))) / 0.0005", "legendFormat": "payments burn rate" }
+      ],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 6 }] }, "custom": { "thresholdsStyle": { "mode": "line+area" } } } }
+    },
+    {
+      "id": 9, "type": "table", "title": "SLO Summary Table",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "100 * (1 - (sum(increase(http_requests_total{status_code=~\"5..\"}[30d])) by (service) / sum(increase(http_requests_total[30d])) by (service)))", "legendFormat": "{{ service }}", "instant": true }
+      ],
+      "options": { "sortBy": [{ "displayName": "Value", "desc": true }] },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 3, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 99 }, { "color": "green", "value": 99.9 }] }, "custom": { "displayMode": "color-background" } } }
+    }
+  ]
+}

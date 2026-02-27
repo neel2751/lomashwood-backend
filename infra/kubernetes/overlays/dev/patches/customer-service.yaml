@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-service
+  namespace: lomash-wood-dev
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: customer-service
+          image: lomashwood/customer-service:dev
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: NODE_ENV
+              value: development
+            - name: LOG_LEVEL
+              value: debug
+            - name: REVIEW_MODERATION_REQUIRED
+              value: "false"
+            - name: INACTIVE_USER_ANONYMIZE_AFTER_DAYS
+              value: "9999"

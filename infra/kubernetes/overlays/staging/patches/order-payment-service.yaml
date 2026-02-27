@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-payment-service
+  namespace: lomash-wood-staging
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: order-payment-service
+          image: lomashwood/order-payment-service:staging
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "192Mi"
+            limits:
+              cpu: "400m"
+              memory: "384Mi"
+          env:
+            - name: NODE_ENV
+              value: staging
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_FORMAT
+              value: json
+            - name: STRIPE_API_VERSION
+              value: "2024-11-20.acacia"
+            - name: ORDER_EXPIRY_MINUTES
+              value: "30"
+            - name: ABANDONED_CHECKOUT_EXPIRY_HOURS
+              value: "24"
+            - name: FAILED_WEBHOOK_RETRY_ATTEMPTS
+              value: "3"
+            - name: FAILED_WEBHOOK_RETRY_DELAY_SECONDS
+              value: "60"

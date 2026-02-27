@@ -1,0 +1,23 @@
+apiVersion: v2
+name: content-service
+description: Helm chart for the Lomash Wood Content Service - manages blogs, media wall, CMS pages, SEO, and landing pages
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - lomash-wood
+  - content
+  - cms
+  - blog
+  - media
+  - seo
+home: https://lomashwood.co.uk
+sources:
+  - https://github.com/lomash-wood/lomash-wood-backend
+maintainers:
+  - name: Lomash Wood Platform Team
+    email: platform@lomashwood.co.uk
+dependencies: []
+annotations:
+  category: backend-service
+  service: content-service

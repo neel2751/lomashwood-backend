@@ -1,0 +1,250 @@
+openapi: "3.1.0"
+
+info:
+  title: "{{title}}"
+  version: "{{version}}"
+  description: |
+    {{description}}
+
+    Generated: {{generatedAt}}
+  contact:
+    name: Lomash Wood Engineering
+    email: engineering@lomashwood.co.uk
+  license:
+    name: Private
+    identifier: LicenseRef-Private
+
+servers:
+  - url: "{{baseUrl}}"
+    description: Primary API server
+  - url: "http://localhost:3000"
+    description: Local development
+
+tags:
+  {{#each tags}}
+  - name: "{{this}}"
+  {{/each}}
+
+security:
+  - BearerAuth: []
+
+paths:
+  {{#each operations}}
+  "{{path}}":
+    {{method}}:
+      operationId: "{{operationId}}"
+      summary: "{{summary}}"
+      {{#if description}}
+      description: "{{description}}"
+      {{/if}}
+      tags:
+        {{#each tags}}
+        - "{{this}}"
+        {{/each}}
+      {{#if deprecated}}
+      deprecated: true
+      {{/if}}
+      {{#if requiresAuth}}
+      security:
+        - BearerAuth: []
+      {{/if}}
+      {{#if parameters.length}}
+      parameters:
+        {{#each parameters}}
+        - name: "{{name}}"
+          in: "{{in}}"
+          required: {{required}}
+          {{#if description}}
+          description: "{{description}}"
+          {{/if}}
+          schema:
+            type: "{{schema.type}}"
+            {{#if schema.format}}
+            format: "{{schema.format}}"
+            {{/if}}
+            {{#if schema.enum}}
+            enum:
+              {{#each schema.enum}}
+              - {{#if (eq ../schema.type "string")}}"{{this}}"{{else}}{{this}}{{/if}}
+              {{/each}}
+            {{/if}}
+        {{/each}}
+      {{/if}}
+      {{#if requestBody}}
+      requestBody:
+        required: {{requestBody.required}}
+        content:
+          "{{requestBody.contentType}}":
+            schema:
+              {{#if requestBody.schema.ref}}
+              $ref: "#/components/schemas/{{requestBody.schema.ref}}"
+              {{else}}
+              type: "{{requestBody.schema.type}}"
+              {{#if requestBody.schema.properties}}
+              properties:
+                {{#each requestBody.schema.properties}}
+                {{@key}}:
+                  type: "{{type}}"
+                  {{#if format}}format: "{{format}}"{{/if}}
+                  {{#if description}}description: "{{description}}"{{/if}}
+                  {{#if enum}}
+                  enum:
+                    {{#each enum}}
+                    - {{#if (eq ../../type "string")}}"{{this}}"{{else}}{{this}}{{/if}}
+                    {{/each}}
+                  {{/if}}
+                {{/each}}
+              {{#if requestBody.schema.required}}
+              required:
+                {{#each requestBody.schema.required}}
+                - "{{this}}"
+                {{/each}}
+              {{/if}}
+              {{/if}}
+              {{/if}}
+      {{/if}}
+      responses:
+        {{#each responses}}
+        "{{statusCode}}":
+          description: "{{description}}"
+          {{#if contentType}}
+          content:
+            "{{contentType}}":
+              schema:
+                {{#if schema}}
+                {{#if schema.ref}}
+                $ref: "#/components/schemas/{{schema.ref}}"
+                {{else}}
+                type: "{{schema.type}}"
+                {{#if schema.properties}}
+                properties:
+                  {{#each schema.properties}}
+                  {{@key}}:
+                    type: "{{type}}"
+                    {{#if format}}format: "{{format}}"{{/if}}
+                    {{#if description}}description: "{{description}}"{{/if}}
+                  {{/each}}
+                {{/if}}
+                {{#if schema.items}}
+                items:
+                  {{#if schema.items.ref}}
+                  $ref: "#/components/schemas/{{schema.items.ref}}"
+                  {{else}}
+                  type: "{{schema.items.type}}"
+                  {{/if}}
+                {{/if}}
+                {{/if}}
+                {{else}}
+                type: object
+                {{/if}}
+          {{/if}}
+        {{/each}}
+
+  {{/each}}
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from POST /v1/auth/login
+
+  schemas:
+    ApiError:
+      type: object
+      required:
+        - statusCode
+        - message
+        - timestamp
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation failed"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+
+    PaginationMeta:
+      type: object
+      required:
+        - total
+        - page
+        - limit
+        - totalPages
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    {{#each models}}
+    {{name}}:
+      type: object
+      {{#if description}}
+      description: "{{description}}"
+      {{/if}}
+      {{#if required.length}}
+      required:
+        {{#each required}}
+        - "{{this}}"
+        {{/each}}
+      {{/if}}
+      {{#if properties}}
+      properties:
+        {{#each properties}}
+        {{@key}}:
+          {{#if ref}}
+          $ref: "#/components/schemas/{{ref}}"
+          {{else}}
+          type: "{{type}}"
+          {{#if format}}format: "{{format}}"{{/if}}
+          {{#if nullable}}nullable: true{{/if}}
+          {{#if description}}description: "{{description}}"{{/if}}
+          {{#if default}}default: {{default}}{{/if}}
+          {{#if minimum}}minimum: {{minimum}}{{/if}}
+          {{#if maximum}}maximum: {{maximum}}{{/if}}
+          {{#if minLength}}minLength: {{minLength}}{{/if}}
+          {{#if maxLength}}maxLength: {{maxLength}}{{/if}}
+          {{#if enum}}
+          enum:
+            {{#each enum}}
+            - {{#if (eq ../../type "string")}}"{{this}}"{{else}}{{this}}{{/if}}
+            {{/each}}
+          {{/if}}
+          {{#if items}}
+          items:
+            {{#if items.ref}}
+            $ref: "#/components/schemas/{{items.ref}}"
+            {{else}}
+            type: "{{items.type}}"
+            {{/if}}
+          {{/if}}
+          {{#if properties}}
+          properties:
+            {{#each properties}}
+            {{@key}}:
+              type: "{{type}}"
+              {{#if format}}format: "{{format}}"{{/if}}
+            {{/each}}
+          {{/if}}
+          {{/if}}
+        {{/each}}
+      {{/if}}
+
+    {{/each}}
