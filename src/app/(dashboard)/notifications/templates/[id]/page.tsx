@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TemplateEditor } from "@/components/notifications/TemplateEditor";
 

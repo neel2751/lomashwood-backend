@@ -1,11 +1,14 @@
 'use client'
 
-import type { Metadata } from 'next'
-import Link from 'next/link'
 import { useState } from 'react'
+
+import Link from 'next/link'
+
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ProductForm } from '@/components/products/ProductForm'
 import { ProductImageUpload } from '@/components/products/ProductImageUpload'
+
+import type { Metadata } from 'next'
 
 const TABS = ['Details', 'Images', 'Colours & Sizes', 'Pricing', 'SEO'] as const
 type Tab = typeof TABS[number]

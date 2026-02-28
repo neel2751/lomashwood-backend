@@ -1,24 +1,9 @@
 "use client";
 
-import { useUsers } from "@/hooks/useUsers";
-import { useSessions } from "@/hooks/useSessions";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { formatters } from "@/utils/formatters";
+import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
 import {
   ArrowLeft,
   Pencil,
@@ -33,8 +18,29 @@ import {
   Calendar,
   Activity,
 } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSessions } from "@/hooks/useSessions";
+import { useUsers } from "@/hooks/useUsers";
+import { formatters } from "@/utils/formatters";
+
+
+
 
 interface UserDetailProps {
   userId: string;

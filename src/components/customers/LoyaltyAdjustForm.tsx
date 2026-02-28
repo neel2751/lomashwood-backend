@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import {
   Save, Loader2, Star, Plus, Minus,
   RotateCcw, ChevronDown, AlertTriangle,
   TrendingUp, Gift, Info,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 type AdjustmentType = "add" | "remove" | "set";

@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { SupportTicketTable } from "@/components/customers/SupportTicketTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function SupportPage() {
   return (

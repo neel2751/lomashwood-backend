@@ -12,7 +12,9 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
+
 import { SidebarGroup } from "./SidebarGroup";
+
 import type { NavGroup } from "@/types/nav.types";
 
 const NAV_GROUPS: NavGroup[] = [

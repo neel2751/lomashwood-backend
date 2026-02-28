@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { LoyaltyTable } from "@/components/customers/LoyaltyTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function LoyaltyPage() {
   return (

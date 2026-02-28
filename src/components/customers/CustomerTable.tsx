@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import {
   Search, Filter, ChevronDown, MoreHorizontal,
   Eye, Mail, Phone, Star, UserPlus,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 type CustomerStatus = "active" | "inactive" | "vip" | "blocked";

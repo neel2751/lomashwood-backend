@@ -1,10 +1,13 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
 import Link from 'next/link'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { MetricCard } from '@/components/analytics/MetricCard'
+
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
+import { MetricCard } from '@/components/analytics/MetricCard'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { ExportButton } from '@/components/shared/ExportButton'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Analytics',

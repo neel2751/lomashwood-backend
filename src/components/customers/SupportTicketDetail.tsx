@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import {
   ArrowLeft, Send, CheckCircle, AlertTriangle,
   ChevronDown, User, Headphones, Paperclip, Clock,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import type { TicketStatus, TicketPriority, TicketCategory } from "./SupportTicketTable";
 
 interface Message {

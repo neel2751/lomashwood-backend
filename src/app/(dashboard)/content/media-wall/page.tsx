@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { MediaWallTable } from "@/components/content/MediaWallTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function MediaWallPage() {
   return (

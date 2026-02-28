@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import {
   Search, Filter, ChevronDown, MoreHorizontal,
   Eye, Pencil, XCircle, CalendarCheck, Phone, Mail,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 export type AppointmentType   = "home_visit" | "showroom" | "online";

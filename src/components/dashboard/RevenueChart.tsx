@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   AreaChart,
   Area,
@@ -9,7 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useState } from "react";
+
 import { cn } from "@/lib/utils";
 
 const MOCK_DATA = {

@@ -1,7 +1,9 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { PageHeader } from '@/components/layout/PageHeader'
+
 import { FunnelBuilder } from '@/components/analytics/FunnelBuilder'
+import { PageHeader } from '@/components/layout/PageHeader'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'New Funnel | Analytics',

@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { CmsPageTable } from "@/components/content/CmsPageTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function CmsPage() {
   return (

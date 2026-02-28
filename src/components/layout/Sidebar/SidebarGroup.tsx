@@ -1,7 +1,9 @@
 "use client";
 
-import { SidebarItem } from "./SidebarItem";
 import { cn } from "@/lib/utils";
+
+import { SidebarItem } from "./SidebarItem";
+
 import type { NavGroup } from "@/types/nav.types";
 
 interface SidebarGroupProps {

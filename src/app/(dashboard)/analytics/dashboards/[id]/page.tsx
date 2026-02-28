@@ -1,11 +1,14 @@
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+
 import Link from 'next/link'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { notFound } from 'next/navigation'
+
 import { DashboardBuilder } from '@/components/analytics/DashboardBuilder'
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { ExportButton } from '@/components/shared/ExportButton'
+
+import type { Metadata } from 'next'
 
 type Props = {
   params: { id: string }

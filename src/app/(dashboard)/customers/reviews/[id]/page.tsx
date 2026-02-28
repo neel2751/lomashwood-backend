@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { ReviewModerationCard } from "@/components/customers/ReviewModerationCard";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function ReviewDetailPage() {
   const { id } = useParams<{ id: string }>();

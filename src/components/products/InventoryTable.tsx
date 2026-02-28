@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import { Search, AlertTriangle, ChevronDown, Pencil } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 type StockStatus = "in_stock" | "low_stock" | "out_of_stock";

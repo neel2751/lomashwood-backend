@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { CmsPageEditor } from "@/components/content/CmsPageEditor";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function CmsDetailPage() {
   const { id } = useParams<{ id: string }>();

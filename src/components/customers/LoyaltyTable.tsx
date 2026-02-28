@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import {
   Search, Star, ChevronDown, Filter,
   TrendingUp, Gift, Plus,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 type LoyaltyTier = "Bronze" | "Silver" | "Gold" | "Platinum";

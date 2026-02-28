@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { ReviewTable } from "@/components/customers/ReviewTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function ReviewsPage() {
   return (

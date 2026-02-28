@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { LandingPageEditor } from "@/components/content/LandingPageEditor";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function NewLandingPage() {
   return (

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
 import { Plus, Trash2, GripVertical, ChevronDown, Save } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { FunnelChart } from "./FunnelChart";
 
 type EventOption = { label: string; value: string };

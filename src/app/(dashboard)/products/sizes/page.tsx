@@ -1,8 +1,11 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
 import Link from 'next/link'
+
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SizeTable } from '@/components/products/SizeTable'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Sizes & Units | Products' }
 

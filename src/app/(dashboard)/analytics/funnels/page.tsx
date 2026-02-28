@@ -1,9 +1,12 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
 import Link from 'next/link'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { FunnelChart } from '@/components/analytics/FunnelChart'
+
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
+import { FunnelChart } from '@/components/analytics/FunnelChart'
+import { PageHeader } from '@/components/layout/PageHeader'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Funnels | Analytics',

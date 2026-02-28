@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
+
 import {
   ShoppingBag, CalendarCheck, Star, RefreshCcw,
   MessageSquare, FileText, Gift, UserCheck, Mail,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 
 export type CustomerEventType =
   | "order_placed"

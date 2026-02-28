@@ -1,9 +1,9 @@
 "use client";
 
+import { AdminUserMenu } from "./AdminUserMenu";
 import { Breadcrumb } from "./Breadcrumb";
 import { GlobalSearch } from "./GlobalSearch";
 import { NotificationBell } from "./NotificationBell";
-import { AdminUserMenu } from "./AdminUserMenu";
 
 export function Header() {
   return (

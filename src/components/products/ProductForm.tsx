@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
 import { Save, Loader2, ChevronDown, Plus, X } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { ProductImageUpload } from "./ProductImageUpload";
 
 type Category = "Kitchen" | "Bedroom";

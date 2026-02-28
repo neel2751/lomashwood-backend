@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
+
 import { Save, Loader2, Pipette } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 const PRESET_COLOURS = [

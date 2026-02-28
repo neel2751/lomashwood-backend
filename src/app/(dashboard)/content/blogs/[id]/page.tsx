@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { BlogEditor } from "@/components/content/BlogEditor";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function BlogDetailPage() {
   const { id } = useParams<{ id: string }>();

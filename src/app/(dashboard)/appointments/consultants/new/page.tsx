@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { ConsultantForm } from "@/components/appointments/ConsultantForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function NewConsultantPage() {
   return (

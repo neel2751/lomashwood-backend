@@ -1,8 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft, CreditCard, ExternalLink, RefreshCcw, Copy, CheckCheck } from "lucide-react";
 import { useState } from "react";
+
+import Link from "next/link";
+
+import { ArrowLeft, CreditCard, ExternalLink, RefreshCcw, Copy, CheckCheck } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 const MOCK_PAYMENT = {

@@ -1,8 +1,9 @@
 'use client'
 
+import { Suspense, useState, useTransition } from 'react'
+
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useState, useTransition } from 'react'
 
 type Status = 'idle' | 'success' | 'error' | 'invalid-token'
 

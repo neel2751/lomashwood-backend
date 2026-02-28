@@ -1,9 +1,11 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { TrackingTable } from '@/components/analytics/TrackingTable'
+
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
+import { TrackingTable } from '@/components/analytics/TrackingTable'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { ExportButton } from '@/components/shared/ExportButton'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Event Tracking | Analytics',

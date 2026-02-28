@@ -1,12 +1,15 @@
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+
 import Link from 'next/link'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { FunnelChart } from '@/components/analytics/FunnelChart'
+import { notFound } from 'next/navigation'
+
 import { CohortTable } from '@/components/analytics/CohortTable'
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
+import { FunnelChart } from '@/components/analytics/FunnelChart'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { ExportButton } from '@/components/shared/ExportButton'
+
+import type { Metadata } from 'next'
 
 type Props = {
   params: { id: string }

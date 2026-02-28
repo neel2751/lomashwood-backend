@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+
 import {
   LayoutDashboard, Plus, Trash2, GripVertical,
   BarChart3, TrendingUp, Users, ShoppingBag,
   CalendarCheck, PieChart, Table2, Save, Eye,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 type WidgetType =

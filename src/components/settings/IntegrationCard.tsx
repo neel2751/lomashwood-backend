@@ -1,22 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+  ExternalLink,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Settings2,
+  Unplug,
+  Plug,
+  Eye,
+  EyeOff,
+  RefreshCw,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -33,20 +36,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { useIntegrations } from "@/hooks/useIntegrations";
 import {
-  ExternalLink,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Settings2,
-  Unplug,
-  Plug,
-  Eye,
-  EyeOff,
-  RefreshCw,
-} from "lucide-react";
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { useIntegrations } from "@/hooks/useIntegrations";
+
 
 // ── Integration catalogue ─────────────────────────────────────────────────────
 

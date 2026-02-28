@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import { ArrowUpDown, ExternalLink, Search } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface TrackingEvent {

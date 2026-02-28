@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
 import {
   Save, Loader2, Globe, Share2,
   Twitter, CheckCircle, AlertTriangle, Info,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface SeoData {

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, X, ArrowRight } from "lucide-react";
+
 import { useRouter } from "next/navigation";
+
+import { Search, X, ArrowRight } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 const QUICK_LINKS = [

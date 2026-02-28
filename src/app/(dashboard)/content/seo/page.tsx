@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { SeoForm } from "@/components/content/SeoForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function SeoPage() {
   return (

@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+
 import {
   ArrowLeft, Mail, Phone, MapPin, Star,
   ShoppingBag, CalendarCheck, MessageSquare,
   Pencil, Gift, TrendingUp,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { CustomerTimeline } from "./CustomerTimeline";
 
 const MOCK_CUSTOMER = {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { SupportTicketDetail } from "@/components/customers/SupportTicketDetail";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function SupportTicketDetailPage() {
   const { id } = useParams<{ id: string }>();

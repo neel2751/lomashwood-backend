@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { LoyaltyAdjustForm } from "@/components/customers/LoyaltyAdjustForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function LoyaltyDetailPage() {
   const { id } = useParams<{ id: string }>();

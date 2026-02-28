@@ -1,10 +1,11 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import {
   Clock, CheckCircle, Truck, Package,
   XCircle, RefreshCcw, AlertCircle,
 } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 export type OrderStatus =
   | "pending"

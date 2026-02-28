@@ -1,7 +1,7 @@
 "use client";
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Home, Monitor, MapPin } from "lucide-react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const DATA = [
   { label: "Home Measurement", key: "home",     value: 42, color: "#C8924A", icon: Home },

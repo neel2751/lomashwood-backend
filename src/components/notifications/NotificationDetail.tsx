@@ -1,12 +1,7 @@
 "use client";
 
-import { useNotification } from "@/hooks/useNotifications";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { formatters } from "@/utils/formatters";
+import { useRouter } from "next/navigation";
+
 import {
   ArrowLeft,
   Mail,
@@ -20,8 +15,15 @@ import {
   Loader2,
   Send,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { NotificationChannel } from "@/types/notification.types";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNotification } from "@/hooks/useNotifications";
+import { type NotificationChannel } from "@/types/notification.types";
+import { formatters } from "@/utils/formatters";
 
 interface NotificationDetailProps {
   id: string;

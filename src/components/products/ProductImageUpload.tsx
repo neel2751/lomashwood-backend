@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+
 import { Upload, X, GripVertical, Star, ImageOff } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface UploadedImage {

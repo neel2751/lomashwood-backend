@@ -1,14 +1,16 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { StatsCard } from '@/components/dashboard/StatsCard'
-import { RevenueChart } from '@/components/dashboard/RevenueChart'
-import { OrdersChart } from '@/components/dashboard/OrdersChart'
-import { AppointmentsChart } from '@/components/dashboard/AppointmentsChart'
-import { TopProducts } from '@/components/dashboard/TopProducts'
-import { RecentOrders } from '@/components/dashboard/RecentOrders'
-import { RecentCustomers } from '@/components/dashboard/RecentCustomers'
+
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
+import { AppointmentsChart } from '@/components/dashboard/AppointmentsChart'
+import { OrdersChart } from '@/components/dashboard/OrdersChart'
+import { RecentCustomers } from '@/components/dashboard/RecentCustomers'
+import { RecentOrders } from '@/components/dashboard/RecentOrders'
+import { RevenueChart } from '@/components/dashboard/RevenueChart'
+import { StatsCard } from '@/components/dashboard/StatsCard'
+import { TopProducts } from '@/components/dashboard/TopProducts'
 import { PageHeader } from '@/components/layout/PageHeader'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Overview',

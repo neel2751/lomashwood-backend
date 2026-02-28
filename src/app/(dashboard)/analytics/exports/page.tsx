@@ -1,8 +1,10 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { PageHeader } from '@/components/layout/PageHeader'
+
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
 import { ExportModal } from '@/components/analytics/ExportModal'
+import { PageHeader } from '@/components/layout/PageHeader'
+
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Exports | Analytics',

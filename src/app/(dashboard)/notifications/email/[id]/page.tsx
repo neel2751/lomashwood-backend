@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+
 import { PageHeader } from "@/components/layout/PageHeader";
 import { NotificationDetail } from "@/components/notifications/NotificationDetail";
 

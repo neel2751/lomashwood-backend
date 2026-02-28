@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { MediaUploader } from "@/components/content/MediaUploader";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function MediaWallDetailPage() {
   const { id } = useParams<{ id: string }>();

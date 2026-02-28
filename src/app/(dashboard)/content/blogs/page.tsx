@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { BlogTable } from "@/components/content/BlogTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function BlogsPage() {
   return (

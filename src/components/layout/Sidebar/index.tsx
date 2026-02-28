@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { SidebarNav } from "./SidebarNav";
-import { SidebarFooter } from "./SidebarFooter";
-import { cn } from "@/lib/utils";
+
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+import { SidebarFooter } from "./SidebarFooter";
+import { SidebarNav } from "./SidebarNav";
+
 
 interface SidebarProps {
   className?: string;

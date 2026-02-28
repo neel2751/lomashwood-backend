@@ -1,33 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useNotifications } from "@/hooks/useNotifications";
-import { NotificationLog, NotificationChannel, NotificationStatus } from "@/types/notification.types";
-import { formatters } from "@/utils/formatters";
+
+import { useRouter } from "next/navigation";
+
 import {
   Bell,
   Mail,
@@ -41,7 +17,36 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useNotifications } from "@/hooks/useNotifications";
+import { type NotificationLog, type NotificationChannel, type NotificationStatus } from "@/types/notification.types";
+import { formatters } from "@/utils/formatters";
+
+
 
 const CHANNEL_ICONS: Record<NotificationChannel, React.ReactNode> = {
   email: <Mail className="h-3.5 w-3.5" />,

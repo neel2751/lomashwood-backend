@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, CalendarCheck, ShoppingBag, Star, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 import Link from "next/link";
+
+import { Bell, CalendarCheck, ShoppingBag, Star, X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 type NotifType = "appointment" | "order" | "review";
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { CustomerDetail } from "@/components/customers/CustomerDetail";
 import { CustomerTimeline } from "@/components/customers/CustomerTimeline";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();

@@ -1,10 +1,13 @@
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+
 import Link from 'next/link'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { notFound } from 'next/navigation'
+
 import { AppointmentDetail } from '@/components/appointments/AppointmentDetail'
 import { AppointmentTimeline } from '@/components/appointments/AppointmentTimeline'
+import { PageHeader } from '@/components/layout/PageHeader'
+
+import type { Metadata } from 'next'
 
 type Props = { params: { id: string } }
 

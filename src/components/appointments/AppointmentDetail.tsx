@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
 import {
   ArrowLeft, Phone, Mail, MapPin, Clock,
   User, Calendar, ChevronDown, Pencil,
   MessageSquare, RefreshCcw, CheckCircle,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import type { AppointmentStatus, AppointmentType } from "./AppointmentTable";
 
 const TYPE_CONFIG: Record<AppointmentType, { label: string; bg: string; text: string }> = {

@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/layout/PageHeader";
 import { CustomerTable } from "@/components/customers/CustomerTable";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function CustomersPage() {
   return (

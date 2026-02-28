@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
+
 import { LandingPageEditor } from "@/components/content/LandingPageEditor";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function LandingPageDetailPage() {
   const { id } = useParams<{ id: string }>();

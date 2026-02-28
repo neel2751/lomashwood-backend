@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { notFound } from 'next/navigation'
+
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
 import { PageHeader } from '@/components/layout/PageHeader'
 
 type Props = { params: { id: string } }

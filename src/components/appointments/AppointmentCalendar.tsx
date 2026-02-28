@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 import Link from "next/link";
+
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 type AppType = "home_visit" | "showroom" | "online";
 

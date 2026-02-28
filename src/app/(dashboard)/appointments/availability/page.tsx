@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+
 import Link from 'next/link'
-import { PageHeader } from '@/components/layout/PageHeader'
+
 import { AvailabilityManager } from '@/components/appointments/AvailabilityManager'
 import { TimeSlotEditor } from '@/components/appointments/TimeSlotEditor'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 const APPT_SUBNAV = [
   { href: '/appointments', label: 'All Appointments' },
