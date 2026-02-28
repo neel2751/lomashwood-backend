@@ -1,0 +1,4 @@
+[submodule "packages/api-client"]
+	path = packages/api-client
+	url = https://github.com/your-org/lomash-wood-api-client.git
+	branch = main
