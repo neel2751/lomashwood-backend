@@ -1,7 +1,5 @@
 'use client'
 
-// components/appointments/ConsultantForm.tsx
-
 import { useState } from 'react'
 
 const ALL_SHOWROOMS = ['London Mayfair', 'Manchester', 'Birmingham']
@@ -48,7 +46,7 @@ export function ConsultantForm({ consultantId: _consultantId, defaultValues }: C
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    // Wire up to your API here
+    
     setSaved(true)
   }
 
@@ -187,7 +185,7 @@ export function ConsultantForm({ consultantId: _consultantId, defaultValues }: C
           cursor: pointer; transition: all 0.15s;
         }
         .cf__toggle--on { background: #1A1A18; color: #F5F0E8; border-color: #1A1A18; }
-        .cf__toggle--typed { /* colours set inline */ }
+        .cf__toggle--typed { }
         .cf__toggle:hover:not(.cf__toggle--on) { border-color: #B8B5AE; }
 
         .cf__footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 4px; }

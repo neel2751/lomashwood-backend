@@ -34,3 +34,4 @@ export type SidebarState = {
   activeItem: string | null;
   expandedGroups: string[];
 };
+

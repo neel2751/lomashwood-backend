@@ -20,8 +20,8 @@ export function useUploadMedia() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ files, meta }: { files: File[]; meta?: Record<string, string> }) =>
-      mediaService.upload(files, meta),
+    mutationFn: ({ files }: { files: File[]; meta?: Record<string, string> }) =>
+      mediaService.upload(files),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
     },

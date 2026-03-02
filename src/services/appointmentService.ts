@@ -1,33 +1,32 @@
-import { appointmentClient } from "@/lib/api-client";
+import { appointmentClient, apiClient } from "@/lib/api-client";
 import type { Appointment, TimeSlot } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import axios from "@/lib/axios";
 import type { ApiResponse } from "@/lib/api-client";
 
 export const appointmentService = {
   getAll: (params?: Record<string, unknown>) =>
-    appointmentClient.appointments.getAll(params),
+    appointmentClient.getAll(params),
 
-  getById: (id: string) => appointmentClient.appointments.getById(id),
+  getById: (id: string) => appointmentClient.getById(id),
 
   create: (payload: Partial<Appointment>) =>
-    appointmentClient.appointments.create(payload),
+    appointmentClient.create(payload),
 
   update: (id: string, payload: Partial<Appointment>) =>
-    appointmentClient.appointments.update(id, payload),
+    appointmentClient.update(id, payload),
 
-  patch: (id: string, payload: Partial<Appointment>) =>
-    appointmentClient.appointments.patch(id, payload),
+  // `makeService` exposes `delete`, not `remove`
+  remove: (id: string) => appointmentClient.delete(id),
 
-  remove: (id: string) => appointmentClient.appointments.remove(id),
-
-  getSlots: (params: { date: string; consultantId?: string }) =>
-    appointmentClient.getSlots(params),
+  // `getSlots` is not on appointmentClient — use the availability service instead
+  getSlots: (params: { date: string; consultantId?: string }): Promise<TimeSlot[]> =>
+    apiClient.availability.getAll(params),
 
   updateStatus: (
     id: string,
     status: string,
   ): Promise<ApiResponse<Appointment>> =>
-    axiosInstance
+    axios
       .patch<ApiResponse<Appointment>>(`/appointments/${id}/status`, { status })
       .then((r) => r.data),
 
@@ -35,19 +34,17 @@ export const appointmentService = {
     id: string,
     slot: string,
   ): Promise<ApiResponse<Appointment>> =>
-    axiosInstance
-      .patch<ApiResponse<Appointment>>(`/appointments/${id}/reschedule`, {
-        slot,
-      })
+    axios
+      .patch<ApiResponse<Appointment>>(`/appointments/${id}/reschedule`, { slot })
       .then((r) => r.data),
 
   getByCustomer: (customerId: string, params?: Record<string, unknown>) =>
-    axiosInstance
+    axios
       .get(`/appointments/by-customer/${customerId}`, { params })
       .then((r) => r.data),
 
   sendConfirmation: (id: string): Promise<void> =>
-    axiosInstance
+    axios
       .post(`/appointments/${id}/send-confirmation`)
       .then(() => undefined),
 };

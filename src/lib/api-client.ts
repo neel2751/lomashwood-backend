@@ -1,5 +1,57 @@
 import axios from "@/lib/axios";
 
+export type ApiResponse<T> = {
+  data: T;
+  message?: string;
+  success: boolean;
+};
+
+export type PaginatedResponse<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type TrackingEvent = {
+  id: string;
+  event: string;
+  userId?: string;
+  sessionId?: string;
+  properties?: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type AnalyticsOverview = {
+  totalRevenue: number;
+  totalOrders: number;
+  totalCustomers: number;
+  totalAppointments: number;
+  revenueChange: number;
+  ordersChange: number;
+  customersChange: number;
+  appointmentsChange: number;
+};
+
+export type Appointment = {
+  id: string;
+  customerId: string;
+  consultantId?: string;
+  status: string;
+  slot: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TimeSlot = {
+  date: string;
+  time: string;
+  consultantId?: string;
+  available: boolean;
+};
+
 function makeService(basePath: string) {
   return {
     getAll: (params?: Record<string, any>) =>
@@ -77,9 +129,9 @@ export function createLomashApiClient() {
     analytics: {
       get: (params?: Record<string, any>) =>
         axios.get("/analytics", { params }).then((r) => r.data),
-      getOverview: (params?: Record<string, any>) =>
+      getOverview: (params?: Record<string, any>): Promise<ApiResponse<AnalyticsOverview>> =>
         axios.get("/analytics/overview", { params }).then((r) => r.data),
-      getTracking: (params?: Record<string, any>) =>
+      getTracking: (params?: Record<string, any>): Promise<PaginatedResponse<TrackingEvent>> =>
         axios.get("/analytics/tracking", { params }).then((r) => r.data),
       getRevenue: (params?: Record<string, any>) =>
         axios.get("/analytics/revenue", { params }).then((r) => r.data),
@@ -112,3 +164,85 @@ export function createLomashApiClient() {
 }
 
 export type LomashApiClient = ReturnType<typeof createLomashApiClient>;
+
+export const apiClient = createLomashApiClient();
+
+export const analyticsClient = apiClient.analytics;
+export const appointmentClient = apiClient.appointments;
+
+export type NotificationTemplate = {
+  id: string;
+  name: string;
+  channel: string;
+  subject?: string;
+  body: string;
+  variables?: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SupportTicket = {
+  id: string;
+  customerId: string;
+  subject: string;
+  body: string;
+  status: string;
+  agentId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Size = {
+  id: string;
+  title: string;
+  value: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SeoMeta = {
+  id: string;
+  pageSlug: string;
+  title: string;
+  description?: string;
+  keywords?: string[];
+  ogImage?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Review = {
+  id: string;
+  customerId: string;
+  productId: string;
+  rating: number;
+  title?: string;
+  body?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Reminder = {
+  id: string;
+  appointmentId: string;
+  type: string;
+  sentAt?: string;
+  scheduledAt: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PricingRule = {
+  id: string;
+  productId: string;
+  name: string;
+  type: string;
+  value: number;
+  startsAt?: string;
+  endsAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};

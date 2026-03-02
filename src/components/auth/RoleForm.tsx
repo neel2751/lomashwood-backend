@@ -31,7 +31,7 @@ import { PermissionsMatrix } from "./PermissionsMatrix";
 
 type RoleFormData = z.infer<typeof roleSchema>;
 
-// Extend Role locally — permissions may come from the API but not be in the base type
+
 type RoleWithPermissions = Role & { permissions?: string[] };
 
 interface RoleFormProps {
@@ -42,8 +42,8 @@ export function RoleForm({ roleId }: RoleFormProps) {
   const router = useRouter();
   const isEditing = !!roleId;
 
-  // useRole takes a single string argument — use the non-null assertion and
-  // guard consumption with the isEditing flag so it never runs with undefined
+  
+  
   const { data: roleData } = useRole(roleId!);
   const role = isEditing ? (roleData as RoleWithPermissions | undefined) : undefined;
 

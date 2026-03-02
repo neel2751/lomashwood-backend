@@ -1,31 +1,31 @@
-import { notificationClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type { NotificationTemplate } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import axios from "@/lib/axios";
 import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
 import type { NotificationChannel } from "@/lib/constants";
 
 export const templateService = {
   getAll: (params?: Record<string, unknown>) =>
-    notificationClient.templates.getAll(params),
+    apiClient.templates.getAll(params),
 
-  getById: (id: string) => notificationClient.templates.getById(id),
+  getById: (id: string) => apiClient.templates.getById(id),
 
   create: (payload: Partial<NotificationTemplate>) =>
-    notificationClient.templates.create(payload),
+    apiClient.templates.create(payload),
 
   update: (id: string, payload: Partial<NotificationTemplate>) =>
-    notificationClient.templates.update(id, payload),
+    apiClient.templates.update(id, payload),
 
   patch: (id: string, payload: Partial<NotificationTemplate>) =>
-    notificationClient.templates.patch(id, payload),
+    axios.patch(`/notifications/templates/${id}`, payload).then((r) => r.data),
 
-  remove: (id: string) => notificationClient.templates.remove(id),
+  remove: (id: string) => apiClient.templates.delete(id),
 
   getByChannel: (
     channel: NotificationChannel,
     params?: Record<string, unknown>,
   ): Promise<PaginatedResponse<NotificationTemplate>> =>
-    axiosInstance
+    axios
       .get<PaginatedResponse<NotificationTemplate>>(
         `/notifications/templates/by-channel/${channel}`,
         { params },
@@ -36,7 +36,7 @@ export const templateService = {
     id: string,
     variables: Record<string, string>,
   ): Promise<ApiResponse<{ subject?: string; body: string }>> =>
-    axiosInstance
+    axios
       .post<ApiResponse<{ subject?: string; body: string }>>(
         `/notifications/templates/${id}/preview`,
         { variables },
@@ -44,7 +44,7 @@ export const templateService = {
       .then((r) => r.data),
 
   duplicate: (id: string): Promise<ApiResponse<NotificationTemplate>> =>
-    axiosInstance
+    axios
       .post<ApiResponse<NotificationTemplate>>(
         `/notifications/templates/${id}/duplicate`,
       )
@@ -54,9 +54,10 @@ export const templateService = {
     id: string,
     recipient: string,
   ): Promise<ApiResponse<void>> =>
-    axiosInstance
+    axios
       .post<ApiResponse<void>>(`/notifications/templates/${id}/send-test`, {
         recipient,
       })
       .then((r) => r.data),
 };
+

@@ -1,61 +1,62 @@
-import { analyticsClient } from "@/lib/api-client";
-import type { Funnel } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
+type Funnel = {
+  id: string;
+  name: string;
+  steps?: { name: string; event: string; conditions?: Record<string, unknown> }[];
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const funnelService = {
   getAll: (params?: Record<string, unknown>) =>
-    analyticsClient.funnels.getAll(params),
+    apiClient.funnels.getAll(params),
 
-  getById: (id: string) => analyticsClient.funnels.getById(id),
+  getById: (id: string) =>
+    apiClient.funnels.getById(id),
 
   create: (payload: Partial<Funnel>) =>
-    analyticsClient.funnels.create(payload),
+    apiClient.funnels.create(payload),
 
   update: (id: string, payload: Partial<Funnel>) =>
-    analyticsClient.funnels.update(id, payload),
+    apiClient.funnels.update(id, payload),
 
-  patch: (id: string, payload: Partial<Funnel>) =>
-    analyticsClient.funnels.patch(id, payload),
-
-  remove: (id: string) => analyticsClient.funnels.remove(id),
+  remove: (id: string) =>
+    apiClient.funnels.delete(id),
 
   getResults: (
     id: string,
     params: { startDate: string; endDate: string },
-  ): Promise<
-    ApiResponse<{
-      steps: {
-        name: string;
-        count: number;
-        dropoffRate: number;
-        conversionRate: number;
-      }[];
-      overallConversionRate: number;
-    }>
-  > =>
-    axiosInstance
-      .get(`/analytics/funnels/${id}/results`, { params })
+  ): Promise<ApiResponse<{
+    steps: {
+      name: string;
+      count: number;
+      dropoffRate: number;
+      conversionRate: number;
+    }[];
+    overallConversionRate: number;
+  }>> =>
+    axios
+      .get(`/funnels/${id}/results`, { params })
       .then((r) => r.data),
 
   duplicate: (id: string): Promise<ApiResponse<Funnel>> =>
-    axiosInstance
-      .post<ApiResponse<Funnel>>(`/analytics/funnels/${id}/duplicate`)
+    axios
+      .post<ApiResponse<Funnel>>(`/funnels/${id}/duplicate`)
       .then((r) => r.data),
 
   addStep: (
     id: string,
     step: { name: string; event: string; conditions?: Record<string, unknown> },
   ): Promise<ApiResponse<Funnel>> =>
-    axiosInstance
-      .post<ApiResponse<Funnel>>(`/analytics/funnels/${id}/steps`, step)
+    axios
+      .post<ApiResponse<Funnel>>(`/funnels/${id}/steps`, step)
       .then((r) => r.data),
 
-  removeStep: (
-    id: string,
-    stepIndex: number,
-  ): Promise<ApiResponse<Funnel>> =>
-    axiosInstance
-      .delete<ApiResponse<Funnel>>(`/analytics/funnels/${id}/steps/${stepIndex}`)
+  removeStep: (id: string, stepIndex: number): Promise<ApiResponse<Funnel>> =>
+    axios
+      .delete<ApiResponse<Funnel>>(`/funnels/${id}/steps/${stepIndex}`)
       .then((r) => r.data),
 };

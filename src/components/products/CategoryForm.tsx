@@ -29,7 +29,7 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const inputCls = "w-full h-10 px-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[13px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors";
+  
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden max-w-lg">

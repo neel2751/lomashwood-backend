@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { useRouter } from "next/navigation";
+
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useCurrentUser } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { PageLoader } from "@/components/shared/PageLoader";
+import type { AdminUser } from "@/stores/useAuthStore";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -13,19 +16,19 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const { isAuthenticated, setUser } = useAuthStore();
-  const { data, isLoading, isError } = useCurrentUser();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (isError || (!isLoading && !isAuthenticated)) {
+    if (!isLoading && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isError, isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router]);
 
   useEffect(() => {
-    if (data?.user) {
-      setUser(data.user);
+    if (user) {
+      setUser(user as unknown as AdminUser);
     }
-  }, [data, setUser]);
+  }, [user, setUser]);
 
   if (isLoading) {
     return <PageLoader />;

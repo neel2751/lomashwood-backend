@@ -1,15 +1,14 @@
 import { axiosInstance } from "@/lib/axios"
 import type { AxiosResponse } from "axios"
 
-export interface Integration {
-  id: string
-  name: string
-  type: string
-  enabled: boolean
-  config: Record<string, unknown>
-  createdAt: string
-  updatedAt: string
-}
+export type Integration = {
+  id: string;
+  enabled: boolean;
+  status: "connected" | "disconnected" | "error";
+  credentials?: Record<string, string>;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export interface IntegrationResponse {
   data: Integration[]

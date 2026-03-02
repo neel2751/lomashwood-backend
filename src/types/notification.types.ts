@@ -122,3 +122,4 @@ export type TemplateFilterParams = PaginationParams & {
   channel?: NotificationChannel;
   isActive?: boolean;
 };
+

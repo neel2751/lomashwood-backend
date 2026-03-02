@@ -1,31 +1,31 @@
-import { customerClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type { SupportTicket } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import axios from "@/lib/axios";
 import type { ApiResponse } from "@/lib/api-client";
 import type { SupportStatus } from "@/lib/constants";
 
 export const supportService = {
   getAll: (params?: Record<string, unknown>) =>
-    customerClient.support.getAll(params),
+    apiClient.support.getAll(params),
 
-  getById: (id: string) => customerClient.support.getById(id),
+  getById: (id: string) => apiClient.support.getById(id),
 
   create: (payload: Partial<SupportTicket>) =>
-    customerClient.support.create(payload),
+    apiClient.support.create(payload),
 
   update: (id: string, payload: Partial<SupportTicket>) =>
-    customerClient.support.update(id, payload),
+    apiClient.support.update(id, payload),
 
   patch: (id: string, payload: Partial<SupportTicket>) =>
-    customerClient.support.patch(id, payload),
+    axios.patch(`/customers/support/${id}`, payload).then((r) => r.data),
 
-  remove: (id: string) => customerClient.support.remove(id),
+  remove: (id: string) => apiClient.support.delete(id),
 
   updateStatus: (
     id: string,
     status: SupportStatus,
   ): Promise<ApiResponse<SupportTicket>> =>
-    axiosInstance
+    axios
       .patch<ApiResponse<SupportTicket>>(
         `/customers/support/${id}/status`,
         { status },
@@ -36,7 +36,7 @@ export const supportService = {
     id: string,
     agentId: string,
   ): Promise<ApiResponse<SupportTicket>> =>
-    axiosInstance
+    axios
       .patch<ApiResponse<SupportTicket>>(
         `/customers/support/${id}/assign`,
         { agentId },
@@ -44,10 +44,10 @@ export const supportService = {
       .then((r) => r.data),
 
   getByCustomer: (customerId: string, params?: Record<string, unknown>) =>
-    axiosInstance
+    axios
       .get(`/customers/support/by-customer/${customerId}`, { params })
       .then((r) => r.data),
 
   getOpen: (params?: Record<string, unknown>) =>
-    customerClient.support.getAll({ ...params, status: "open" }),
+    apiClient.support.getAll({ ...params, status: "open" }),
 };

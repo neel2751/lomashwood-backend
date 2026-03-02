@@ -1,20 +1,26 @@
-import { productClient } from "@/lib/api-client";
-import type { Colour } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
+
+type Colour = {
+  id: string;
+  name: string;
+  hex?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const colourService = {
   getAll: (params?: Record<string, unknown>) =>
-    productClient.colours.getAll(params),
+    apiClient.colours.getAll(params),
 
-  getById: (id: string) => productClient.colours.getById(id),
+  getById: (id: string) =>
+    apiClient.colours.getById(id),
 
   create: (payload: Partial<Colour>) =>
-    productClient.colours.create(payload),
+    apiClient.colours.create(payload),
 
   update: (id: string, payload: Partial<Colour>) =>
-    productClient.colours.update(id, payload),
+    apiClient.colours.update(id, payload),
 
-  patch: (id: string, payload: Partial<Colour>) =>
-    productClient.colours.patch(id, payload),
-
-  remove: (id: string) => productClient.colours.remove(id),
+  remove: (id: string) =>
+    apiClient.colours.delete(id),
 };

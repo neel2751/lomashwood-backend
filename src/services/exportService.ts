@@ -1,5 +1,5 @@
-import { analyticsClient } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
+import axios from "@/lib/axios";
 
 export type ExportFormat = "csv" | "xlsx" | "json";
 
@@ -40,40 +40,38 @@ export const exportService = {
     startDate: string;
     endDate: string;
     format: ExportFormat;
-  }): Promise<Blob> => analyticsClient.export(params),
+  }): Promise<unknown> =>
+    apiClient.exports.create(params),
 
-  exportResource: (
-    resource: ExportResource,
-    params: ExportParams,
-  ): Promise<Blob> => {
+  exportResource: (resource: ExportResource, params: ExportParams): Promise<Blob> => {
     const path = RESOURCE_EXPORT_PATHS[resource];
-    return axiosInstance
+    return axios
       .get(path, { params, responseType: "blob" })
       .then((r) => r.data as Blob);
   },
 
   exportOrders: (params: ExportParams): Promise<Blob> =>
-    axiosInstance
+    axios
       .get("/orders/export", { params, responseType: "blob" })
       .then((r) => r.data as Blob),
 
   exportProducts: (params: ExportParams): Promise<Blob> =>
-    axiosInstance
+    axios
       .get("/products/export", { params, responseType: "blob" })
       .then((r) => r.data as Blob),
 
   exportCustomers: (params: ExportParams): Promise<Blob> =>
-    axiosInstance
+    axios
       .get("/customers/export", { params, responseType: "blob" })
       .then((r) => r.data as Blob),
 
   exportAppointments: (params: ExportParams): Promise<Blob> =>
-    axiosInstance
+    axios
       .get("/appointments/export", { params, responseType: "blob" })
       .then((r) => r.data as Blob),
 
   exportInventory: (params: ExportParams): Promise<Blob> =>
-    axiosInstance
+    axios
       .get("/products/inventory/export", { params, responseType: "blob" })
       .then((r) => r.data as Blob),
 
@@ -93,10 +91,7 @@ export const exportService = {
     return `lomashwood-${resource}-${timestamp}.${format}`;
   },
 
-  downloadExport: async (
-    resource: ExportResource,
-    params: ExportParams,
-  ): Promise<void> => {
+  downloadExport: async (resource: ExportResource, params: ExportParams): Promise<void> => {
     const blob = await exportService.exportResource(resource, params);
     const filename = exportService.buildFilename(resource, params.format);
     exportService.triggerDownload(blob, filename);

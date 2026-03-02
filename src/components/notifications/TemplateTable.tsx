@@ -85,29 +85,36 @@ export function TemplateTable() {
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data, isLoading } = useTemplates({
-    search,
-    channel: channelFilter !== "all" ? channelFilter : undefined,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const { data, isLoading } = useTemplates();
 
   const { mutateAsync: deleteTemplate } = useMutation<void, Error, string>({
-  mutationFn: deleteTemplateById,
-  onSuccess: () => {
-    void queryClient.invalidateQueries({ queryKey: ["templates"] });
-  },
-});
+    mutationFn: deleteTemplateById,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["templates"] });
+    },
+  });
 
-  const templates: NotificationTemplate[] = data?.data ?? [];
-  const total = data?.meta?.total ?? 0;
+  const allTemplates: NotificationTemplate[] = data?.data ?? [];
+
+  // Client-side filtering
+  const filtered = allTemplates.filter((tpl) => {
+    const matchesSearch =
+      !search ||
+      tpl.name.toLowerCase().includes(search.toLowerCase()) ||
+      tpl.subject?.toLowerCase().includes(search.toLowerCase());
+    const matchesChannel = channelFilter === "all" || tpl.channel === channelFilter;
+    return matchesSearch && matchesChannel;
+  });
+
+  const total = filtered.length;
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const templates = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleDelete = async () => {
-  if (!deleteId) return;
-  await deleteTemplate(deleteId!);
-  setDeleteId(null);
-};
+    if (!deleteId) return;
+    await deleteTemplate(deleteId);
+    setDeleteId(null);
+  };
 
   const formatUpdatedAt = (dateStr?: string | null): string => {
     if (!dateStr) return "—";

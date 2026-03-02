@@ -15,11 +15,11 @@ import {
 
 import { SidebarGroup } from "./SidebarGroup";
 
-import type { NavGroup } from "@/types/nav.types";
+import type { NavSection } from "@/types/nav.types";
 
-const NAV_GROUPS: NavGroup[] = [
+const NAV_GROUPS: NavSection[] = [
   {
-    label: "Overview",
+    title: "Overview",
     items: [
       {
         label: "Dashboard",
@@ -29,7 +29,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Catalogue",
+    title: "Catalogue",
     items: [
       {
         label: "Products",
@@ -48,7 +48,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Sales",
+    title: "Sales",
     items: [
       {
         label: "Orders",
@@ -77,7 +77,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Customers",
+    title: "Customers",
     items: [
       {
         label: "Customers",
@@ -93,7 +93,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Content",
+    title: "Content",
     items: [
       {
         label: "Content",
@@ -121,7 +121,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Analytics",
+    title: "Analytics",
     items: [
       {
         label: "Analytics",
@@ -138,7 +138,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "System",
+    title: "System",
     items: [
       {
         label: "Auth & Access",
@@ -173,7 +173,7 @@ export function SidebarNav({ collapsed }: SidebarNavProps) {
   return (
     <nav className="flex flex-col gap-1 px-2">
       {NAV_GROUPS.map((group) => (
-        <SidebarGroup key={group.label} group={group} collapsed={collapsed} />
+        <SidebarGroup key={group.title} group={group} collapsed={collapsed} />
       ))}
     </nav>
   );

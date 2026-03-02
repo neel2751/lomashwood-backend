@@ -72,10 +72,10 @@ export function OrderTimeline({ events = DEFAULT_EVENTS }: OrderTimelineProps) {
         <div className="absolute left-[15px] top-4 bottom-4 w-px bg-[#2E231A]" />
 
         <div className="flex flex-col gap-0.5">
-          {events.map((event, i) => {
+          {events.map((event) => {
             const config = EVENT_CONFIG[event.type];
             const Icon = config.icon;
-            const isLast = i === events.length - 1;
+          
 
             return (
               <div

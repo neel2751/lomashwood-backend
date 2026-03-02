@@ -14,26 +14,24 @@ import type { NavItem } from "@/types/nav.types";
 interface SidebarItemProps {
   item: NavItem;
   collapsed: boolean;
-  depth?: number;
 }
 
-export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
+export function SidebarItem({ item, collapsed }: SidebarItemProps) {
   const pathname = usePathname();
   const Icon = item.icon;
   const hasChildren = item.children && item.children.length > 0;
 
-  // Auto-expand if a child is active
   const isChildActive = item.children?.some(
     (child) => pathname === child.href || pathname.startsWith(child.href + "/")
   );
-  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+  const isActive = item.href
+    ? pathname === item.href || pathname.startsWith(item.href + "/")
+    : false;
   const [open, setOpen] = useState(isChildActive ?? false);
 
-  // Tooltip positioning for collapsed state
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  // Sync open state when route changes
   useEffect(() => {
     if (isChildActive) setOpen(true);
   }, [isChildActive]);
@@ -46,7 +44,7 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
 
   const itemContent = (
     <>
-      {/* Icon */}
+   
       {Icon && (
         <span
           className={cn(
@@ -60,7 +58,7 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
         </span>
       )}
 
-      {/* Label + badge */}
+     
       {!collapsed && (
         <span className="flex-1 flex items-center justify-between min-w-0">
           <span
@@ -73,13 +71,13 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
           </span>
 
           <span className="flex items-center gap-1.5 shrink-0 ml-2">
-            {/* Badge */}
+          
             {item.badge && (
               <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#C8924A] text-[10px] font-bold text-white leading-none">
                 {item.badge}
               </span>
             )}
-            {/* Chevron */}
+          
             {hasChildren && (
               <ChevronRight
                 size={13}
@@ -93,7 +91,7 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
         </span>
       )}
 
-      {/* Collapsed badge dot */}
+     
       {collapsed && item.badge && (
         <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#C8924A]" />
       )}
@@ -107,8 +105,8 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
         onMouseEnter={() => collapsed && setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        {/* Main row */}
-        {hasChildren && !collapsed ? (
+       
+        {hasChildren || !item.href ? (
           <button
             onClick={handleClick}
             className={cn(
@@ -118,7 +116,7 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
             )}
           >
             {itemContent}
-            {/* Active indicator bar */}
+           
             {(isActive || isChildActive) && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#C8924A]" />
             )}
@@ -141,7 +139,6 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
           </Link>
         )}
 
-        {/* Tooltip for collapsed mode */}
         {collapsed && showTooltip && (
           <div
             ref={tooltipRef}
@@ -154,14 +151,14 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
                   {item.badge}
                 </span>
               )}
-              {/* Arrow */}
+              
               <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#3D2E1E]" />
             </div>
           </div>
         )}
       </div>
 
-      {/* Sub-items accordion */}
+      
       {hasChildren && !collapsed && (
         <div
           className={cn(
@@ -182,7 +179,7 @@ export function SidebarItem({ item, collapsed, depth = 0 }: SidebarItemProps) {
                     : "text-[#7A6045] hover:text-[#C8924A] hover:bg-[#221A12]"
                 )}
               >
-                {/* Dot indicator */}
+              
                 <span
                   className={cn(
                     "w-1 h-1 rounded-full shrink-0 transition-colors",

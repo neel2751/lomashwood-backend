@@ -13,9 +13,9 @@ import {
 
 import { cn } from "@/lib/utils";
 
-type LandingStatus  = "live" | "draft" | "paused" | "archived";
-type SectionType    = "hero" | "features" | "gallery" | "testimonial" | "cta" | "form" | "stats";
-type GoalType       = "form_submit" | "button_click" | "page_view" | "time_on_page";
+type LandingStatus = "live" | "draft" | "paused" | "archived";
+type SectionType   = "hero" | "features" | "gallery" | "testimonial" | "cta" | "form" | "stats";
+type GoalType      = "form_submit" | "button_click" | "page_view" | "time_on_page";
 
 interface Section {
   id: string;
@@ -33,13 +33,13 @@ interface ConversionGoal {
 }
 
 const SECTION_TYPES: { type: SectionType; label: string; icon: React.ElementType; desc: string }[] = [
-  { type: "hero",        label: "Hero Section",    icon: Type,   desc: "Main banner with headline & CTA" },
-  { type: "features",    label: "Features",        icon: Zap,    desc: "3–4 benefit icons with text"     },
-  { type: "gallery",     label: "Image Gallery",   icon: Image,  desc: "Grid of product images"          },
-  { type: "testimonial", label: "Testimonials",    icon: Type,   desc: "Customer quotes & ratings"       },
-  { type: "cta",         label: "Call to Action",  icon: Target, desc: "Conversion-focused CTA block"    },
-  { type: "form",        label: "Lead Form",       icon: Type,   desc: "Enquiry or booking form"         },
-  { type: "stats",       label: "Stats Bar",       icon: TrendingUp, desc: "3 headline numbers"         },
+  { type: "hero",        label: "Hero Section",   icon: Type,        desc: "Main banner with headline & CTA" },
+  { type: "features",    label: "Features",       icon: Zap,         desc: "3–4 benefit icons with text"     },
+  { type: "gallery",     label: "Image Gallery",  icon: Image,       desc: "Grid of product images"          },
+  { type: "testimonial", label: "Testimonials",   icon: Type,        desc: "Customer quotes & ratings"       },
+  { type: "cta",         label: "Call to Action", icon: Target,      desc: "Conversion-focused CTA block"    },
+  { type: "form",        label: "Lead Form",      icon: Type,        desc: "Enquiry or booking form"         },
+  { type: "stats",       label: "Stats Bar",      icon: TrendingUp,  desc: "3 headline numbers"              },
 ];
 
 function uid() { return Math.random().toString(36).slice(2, 8); }
@@ -69,7 +69,7 @@ function SectionCard({ section, onUpdate, onDelete, onToggle }: {
 
   const field = (key: string, placeholder: string) => (
     <div key={key}>
-      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1 capitalize">{key.replace(/([A-Z]|\d)/g, " $1").trim()}</label>
+      <label className="block text-[10px] font-semibold tracking-wider text-[#3D2E1E] mb-1 uppercase">{key.replace(/([A-Z]|\d)/g, " $1").trim()}</label>
       <input value={section.settings[key] ?? ""} onChange={(e) => onUpdate(section.id, { ...section.settings, [key]: e.target.value })}
         placeholder={placeholder} className={inputCls} />
     </div>
@@ -119,29 +119,29 @@ function SectionCard({ section, onUpdate, onDelete, onToggle }: {
   );
 }
 
-interface LandingPageEditorProps { pageId?: string; isEdit?: boolean; }
+interface LandingPageEditorProps { isEdit?: boolean; }
 
-export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorProps) {
-  const [title,      setTitle]      = useState(isEdit ? "Spring Kitchen Sale 2026" : "");
-  const [slug,       setSlug]       = useState(isEdit ? "/kitchen-spring-sale" : "/");
-  const [campaign,   setCampaign]   = useState(isEdit ? "Spring Sale" : "");
-  const [status,     setStatus]     = useState<LandingStatus>("draft");
-  const [expiresAt,  setExpires]    = useState(isEdit ? "2026-03-31" : "");
-  const [sections,   setSections]   = useState<Section[]>(
+export function LandingPageEditor({ isEdit = false }: LandingPageEditorProps) {
+  const [title,     setTitle]    = useState(isEdit ? "Spring Kitchen Sale 2026" : "");
+  const [slug,      setSlug]     = useState(isEdit ? "/kitchen-spring-sale" : "/");
+  const [campaign,  setCampaign] = useState(isEdit ? "Spring Sale" : "");
+  const [status,    setStatus]   = useState<LandingStatus>("draft");
+  const [expiresAt, setExpires]  = useState(isEdit ? "2026-03-31" : "");
+  const [sections,  setSections] = useState<Section[]>(
     isEdit ? [
-      { id: "s1", type: "hero",     label: "Hero Section",   enabled: true,  settings: defaultSettings("hero")     },
-      { id: "s2", type: "features", label: "Features",       enabled: true,  settings: defaultSettings("features") },
-      { id: "s3", type: "gallery",  label: "Image Gallery",  enabled: true,  settings: defaultSettings("gallery")  },
-      { id: "s4", type: "cta",      label: "Call to Action", enabled: true,  settings: defaultSettings("cta")      },
-      { id: "s5", type: "form",     label: "Lead Form",      enabled: true,  settings: defaultSettings("form")     },
+      { id: "s1", type: "hero",     label: "Hero Section",   enabled: true, settings: defaultSettings("hero")     },
+      { id: "s2", type: "features", label: "Features",       enabled: true, settings: defaultSettings("features") },
+      { id: "s3", type: "gallery",  label: "Image Gallery",  enabled: true, settings: defaultSettings("gallery")  },
+      { id: "s4", type: "cta",      label: "Call to Action", enabled: true, settings: defaultSettings("cta")      },
+      { id: "s5", type: "form",     label: "Lead Form",      enabled: true, settings: defaultSettings("form")     },
     ] : []
   );
-  const [goals,      setGoals]      = useState<ConversionGoal[]>([
+  const [goals,      setGoals]     = useState<ConversionGoal[]>([
     { id: "g1", type: "form_submit",  label: "Form submission" },
     { id: "g2", type: "button_click", label: "CTA button click", target: "#cta" },
   ]);
-  const [showSectionPicker, setShowPicker] = useState(false);
-  const [activeTab,  setTab]        = useState<"sections"|"goals"|"settings">("sections");
+  const [showPicker, setShowPicker] = useState(false);
+  const [activeTab,  setTab]        = useState<"sections" | "goals" | "settings">("sections");
   const [saving,     setSaving]     = useState(false);
   const [saved,      setSaved]      = useState(false);
 
@@ -172,14 +172,13 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
   const inputCls  = "w-full h-9 px-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors";
 
   const TABS = [
-    { id: "sections", label: "Sections",    icon: Palette  },
-    { id: "goals",    label: "Goals",       icon: Target   },
-    { id: "settings", label: "Settings",    icon: Settings },
+    { id: "sections", label: "Sections", icon: Palette  },
+    { id: "goals",    label: "Goals",    icon: Target   },
+    { id: "settings", label: "Settings", icon: Settings },
   ] as const;
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Top bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <Link href="/content/landing"
@@ -209,9 +208,7 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Main: tabbed editor */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          {/* Title + slug */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <input value={title}
               onChange={(e) => { setTitle(e.target.value); if (!isEdit) setSlug("/" + e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-")); }}
@@ -224,7 +221,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
             <div className="flex border-b border-[#2E231A]">
               {TABS.map(({ id, label, icon: Icon }) => (
@@ -239,7 +235,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
             </div>
 
             <div className="p-5 flex flex-col gap-3">
-              {/* Sections tab */}
               {activeTab === "sections" && (
                 <>
                   {sections.length === 0 && (
@@ -253,7 +248,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
                       onUpdate={updateSection} onDelete={deleteSection} onToggle={toggleSection} />
                   ))}
 
-                  {/* Add section */}
                   <div className="relative">
                     <button onClick={() => setShowPicker((v) => !v)}
                       className="w-full flex items-center justify-center gap-2 h-10 rounded-[12px] border-2 border-dashed border-[#3D2E1E] text-[12.5px] text-[#5A4232] hover:border-[#C8924A]/50 hover:text-[#C8924A] hover:bg-[#221A12] transition-all">
@@ -280,7 +274,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
                 </>
               )}
 
-              {/* Goals tab */}
               {activeTab === "goals" && (
                 <>
                   <p className="text-[12px] text-[#5A4232] mb-1">Define what counts as a conversion on this page.</p>
@@ -289,7 +282,7 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
                       <CheckCircle size={14} className="text-emerald-400 shrink-0" />
                       <div className="flex-1">
                         <p className="text-[12.5px] font-medium text-[#C8B99A]">{goal.label}</p>
-                        <p className="text-[11px] text-[#5A4232] capitalize">{goal.type.replace("_"," ")}
+                        <p className="text-[11px] text-[#5A4232] capitalize">{goal.type.replace("_", " ")}
                           {goal.target && <span> · <span className="font-mono">{goal.target}</span></span>}
                         </p>
                       </div>
@@ -307,7 +300,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
                 </>
               )}
 
-              {/* Settings tab */}
               {activeTab === "settings" && (
                 <div className="flex flex-col gap-4">
                   <div>
@@ -330,9 +322,7 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="flex flex-col gap-4">
-          {/* Publish */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-4">Publish</h3>
             <div className="flex flex-col gap-3">
@@ -351,7 +341,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
             </div>
           </div>
 
-          {/* Section summary */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-3">Sections ({sections.length})</h3>
             {sections.length === 0
@@ -366,7 +355,6 @@ export function LandingPageEditor({ pageId, isEdit = false }: LandingPageEditorP
             }
           </div>
 
-          {/* Goals summary */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-3 flex items-center gap-2">
               <Target size={13} className="text-[#C8924A]" />

@@ -1,47 +1,73 @@
-import { authClient } from "@/lib/api-client";
-import type { AdminUser, Role, Session } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
+type AdminUser = {
+  id: string;
+  email: string;
+  name?: string;
+  roleId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type Role = {
+  id: string;
+  name: string;
+  permissions?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const authService = {
   login: (credentials: { email: string; password: string }) =>
-    authClient.login(credentials),
+    apiClient.auth.login(credentials),
 
-  logout: () => authClient.logout(),
+  logout: () => apiClient.auth.logout(),
 
   refreshToken: (refreshToken: string) =>
-    authClient.refreshToken(refreshToken),
+    axios.post("/auth/refresh", { refreshToken }).then((r) => r.data),
 
-  me: () => authClient.me(),
+  me: () => apiClient.auth.me(),
 
   getUsers: (params?: Record<string, unknown>) =>
-    authClient.users.getAll(params),
+    apiClient.users.getAll(params),
 
-  getUserById: (id: string) => authClient.users.getById(id),
+  getUserById: (id: string) =>
+    apiClient.users.getById(id),
 
   createUser: (payload: Partial<AdminUser>) =>
-    authClient.users.create(payload),
+    apiClient.users.create(payload),
 
   updateUser: (id: string, payload: Partial<AdminUser>) =>
-    authClient.users.update(id, payload),
+    apiClient.users.update(id, payload),
 
-  deleteUser: (id: string) => authClient.users.remove(id),
+  deleteUser: (id: string) =>
+    apiClient.users.delete(id),
 
   getRoles: (params?: Record<string, unknown>) =>
-    authClient.roles.getAll(params),
+    apiClient.roles.getAll(params),
 
-  getRoleById: (id: string) => authClient.roles.getById(id),
+  getRoleById: (id: string) =>
+    apiClient.roles.getById(id),
 
   createRole: (payload: Partial<Role>) =>
-    authClient.roles.create(payload),
+    apiClient.roles.create(payload),
 
   updateRole: (id: string, payload: Partial<Role>) =>
-    authClient.roles.update(id, payload),
+    apiClient.roles.update(id, payload),
 
-  deleteRole: (id: string) => authClient.roles.remove(id),
+  deleteRole: (id: string) =>
+    apiClient.roles.delete(id),
 
   getSessions: (params?: Record<string, unknown>) =>
-    authClient.sessions.getAll(params),
+    apiClient.sessions.getAll(params),
 
-  getSessionById: (id: string) => authClient.sessions.getById(id),
+  getSessionById: (id: string) =>
+    apiClient.sessions.getById(id),
 
-  revokeSession: (id: string) => authClient.sessions.remove(id),
+  revokeSession: (id: string) =>
+    apiClient.sessions.revoke(id),
+
+  revokeAllSessions: (userId: string) =>
+    apiClient.sessions.revokeAll(userId),
 };

@@ -1,36 +1,36 @@
-import { appointmentClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type { Reminder } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import axios from "@/lib/axios";
 import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
 
 export const reminderService = {
   getAll: (params?: Record<string, unknown>) =>
-    appointmentClient.reminders.getAll(params),
+    apiClient.reminders.getAll(params),
 
-  getById: (id: string) => appointmentClient.reminders.getById(id),
+  getById: (id: string) => apiClient.reminders.getById(id),
 
   create: (payload: Partial<Reminder>) =>
-    appointmentClient.reminders.create(payload),
+    apiClient.reminders.create(payload),
 
   update: (id: string, payload: Partial<Reminder>) =>
-    appointmentClient.reminders.update(id, payload),
+    apiClient.reminders.update(id, payload),
 
   patch: (id: string, payload: Partial<Reminder>) =>
-    appointmentClient.reminders.patch(id, payload),
+    axios.patch(`/appointments/reminders/${id}`, payload).then((r) => r.data),
 
-  remove: (id: string) => appointmentClient.reminders.remove(id),
+  remove: (id: string) => apiClient.reminders.delete(id),
 
   getByAppointment: (
     appointmentId: string,
   ): Promise<PaginatedResponse<Reminder>> =>
-    axiosInstance
+    axios
       .get<PaginatedResponse<Reminder>>(
         `/appointments/reminders/by-appointment/${appointmentId}`,
       )
       .then((r) => r.data),
 
   sendNow: (id: string): Promise<ApiResponse<Reminder>> =>
-    axiosInstance
+    axios
       .post<ApiResponse<Reminder>>(`/appointments/reminders/${id}/send`)
       .then((r) => r.data),
 };

@@ -1,41 +1,40 @@
-import { analyticsClient } from "@/lib/api-client";
-import type { AnalyticsDashboard } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
+type AnalyticsDashboard = {
+  id: string;
+  title: string;
+  widgets?: unknown[];
+  isDefault?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const dashboardService = {
   getAll: (params?: Record<string, unknown>) =>
-    analyticsClient.dashboards.getAll(params),
+    apiClient.dashboards.getAll(params),
 
-  getById: (id: string) => analyticsClient.dashboards.getById(id),
+  getById: (id: string) =>
+    apiClient.dashboards.getById(id),
 
   create: (payload: Partial<AnalyticsDashboard>) =>
-    analyticsClient.dashboards.create(payload),
+    apiClient.dashboards.create(payload),
 
   update: (id: string, payload: Partial<AnalyticsDashboard>) =>
-    analyticsClient.dashboards.update(id, payload),
+    apiClient.dashboards.update(id, payload),
 
-  patch: (id: string, payload: Partial<AnalyticsDashboard>) =>
-    analyticsClient.dashboards.patch(id, payload),
-
-  remove: (id: string) => analyticsClient.dashboards.remove(id),
+  remove: (id: string) =>
+    apiClient.dashboards.delete(id),
 
   duplicate: (id: string): Promise<ApiResponse<AnalyticsDashboard>> =>
-    axiosInstance
-      .post<ApiResponse<AnalyticsDashboard>>(
-        `/analytics/dashboards/${id}/duplicate`,
-      )
+    axios
+      .post<ApiResponse<AnalyticsDashboard>>(`/dashboards/${id}/duplicate`)
       .then((r) => r.data),
 
-  updateWidgets: (
-    id: string,
-    widgets: unknown[],
-  ): Promise<ApiResponse<AnalyticsDashboard>> =>
-    axiosInstance
-      .patch<ApiResponse<AnalyticsDashboard>>(
-        `/analytics/dashboards/${id}/widgets`,
-        { widgets },
-      )
+  updateWidgets: (id: string, widgets: unknown[]): Promise<ApiResponse<AnalyticsDashboard>> =>
+    axios
+      .patch<ApiResponse<AnalyticsDashboard>>(`/dashboards/${id}/widgets`, { widgets })
       .then((r) => r.data),
 
   addWidget: (
@@ -47,32 +46,22 @@ export const dashboardService = {
       position: { x: number; y: number; w: number; h: number };
     },
   ): Promise<ApiResponse<AnalyticsDashboard>> =>
-    axiosInstance
-      .post<ApiResponse<AnalyticsDashboard>>(
-        `/analytics/dashboards/${id}/widgets`,
-        widget,
-      )
+    axios
+      .post<ApiResponse<AnalyticsDashboard>>(`/dashboards/${id}/widgets`, widget)
       .then((r) => r.data),
 
-  removeWidget: (
-    id: string,
-    widgetId: string,
-  ): Promise<ApiResponse<AnalyticsDashboard>> =>
-    axiosInstance
-      .delete<ApiResponse<AnalyticsDashboard>>(
-        `/analytics/dashboards/${id}/widgets/${widgetId}`,
-      )
+  removeWidget: (id: string, widgetId: string): Promise<ApiResponse<AnalyticsDashboard>> =>
+    axios
+      .delete<ApiResponse<AnalyticsDashboard>>(`/dashboards/${id}/widgets/${widgetId}`)
       .then((r) => r.data),
 
   setDefault: (id: string): Promise<ApiResponse<AnalyticsDashboard>> =>
-    axiosInstance
-      .patch<ApiResponse<AnalyticsDashboard>>(
-        `/analytics/dashboards/${id}/set-default`,
-      )
+    axios
+      .patch<ApiResponse<AnalyticsDashboard>>(`/dashboards/${id}/set-default`)
       .then((r) => r.data),
 
   getDefault: (): Promise<ApiResponse<AnalyticsDashboard>> =>
-    axiosInstance
-      .get<ApiResponse<AnalyticsDashboard>>("/analytics/dashboards/default")
+    axios
+      .get<ApiResponse<AnalyticsDashboard>>("/dashboards/default")
       .then((r) => r.data),
 };

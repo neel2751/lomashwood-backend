@@ -1,37 +1,42 @@
-import { appointmentClient } from "@/lib/api-client";
-import type { Consultant } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { PaginatedResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
+type Consultant = {
+  id: string;
+  name: string;
+  email?: string;
+  speciality?: string;
+  active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const consultantService = {
   getAll: (params?: Record<string, unknown>) =>
-    appointmentClient.consultants.getAll(params),
+    apiClient.consultants.getAll(params),
 
-  getById: (id: string) => appointmentClient.consultants.getById(id),
+  getById: (id: string) =>
+    apiClient.consultants.getById(id),
 
   create: (payload: Partial<Consultant>) =>
-    appointmentClient.consultants.create(payload),
+    apiClient.consultants.create(payload),
 
   update: (id: string, payload: Partial<Consultant>) =>
-    appointmentClient.consultants.update(id, payload),
+    apiClient.consultants.update(id, payload),
 
-  patch: (id: string, payload: Partial<Consultant>) =>
-    appointmentClient.consultants.patch(id, payload),
-
-  remove: (id: string) => appointmentClient.consultants.remove(id),
+  remove: (id: string) =>
+    apiClient.consultants.delete(id),
 
   getActive: (): Promise<PaginatedResponse<Consultant>> =>
-    axiosInstance
-      .get<PaginatedResponse<Consultant>>("/appointments/consultants/active")
+    axios
+      .get<PaginatedResponse<Consultant>>("/consultants/active")
       .then((r) => r.data),
 
-  getBySpeciality: (
-    speciality: string,
-  ): Promise<PaginatedResponse<Consultant>> =>
-    axiosInstance
-      .get<PaginatedResponse<Consultant>>(
-        "/appointments/consultants/by-speciality",
-        { params: { speciality } },
-      )
+  getBySpeciality: (speciality: string): Promise<PaginatedResponse<Consultant>> =>
+    axios
+      .get<PaginatedResponse<Consultant>>("/consultants/by-speciality", {
+        params: { speciality },
+      })
       .then((r) => r.data),
 };

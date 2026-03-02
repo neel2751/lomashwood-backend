@@ -1,42 +1,42 @@
-import { contentClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type { SeoMeta } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import axios from "@/lib/axios";
 import type { ApiResponse } from "@/lib/api-client";
 
 export const seoService = {
   getAll: (params?: Record<string, unknown>) =>
-    contentClient.seo.getAll(params),
+    apiClient.seo.getAll(params),
 
-  getById: (id: string) => contentClient.seo.getById(id),
+  getById: (id: string) => apiClient.seo.getById(id),
 
   getBySlug: (pageSlug: string): Promise<ApiResponse<SeoMeta>> =>
-    axiosInstance
+    axios
       .get<ApiResponse<SeoMeta>>(`/content/seo/slug/${pageSlug}`)
       .then((r) => r.data),
 
   create: (payload: Partial<SeoMeta>) =>
-    contentClient.seo.create(payload),
+    apiClient.seo.create(payload),
 
   update: (id: string, payload: Partial<SeoMeta>) =>
-    contentClient.seo.update(id, payload),
+    apiClient.seo.update(id, payload),
 
   patch: (id: string, payload: Partial<SeoMeta>) =>
-    contentClient.seo.patch(id, payload),
+    axios.patch(`/content/seo/${id}`, payload).then((r) => r.data),
 
-  remove: (id: string) => contentClient.seo.remove(id),
+  remove: (id: string) => apiClient.seo.delete(id),
 
   upsertBySlug: (
     pageSlug: string,
     payload: Partial<SeoMeta>,
   ): Promise<ApiResponse<SeoMeta>> =>
-    axiosInstance
+    axios
       .put<ApiResponse<SeoMeta>>(`/content/seo/slug/${pageSlug}`, payload)
       .then((r) => r.data),
 
   bulkUpdate: (
     entries: Array<{ pageSlug: string } & Partial<SeoMeta>>,
   ): Promise<ApiResponse<SeoMeta[]>> =>
-    axiosInstance
+    axios
       .patch<ApiResponse<SeoMeta[]>>("/content/seo/bulk", { entries })
       .then((r) => r.data),
 };

@@ -61,4 +61,5 @@ export function useAuth() {
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
   };
+  
 }

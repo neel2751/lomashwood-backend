@@ -1,41 +1,46 @@
-import { contentClient } from "@/lib/api-client";
-import type { CmsPage } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
 import type { ManagedPageSlug } from "@/lib/constants";
+
+type CmsPage = {
+  id: string;
+  title: string;
+  slug: string;
+  content?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const cmsPageService = {
   getAll: (params?: Record<string, unknown>) =>
-    contentClient.cmsPages.getAll(params),
+    apiClient.cmsPages.getAll(params),
 
-  getById: (id: string) => contentClient.cmsPages.getById(id),
+  getById: (id: string) =>
+    apiClient.cmsPages.getById(id),
 
   getBySlug: (slug: ManagedPageSlug | string): Promise<ApiResponse<CmsPage>> =>
-    axiosInstance
-      .get<ApiResponse<CmsPage>>(`/content/cms/slug/${slug}`)
+    axios
+      .get<ApiResponse<CmsPage>>(`/cms-pages/slug/${slug}`)
       .then((r) => r.data),
 
   create: (payload: Partial<CmsPage>) =>
-    contentClient.cmsPages.create(payload),
+    apiClient.cmsPages.create(payload),
 
   update: (id: string, payload: Partial<CmsPage>) =>
-    contentClient.cmsPages.update(id, payload),
+    apiClient.cmsPages.update(id, payload),
 
-  patch: (id: string, payload: Partial<CmsPage>) =>
-    contentClient.cmsPages.patch(id, payload),
+  remove: (id: string) =>
+    apiClient.cmsPages.delete(id),
 
-  remove: (id: string) => contentClient.cmsPages.remove(id),
-
-  upsertBySlug: (
-    slug: ManagedPageSlug | string,
-    payload: Partial<CmsPage>,
-  ): Promise<ApiResponse<CmsPage>> =>
-    axiosInstance
-      .put<ApiResponse<CmsPage>>(`/content/cms/slug/${slug}`, payload)
+  upsertBySlug: (slug: ManagedPageSlug | string, payload: Partial<CmsPage>): Promise<ApiResponse<CmsPage>> =>
+    axios
+      .put<ApiResponse<CmsPage>>(`/cms-pages/slug/${slug}`, payload)
       .then((r) => r.data),
 
   getManagedPages: (): Promise<ApiResponse<CmsPage[]>> =>
-    axiosInstance
-      .get<ApiResponse<CmsPage[]>>("/content/cms/managed")
+    axios
+      .get<ApiResponse<CmsPage[]>>("/cms-pages/managed")
       .then((r) => r.data),
 };

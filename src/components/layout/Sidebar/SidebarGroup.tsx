@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 
 import { SidebarItem } from "./SidebarItem";
 
-import type { NavGroup } from "@/types/nav.types";
+import type { NavSection } from "@/types/nav.types";
 
 interface SidebarGroupProps {
-  group: NavGroup;
+  group: NavSection;
   collapsed: boolean;
 }
 
@@ -22,7 +22,7 @@ export function SidebarGroup({ group, collapsed }: SidebarGroupProps) {
             "text-[#5A4232] select-none"
           )}
         >
-          {group.label}
+          {group.title}
         </p>
       )}
 

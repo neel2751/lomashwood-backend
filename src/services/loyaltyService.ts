@@ -1,50 +1,45 @@
-import { customerClient } from "@/lib/api-client";
-import type { LoyaltyAccount } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
+type LoyaltyAccount = {
+  id: string;
+  customerId: string;
+  points: number;
+  tier?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const loyaltyService = {
   getAll: (params?: Record<string, unknown>) =>
-    customerClient.loyalty.getAll(params),
+    apiClient.loyalty.getAll(params),
 
-  getById: (id: string) => customerClient.loyalty.getById(id),
+  getById: (id: string) =>
+    apiClient.loyalty.getById(id),
 
   create: (payload: Partial<LoyaltyAccount>) =>
-    customerClient.loyalty.create(payload),
+    apiClient.loyalty.create(payload),
 
   update: (id: string, payload: Partial<LoyaltyAccount>) =>
-    customerClient.loyalty.update(id, payload),
+    apiClient.loyalty.update(id, payload),
 
-  patch: (id: string, payload: Partial<LoyaltyAccount>) =>
-    customerClient.loyalty.patch(id, payload),
-
-  remove: (id: string) => customerClient.loyalty.remove(id),
+  remove: (id: string) =>
+    apiClient.loyalty.delete(id),
 
   getByCustomer: (customerId: string): Promise<ApiResponse<LoyaltyAccount>> =>
-    axiosInstance
-      .get<ApiResponse<LoyaltyAccount>>(
-        `/customers/loyalty/by-customer/${customerId}`,
-      )
+    axios
+      .get<ApiResponse<LoyaltyAccount>>(`/loyalty/by-customer/${customerId}`)
       .then((r) => r.data),
 
   adjustPoints: (
     id: string,
     adjustment: { points: number; reason: string },
   ): Promise<ApiResponse<LoyaltyAccount>> =>
-    axiosInstance
-      .post<ApiResponse<LoyaltyAccount>>(
-        `/customers/loyalty/${id}/adjust`,
-        adjustment,
-      )
-      .then((r) => r.data),
+    apiClient.loyalty.adjust(id, adjustment),
 
-  upgradeTier: (
-    id: string,
-    tier: string,
-  ): Promise<ApiResponse<LoyaltyAccount>> =>
-    axiosInstance
-      .patch<ApiResponse<LoyaltyAccount>>(`/customers/loyalty/${id}/tier`, {
-        tier,
-      })
+  upgradeTier: (id: string, tier: string): Promise<ApiResponse<LoyaltyAccount>> =>
+    axios
+      .patch<ApiResponse<LoyaltyAccount>>(`/loyalty/${id}/tier`, { tier })
       .then((r) => r.data),
 };

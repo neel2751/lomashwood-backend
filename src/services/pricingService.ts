@@ -1,27 +1,27 @@
-import { productClient } from "@/lib/api-client";
-import type { PricingRule } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
+import type { PricingRule } from "@/types/product.types";
+import axios from "@/lib/axios";
 
 export const pricingService = {
   getAll: (params?: Record<string, unknown>) =>
-    productClient.pricing.getAll(params),
+    apiClient.pricing.getAll(params),
 
-  getById: (id: string) => productClient.pricing.getById(id),
+  getById: (id: string) => apiClient.pricing.getById(id),
 
   create: (payload: Partial<PricingRule>) =>
-    productClient.pricing.create(payload),
+    apiClient.pricing.create(payload),
 
   update: (id: string, payload: Partial<PricingRule>) =>
-    productClient.pricing.update(id, payload),
+    apiClient.pricing.update(id, payload),
 
   patch: (id: string, payload: Partial<PricingRule>) =>
-    productClient.pricing.patch(id, payload),
+    axios.patch(`/products/pricing/${id}`, payload).then((r) => r.data),
 
-  remove: (id: string) => productClient.pricing.remove(id),
+  remove: (id: string) => apiClient.pricing.delete(id),
 
   getByProduct: (productId: string): Promise<PaginatedResponse<PricingRule>> =>
-    axiosInstance
+    axios
       .get<PaginatedResponse<PricingRule>>(
         `/products/pricing/by-product/${productId}`,
       )
@@ -30,7 +30,7 @@ export const pricingService = {
   bulkUpdate: (
     rules: Array<{ id: string } & Partial<PricingRule>>,
   ): Promise<ApiResponse<PricingRule[]>> =>
-    axiosInstance
+    axios
       .patch<ApiResponse<PricingRule[]>>("/products/pricing/bulk", { rules })
       .then((r) => r.data),
 };

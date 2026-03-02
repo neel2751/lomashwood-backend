@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import {
   Search, Plus, Pencil, Eye, Copy,
-  ExternalLink, Trash2, ChevronDown,
+  ExternalLink, Trash2, 
   TrendingUp, Target, Calendar,
 } from "lucide-react";
 

@@ -43,15 +43,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNotifications } from "@/hooks/useNotifications";
-import { type NotificationStatus } from "@/types/notification.types";
+import { type Notification, type NotificationStatus } from "@/types/notification.types";
 import { formatters } from "@/utils/formatters";
 
-
-
-const STATUS_CONFIG: Record<
-  NotificationStatus,
-  { label: string; icon: React.ReactNode; style: string }
-> = {
+const STATUS_CONFIG: Partial<Record<string, { label: string; icon: React.ReactNode; style: string }>> = {
   delivered: {
     label: "Delivered",
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
@@ -79,6 +74,12 @@ const STATUS_CONFIG: Record<
   },
 };
 
+const FALLBACK_STATUS = {
+  label: "Unknown",
+  icon: <Clock className="h-3.5 w-3.5" />,
+  style: "bg-muted text-muted-foreground border-muted",
+};
+
 const PAGE_SIZE = 20;
 
 export function SmsLogTable() {
@@ -92,10 +93,9 @@ export function SmsLogTable() {
     search,
     status: statusFilter !== "all" ? statusFilter : undefined,
     page,
-    pageSize: PAGE_SIZE,
   });
 
-  const messages = data?.data ?? [];
+  const messages: Notification[] = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -168,8 +168,8 @@ export function SmsLogTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              messages.map((msg) => {
-                const statusCfg = STATUS_CONFIG[msg.status];
+              messages.map((msg: Notification) => {
+                const statusCfg = STATUS_CONFIG[msg.status] ?? FALLBACK_STATUS;
                 return (
                   <TableRow
                     key={msg.id}
@@ -177,10 +177,10 @@ export function SmsLogTable() {
                     onClick={() => router.push(`/notifications/sms/${msg.id}`)}
                   >
                     <TableCell>
-                      <p className="font-medium text-sm">{msg.recipientName ?? "—"}</p>
+                      <p className="font-medium text-sm">{msg.recipient ?? "—"}</p>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-mono">{msg.recipientAddress}</span>
+                      <span className="text-sm font-mono">{msg.recipient}</span>
                     </TableCell>
                     <TableCell>
                       <p className="text-sm truncate max-w-[240px] text-muted-foreground">
@@ -188,9 +188,7 @@ export function SmsLogTable() {
                       </p>
                     </TableCell>
                     <TableCell>
-                      <span className="text-xs text-muted-foreground">
-                        {msg.smsSegments ?? "—"}
-                      </span>
+                      <span className="text-xs text-muted-foreground">—</span>
                     </TableCell>
                     <TableCell>
                       <Badge

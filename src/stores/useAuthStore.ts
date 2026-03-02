@@ -1,9 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AdminUser } from "@/types/auth.types";
+
+export type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  roleId?: string;
+  roleName?: string;
+  status: string;
+  lastLoginAt?: string;
+  createdAt: string;
+  activeSessionCount?: number;
+};
 
 interface AuthState {
   user: AdminUser | null;
+  
   accessToken: string | null;
   isAuthenticated: boolean;
   setUser: (user: AdminUser) => void;
@@ -28,8 +40,8 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, accessToken: null, isAuthenticated: false }),
     }),
     {
-      name: "lomash-auth",
-      partialize: (state) => ({
+      name: "auth-store", // cspell:disable-line
+      partialize: (state) => ({ // cspell:disable-line
         user: state.user,
         accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,

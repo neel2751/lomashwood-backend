@@ -1,4 +1,4 @@
-// components/appointments/AppointmentTimeline.tsx
+
 
 type TimelineEvent = {
   id: string

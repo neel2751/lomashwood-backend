@@ -1,61 +1,89 @@
-import { notificationClient } from "@/lib/api-client";
-import type { Notification, EmailLog, SmsLog, PushLog } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
 import type { NotificationChannel } from "@/lib/constants";
+
+type Notification = {
+  id: string;
+  channel: string;
+  status: string;
+  recipient?: string;
+  subject?: string;
+  body?: string;
+  createdAt?: string;
+};
+
+type EmailLog = {
+  id: string;
+  to: string;
+  subject: string;
+  status: string;
+  openedAt?: string;
+  createdAt?: string;
+};
+
+type SmsLog = {
+  id: string;
+  to: string;
+  message: string;
+  status: string;
+  createdAt?: string;
+};
+
+type PushLog = {
+  id: string;
+  title: string;
+  body: string;
+  status: string;
+  clickedAt?: string;
+  createdAt?: string;
+};
 
 export const notificationService = {
   getAll: (params?: Record<string, unknown>) =>
-    notificationClient.notifications.getAll(params),
+    apiClient.notifications.getAll(params),
 
-  getById: (id: string) => notificationClient.notifications.getById(id),
+  getById: (id: string) =>
+    apiClient.notifications.getById(id),
 
-  remove: (id: string) => notificationClient.notifications.remove(id),
+  remove: (id: string) =>
+    apiClient.notifications.delete(id),
 
   getByChannel: (
     channel: NotificationChannel,
     params?: Record<string, unknown>,
   ): Promise<PaginatedResponse<EmailLog | SmsLog | PushLog>> =>
-    axiosInstance
-      .get<PaginatedResponse<EmailLog | SmsLog | PushLog>>(
-        `/notifications/${channel}`,
-        { params },
-      )
-      .then((r) => r.data),
+    apiClient.notifications.getByChannel(channel, params),
 
   getEmailLogs: (params?: Record<string, unknown>) =>
-    notificationClient.email.getAll(params),
+    axios.get("/notifications/email", { params }).then((r) => r.data),
 
-  getEmailLogById: (id: string) => notificationClient.email.getById(id),
+  getEmailLogById: (id: string) =>
+    axios.get(`/notifications/email/${id}`).then((r) => r.data),
 
   getSmsLogs: (params?: Record<string, unknown>) =>
-    notificationClient.sms.getAll(params),
+    axios.get("/notifications/sms", { params }).then((r) => r.data),
 
-  getSmsLogById: (id: string) => notificationClient.sms.getById(id),
+  getSmsLogById: (id: string) =>
+    axios.get(`/notifications/sms/${id}`).then((r) => r.data),
 
   getPushLogs: (params?: Record<string, unknown>) =>
-    notificationClient.push.getAll(params),
+    axios.get("/notifications/push", { params }).then((r) => r.data),
 
-  getPushLogById: (id: string) => notificationClient.push.getById(id),
+  getPushLogById: (id: string) =>
+    axios.get(`/notifications/push/${id}`).then((r) => r.data),
 
-  resend: (
-    id: string,
-    channel: NotificationChannel,
-  ): Promise<ApiResponse<Notification>> =>
-    axiosInstance
-      .post<ApiResponse<Notification>>(
-        `/notifications/${channel}/${id}/resend`,
-      )
+  resend: (id: string, channel: NotificationChannel): Promise<ApiResponse<Notification>> =>
+    axios
+      .post<ApiResponse<Notification>>(`/notifications/${channel}/${id}/resend`)
       .then((r) => r.data),
 
-  getStats: (params?: Record<string, unknown>): Promise<
-    ApiResponse<{
-      email: { sent: number; failed: number; opened: number };
-      sms: { sent: number; failed: number };
-      push: { sent: number; failed: number; clicked: number };
-    }>
-  > =>
-    axiosInstance
+  getStats: (params?: Record<string, unknown>): Promise<ApiResponse<{
+    email: { sent: number; failed: number; opened: number };
+    sms: { sent: number; failed: number };
+    push: { sent: number; failed: number; clicked: number };
+  }>> =>
+    axios
       .get("/notifications/stats", { params })
       .then((r) => r.data),
 };

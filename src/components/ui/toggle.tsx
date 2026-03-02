@@ -139,10 +139,7 @@ ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName
 
 export { ToggleGroup, ToggleGroupItem }
 
-// ── Segmented control (compound component) ────────────────────────────────────
-// Styled single-select ToggleGroup that looks like a segmented button row.
-// Commonly used for: Time range (7d / 30d / 90d), View (Kitchen / Bedroom),
-// Appointment type filters, Analytics period pickers.
+
 
 interface SegmentedControlOption<T extends string = string> {
   value: T

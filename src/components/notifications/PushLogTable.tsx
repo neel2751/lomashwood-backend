@@ -42,15 +42,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNotifications } from "@/hooks/useNotifications";
-import { type NotificationStatus } from "@/types/notification.types";
+import { type Notification, type NotificationStatus } from "@/types/notification.types";
 import { formatters } from "@/utils/formatters";
 
-
-
-const STATUS_CONFIG: Record<
-  NotificationStatus,
-  { label: string; icon: React.ReactNode; style: string }
-> = {
+const STATUS_CONFIG: Partial<Record<string, { label: string; icon: React.ReactNode; style: string }>> = {
   delivered: {
     label: "Delivered",
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
@@ -72,10 +67,16 @@ const STATUS_CONFIG: Record<
     style: "bg-red-50 text-red-700 border-red-200",
   },
   bounced: {
-    label: "Failed",
+    label: "Bounced",
     icon: <XCircle className="h-3.5 w-3.5" />,
     style: "bg-red-50 text-red-700 border-red-200",
   },
+};
+
+const FALLBACK_STATUS = {
+  label: "Unknown",
+  icon: <Clock className="h-3.5 w-3.5" />,
+  style: "bg-muted text-muted-foreground border-muted",
 };
 
 const PAGE_SIZE = 20;
@@ -91,10 +92,9 @@ export function PushLogTable() {
     search,
     status: statusFilter !== "all" ? statusFilter : undefined,
     page,
-    pageSize: PAGE_SIZE,
   });
 
-  const pushLogs = data?.data ?? [];
+  const pushLogs: Notification[] = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -167,8 +167,8 @@ export function PushLogTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              pushLogs.map((push) => {
-                const statusCfg = STATUS_CONFIG[push.status];
+              pushLogs.map((push: Notification) => {
+                const statusCfg = STATUS_CONFIG[push.status] ?? FALLBACK_STATUS;
                 return (
                   <TableRow
                     key={push.id}
@@ -177,9 +177,9 @@ export function PushLogTable() {
                   >
                     <TableCell>
                       <div>
-                        <p className="font-medium text-sm">{push.recipientName ?? "—"}</p>
+                        <p className="font-medium text-sm">{push.recipient ?? "—"}</p>
                         <p className="text-xs text-muted-foreground truncate max-w-[120px]">
-                          {push.recipientAddress}
+                          {push.recipient}
                         </p>
                       </div>
                     </TableCell>
@@ -193,7 +193,7 @@ export function PushLogTable() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
-                        {push.platform ?? "Web"}
+                        Web
                       </Badge>
                     </TableCell>
                     <TableCell>

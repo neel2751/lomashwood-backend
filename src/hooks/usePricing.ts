@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { pricingService } from "@/services/pricingService";
-import type { CreateProductPayload, UpdateProductPayload } from "@/types/product.types";
+import type { PricingRule } from "@/types/product.types";
 
 export function usePricing(productId?: string) {
   return useQuery({
@@ -21,7 +21,7 @@ export function useCreatePricing() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateProductPayload) => pricingService.create(payload),
+    mutationFn: (payload: Partial<PricingRule>) => pricingService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pricing"] });
     },
@@ -32,9 +32,9 @@ export function useUpdatePricing() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateProductPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<PricingRule> }) =>
       pricingService.update(id, payload),
-    onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
+    onSuccess: (_data: unknown, { id }: { id: string; payload: Partial<PricingRule> }) => {
       queryClient.invalidateQueries({ queryKey: ["pricing"] });
       queryClient.invalidateQueries({ queryKey: ["pricing", id] });
     },

@@ -34,7 +34,7 @@ const MENU_ITEMS = [
 
 export function AdminUserMenu() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, clearUser  } = useAuthStore();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -48,10 +48,10 @@ export function AdminUserMenu() {
     : "LW";
 
   const handleLogout = async () => {
-    setOpen(false);
-    logout();
-    router.push("/login");
-  };
+  setOpen(false);
+  clearUser();
+  router.push("/login");
+}
 
   // Close on outside click
   useEffect(() => {
@@ -92,7 +92,7 @@ export function AdminUserMenu() {
             {user?.name ?? "Admin"}
           </span>
           <span className="text-[10px] text-[#5A4232] leading-none mt-0.5 capitalize">
-            {user?.role ?? "administrator"}
+            {user?.roleName ?? "administrator"}
           </span>
         </div>
 

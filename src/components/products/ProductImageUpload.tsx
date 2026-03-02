@@ -37,10 +37,10 @@ export function ProductImageUpload({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const emit = (imgs: UploadedImage[]) => {
+  const emit = useCallback((imgs: UploadedImage[]) => {
     setImages(imgs);
     onChange?.(imgs);
-  };
+  }, [onChange]);
 
   const processFiles = useCallback(
     (files: FileList | null) => {
@@ -58,7 +58,7 @@ export function ProductImageUpload({
 
       emit([...images, ...newImages]);
     },
-    [images, maxImages]
+    [images, maxImages, emit]
   );
 
   const onDrop = useCallback(
@@ -72,11 +72,12 @@ export function ProductImageUpload({
 
   const removeImage = (id: string) => {
     const updated = images.filter((img) => img.id !== id);
-    // Re-assign primary if needed
-    if (updated.length > 0 && !updated.some((img) => img.isPrimary)) {
-      updated[0].isPrimary = true;
-    }
-    emit(updated);
+    const hasPrimary = updated.some((img) => img.isPrimary);
+    const final = updated.map((img, i) => ({
+      ...img,
+      isPrimary: hasPrimary ? img.isPrimary : i === 0,
+    }));
+    emit(final);
   };
 
   const setPrimary = (id: string) => {

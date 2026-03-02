@@ -25,15 +25,15 @@ interface ContentBlock {
 }
 
 const BLOCK_TYPES: { type: BlockType; label: string; icon: React.ElementType; desc: string }[] = [
-  { type: "hero",    label: "Hero",          icon: Type,    desc: "Full-width banner with heading & CTA" },
-  { type: "text",    label: "Rich Text",     icon: Type,    desc: "Paragraphs, headings, lists"          },
-  { type: "image",   label: "Image",         icon: Image,   desc: "Single image with caption"            },
-  { type: "columns", label: "Two Columns",   icon: Columns, desc: "Side-by-side content blocks"          },
-  { type: "quote",   label: "Pull Quote",    icon: Quote,   desc: "Highlighted quote block"              },
-  { type: "divider", label: "Divider",       icon: Minus,   desc: "Horizontal rule"                     },
-  { type: "cta",     label: "Call to Action",icon: Type,    desc: "Button block with heading"            },
-  { type: "video",   label: "Video",         icon: Video,   desc: "Embedded video"                      },
-  { type: "html",    label: "Custom HTML",   icon: Code,    desc: "Raw HTML / embed code"                },
+  { type: "hero",    label: "Hero",           icon: Type,    desc: "Full-width banner with heading & CTA" },
+  { type: "text",    label: "Rich Text",      icon: Type,    desc: "Paragraphs, headings, lists"          },
+  { type: "image",   label: "Image",          icon: Image,   desc: "Single image with caption"            },
+  { type: "columns", label: "Two Columns",    icon: Columns, desc: "Side-by-side content blocks"          },
+  { type: "quote",   label: "Pull Quote",     icon: Quote,   desc: "Highlighted quote block"              },
+  { type: "divider", label: "Divider",        icon: Minus,   desc: "Horizontal rule"                     },
+  { type: "cta",     label: "Call to Action", icon: Type,    desc: "Button block with heading"            },
+  { type: "video",   label: "Video",          icon: Video,   desc: "Embedded video"                      },
+  { type: "html",    label: "Custom HTML",    icon: Code,    desc: "Raw HTML / embed code"                },
 ];
 
 const TEMPLATES: { value: PageTemplate; label: string; desc: string }[] = [
@@ -73,7 +73,7 @@ function BlockEditor({ block, onUpdate, onDelete }: {
 
   const field = (key: string, placeholder: string, rows?: number) => (
     <div key={key}>
-      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1 capitalize">{key.replace("_", " ")}</label>
+      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">{key.replace("_", " ")}</label>
       {rows
         ? <textarea value={block.content[key] ?? ""} onChange={(e) => onUpdate(block.id, { ...block.content, [key]: e.target.value })}
             placeholder={placeholder} rows={rows} className={textareaCls} />
@@ -100,7 +100,6 @@ function BlockEditor({ block, onUpdate, onDelete }: {
 
   return (
     <div className="rounded-[12px] bg-[#1C1611] border border-[#2E231A] overflow-hidden group/block">
-      {/* Block header */}
       <div className="flex items-center gap-2 px-4 py-2.5 bg-[#1A100C] border-b border-[#2E231A]">
         <GripVertical size={14} className="text-[#3D2E1E] cursor-grab" />
         <span className="flex-1 text-[12px] font-semibold text-[#C8B99A]">{block.label}</span>
@@ -123,21 +122,21 @@ function BlockEditor({ block, onUpdate, onDelete }: {
   );
 }
 
-interface CmsPageEditorProps { pageId?: string; isEdit?: boolean; }
+interface CmsPageEditorProps { isEdit?: boolean; }
 
-export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
+export function CmsPageEditor({ isEdit = false }: CmsPageEditorProps) {
   const [title,    setTitle]    = useState(isEdit ? "Our Showroom" : "");
   const [slug,     setSlug]     = useState(isEdit ? "/showroom" : "/");
   const [template, setTemplate] = useState<PageTemplate>("default");
   const [status,   setStatus]   = useState<PageStatus>("draft");
   const [blocks,   setBlocks]   = useState<ContentBlock[]>(
     isEdit ? [
-      { id: "b1", type: "hero",  label: "Hero Banner",  content: defaultContent("hero") },
-      { id: "b2", type: "text",  label: "Rich Text",    content: defaultContent("text") },
-      { id: "b3", type: "image", label: "Image",        content: defaultContent("image") },
+      { id: "b1", type: "hero",  label: "Hero Banner", content: defaultContent("hero")  },
+      { id: "b2", type: "text",  label: "Rich Text",   content: defaultContent("text")  },
+      { id: "b3", type: "image", label: "Image",       content: defaultContent("image") },
     ] : []
   );
-  const [showBlockPicker, setShowPicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
 
@@ -165,7 +164,6 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Top bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <Link href="/content/pages"
@@ -195,9 +193,7 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Main: blocks */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          {/* Title + slug */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <input value={title} onChange={(e) => { setTitle(e.target.value); if (!isEdit) setSlug("/" + e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-")); }}
               placeholder="Page title…"
@@ -209,7 +205,6 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
             </div>
           </div>
 
-          {/* Content blocks */}
           <div className="flex flex-col gap-3">
             {blocks.length === 0 && (
               <div className="rounded-[16px] border-2 border-dashed border-[#2E231A] py-14 flex flex-col items-center justify-center gap-2 text-center">
@@ -223,7 +218,6 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
             ))}
           </div>
 
-          {/* Add block */}
           <div className="relative">
             <button onClick={() => setShowPicker((v) => !v)}
               className="w-full flex items-center justify-center gap-2 h-10 rounded-[12px] border-2 border-dashed border-[#3D2E1E] text-[12.5px] text-[#5A4232] hover:border-[#C8924A]/50 hover:text-[#C8924A] hover:bg-[#221A12] transition-all">
@@ -249,13 +243,10 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
           </div>
         </div>
 
-        {/* Sidebar: page settings */}
         <div className="flex flex-col gap-4">
-          {/* Page settings */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-4">Page Settings</h3>
             <div className="flex flex-col gap-3">
-              {/* Status */}
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
                 <div className="relative">
@@ -268,7 +259,6 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
                 </div>
               </div>
 
-              {/* Template */}
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Template</label>
                 <div className="relative">
@@ -286,7 +276,6 @@ export function CmsPageEditor({ pageId, isEdit = false }: CmsPageEditorProps) {
             </div>
           </div>
 
-          {/* Block count summary */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-3">Content Blocks</h3>
             {blocks.length === 0 ? (

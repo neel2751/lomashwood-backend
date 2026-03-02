@@ -1,20 +1,27 @@
-import { productClient } from "@/lib/api-client";
-import type { Category } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
+
+type Category = {
+  id: string;
+  name: string;
+  slug?: string;
+  parentId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const categoryService = {
   getAll: (params?: Record<string, unknown>) =>
-    productClient.categories.getAll(params),
+    apiClient.categories.getAll(params),
 
-  getById: (id: string) => productClient.categories.getById(id),
+  getById: (id: string) =>
+    apiClient.categories.getById(id),
 
   create: (payload: Partial<Category>) =>
-    productClient.categories.create(payload),
+    apiClient.categories.create(payload),
 
   update: (id: string, payload: Partial<Category>) =>
-    productClient.categories.update(id, payload),
+    apiClient.categories.update(id, payload),
 
-  patch: (id: string, payload: Partial<Category>) =>
-    productClient.categories.patch(id, payload),
-
-  remove: (id: string) => productClient.categories.remove(id),
+  remove: (id: string) =>
+    apiClient.categories.delete(id),
 };

@@ -1,39 +1,42 @@
 import { useCallback } from "react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { hasPermission, hasAnyPermission, hasAllPermissions } from "@/utils/permission-helpers";
-
-type PermissionKey = Parameters<typeof hasPermission>[1];
+import type { UserWithRole } from "@/utils/permission-helpers";
+import type { PermissionKey, RoleName } from "@/lib/constants";
 
 export function usePermissions() {
   const user = useAuthStore((s) => s.user);
-  const role = user?.role ?? null;
+
+  const userWithRole: UserWithRole | null = user?.roleName
+    ? { id: user.id, role: user.roleName as RoleName }
+    : null;
 
   const can = useCallback(
     (permission: PermissionKey): boolean => {
-      if (!role) return false;
-      return hasPermission(role, permission);
+      if (!userWithRole) return false;
+      return hasPermission(userWithRole, permission);
     },
-    [role]
+    [userWithRole]
   );
 
   const canAny = useCallback(
     (permissions: PermissionKey[]): boolean => {
-      if (!role) return false;
-      return hasAnyPermission(role, permissions);
+      if (!userWithRole) return false;
+      return hasAnyPermission(userWithRole, permissions);
     },
-    [role]
+    [userWithRole]
   );
 
   const canAll = useCallback(
     (permissions: PermissionKey[]): boolean => {
-      if (!role) return false;
-      return hasAllPermissions(role, permissions);
+      if (!userWithRole) return false;
+      return hasAllPermissions(userWithRole, permissions);
     },
-    [role]
+    [userWithRole]
   );
 
-  const isAdmin = role === "admin";
-  const isStaff = role === "staff";
+  const isAdmin = userWithRole?.role === "admin" || userWithRole?.role === "super_admin";
+  const isStaff = userWithRole?.role === "manager" || userWithRole?.role === "consultant";
 
-  return { can, canAny, canAll, isAdmin, isStaff, role };
+  return { can, canAny, canAll, isAdmin, isStaff, role: userWithRole?.role ?? null };
 }

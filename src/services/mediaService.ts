@@ -1,35 +1,43 @@
-import { contentClient } from "@/lib/api-client";
-import type { MediaWallItem } from "@/lib/api-client";
-import { axiosInstance } from "@/lib/axios";
+import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
+type MediaWallItem = {
+  id: string;
+  url: string;
+  type?: string;
+  active?: boolean;
+  order?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export const mediaService = {
   getAll: (params?: Record<string, unknown>) =>
-    contentClient.mediaWall.getAll(params),
+    apiClient.media.getAll(params),
 
-  getById: (id: string) => contentClient.mediaWall.getById(id),
+  getById: (id: string) =>
+    apiClient.media.getById(id),
 
   create: (payload: Partial<MediaWallItem>) =>
-    contentClient.mediaWall.create(payload),
+    apiClient.media.create(payload),
 
   update: (id: string, payload: Partial<MediaWallItem>) =>
-    contentClient.mediaWall.update(id, payload),
+    apiClient.media.update(id, payload),
 
-  patch: (id: string, payload: Partial<MediaWallItem>) =>
-    contentClient.mediaWall.patch(id, payload),
+  remove: (id: string) =>
+    apiClient.media.delete(id),
 
-  remove: (id: string) => contentClient.mediaWall.remove(id),
-
-  upload: (files: File[], meta?: Record<string, string>) =>
-    contentClient.uploadMedia(files, meta),
+  upload: (payload: unknown) =>
+    apiClient.media.upload(payload),
 
   reorder: (orderedIds: string[]): Promise<ApiResponse<void>> =>
-    axiosInstance
-      .patch<ApiResponse<void>>("/content/media-wall/reorder", { orderedIds })
+    axios
+      .patch<ApiResponse<void>>("/media/reorder", { orderedIds })
       .then((r) => r.data),
 
   setActive: (id: string, active: boolean): Promise<ApiResponse<MediaWallItem>> =>
-    axiosInstance
-      .patch<ApiResponse<MediaWallItem>>(`/content/media-wall/${id}/active`, { active })
+    axios
+      .patch<ApiResponse<MediaWallItem>>(`/media/${id}/active`, { active })
       .then((r) => r.data),
 };

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const statusBadgeVariants = cva(
@@ -28,7 +28,7 @@ const statusBadgeVariants = cva(
         new:         "bg-blue-50 text-blue-700 border-blue-200",
         open:        "bg-amber-50 text-amber-700 border-amber-200",
         resolved:    "bg-emerald-50 text-emerald-700 border-emerald-200",
-      },
+      } as Record<string, string>,
     },
   }
 )
@@ -96,13 +96,17 @@ export function StatusBadge({
   showDot = true,
   className,
 }: StatusBadgeProps) {
-  const knownStatus = status as StatusKey
-  const badgeClass = statusBadgeVariants({ status: knownStatus })
-  const dotClass   = DOT_VARIANTS[status] ?? "bg-muted-foreground/40"
-  const displayLabel = label ?? STATUS_LABELS[status] ?? status.replace(/_/g, " ")
+  const badgeClass = statusBadgeVariants({ status });
+  const dotClass = DOT_VARIANTS[status] ?? "bg-muted-foreground/40";
+  const displayLabel = label ?? STATUS_LABELS[status] ?? status.replace(/_/g, " ");
 
   return (
-    <span className={cn(badgeClass ?? "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-muted text-muted-foreground", className)}>
+    <span
+      className={cn(
+        badgeClass ?? "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-muted text-muted-foreground",
+        className
+      )}
+    >
       {showDot && (
         <span className={cn("h-1.5 w-1.5 rounded-full flex-shrink-0", dotClass)} />
       )}

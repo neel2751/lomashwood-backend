@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/lib/axios"
+import axios from "@/lib/axios"
 import type { AxiosResponse } from "axios"
 
 export interface Settings {
@@ -18,21 +18,21 @@ export interface SettingsResponse {
 export const settingsService = {
   getSettings: async (): Promise<SettingsResponse> => {
     const response: AxiosResponse<SettingsResponse> =
-      await axiosInstance.get("/settings")
+      await axios.get("/settings")
 
     return response.data
   },
 
   getSetting: async (key: string): Promise<Settings> => {
     const response: AxiosResponse<Settings> =
-      await axiosInstance.get(`/settings/${key}`)
+      await axios.get(`/settings/${key}`)
 
     return response.data
   },
 
   updateSettings: async (payload: Partial<Settings>): Promise<Settings> => {
     const response: AxiosResponse<Settings> =
-      await axiosInstance.put("/settings", payload)
+      await axios.put("/settings", payload)
 
     return response.data
   },
@@ -42,10 +42,8 @@ export const settingsService = {
     value: unknown
   ): Promise<Settings> => {
     const response: AxiosResponse<Settings> =
-      await axiosInstance.put(`/settings/${key}`, { value })
+      await axios.put(`/settings/${key}`, { value })
 
     return response.data
   },
 } as const
-
-export type { Settings, SettingsResponse }
