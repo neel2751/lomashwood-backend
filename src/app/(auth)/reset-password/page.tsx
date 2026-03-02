@@ -3,7 +3,7 @@
 import { Suspense, useState, useTransition } from 'react'
 
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 type Status = 'idle' | 'success' | 'error' | 'invalid-token'
 
@@ -43,7 +43,7 @@ function getStrengthScore(pw: string): number {
 }
 
 function ResetPasswordForm() {
-  const router = useRouter()
+  
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
 

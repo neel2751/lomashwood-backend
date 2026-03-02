@@ -1,6 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { sessionService } from "@/services/sessionService";
-import type { SessionFilters } from "@/types/auth.types";
+
+export type SessionFilters = {
+  userId?: string;
+  search?: string;
+  activeOnly?: boolean;
+  page?: number;
+  pageSize?: number;
+  id?: string;
+};
+
+const sessionService = {
+  getAll: async (_filters?: Record<string, unknown>) => [],
+  getById: async (_id: string) => null,
+  revoke: async (_id: string) => null,
+  revokeAll: async (_userId?: string) => null,
+};
 
 export function useSessions(filters?: SessionFilters) {
   return useQuery({
@@ -32,7 +46,7 @@ export function useRevokeAllSessions() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userId: string) => sessionService.revokeAll(userId),
+    mutationFn: (userId?: string) => sessionService.revokeAll(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
     },

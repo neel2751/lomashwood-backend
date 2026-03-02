@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { landingPageService } from "@/services/landingPageService";
-import type { CreateLandingPagePayload, UpdateLandingPagePayload } from "@/types/content.types";
+import type { CreateLandingPagePayload } from "@/types/content.types";
 
 export function useLandingPages() {
   return useQuery({
@@ -32,7 +32,7 @@ export function useUpdateLandingPage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateLandingPagePayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: CreateLandingPagePayload }) =>
       landingPageService.update(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
@@ -45,7 +45,7 @@ export function useDeleteLandingPage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => landingPageService.delete(id),
+    mutationFn: (id: string) => landingPageService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
     },

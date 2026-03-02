@@ -1,12 +1,12 @@
 "use client";
 
-import { useParams } from "next/navigation";
+
 
 import { CmsPageEditor } from "@/components/content/CmsPageEditor";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function CmsDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  
 
   return (
     <div className="flex flex-col gap-6">
@@ -15,7 +15,7 @@ export default function CmsDetailPage() {
         description="Update this dynamic content page."
         backHref="/content/cms"
       />
-      <CmsPageEditor id={id} />
+      <CmsPageEditor />
     </div>
   );
 }

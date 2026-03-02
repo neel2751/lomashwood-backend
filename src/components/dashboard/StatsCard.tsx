@@ -9,7 +9,7 @@ import type { LucideIcon } from "lucide-react";
 interface StatsCardProps {
   title: string;
   value: string;
-  change: number; // percentage, e.g. 12.5 or -3.2
+  change: number;
   changeLabel?: string;
   icon: LucideIcon;
   iconColor?: string;

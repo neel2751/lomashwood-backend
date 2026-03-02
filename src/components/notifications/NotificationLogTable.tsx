@@ -43,10 +43,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNotifications } from "@/hooks/useNotifications";
-import { type NotificationLog, type NotificationChannel, type NotificationStatus } from "@/types/notification.types";
-import { formatters } from "@/utils/formatters";
-
-
+import { type Notification, type NotificationChannel, type NotificationStatus } from "@/types/notification.types";
+import { formatDate } from "@/utils/formatters";
 
 const CHANNEL_ICONS: Record<NotificationChannel, React.ReactNode> = {
   email: <Mail className="h-3.5 w-3.5" />,
@@ -54,24 +52,7 @@ const CHANNEL_ICONS: Record<NotificationChannel, React.ReactNode> = {
   push: <Smartphone className="h-3.5 w-3.5" />,
 };
 
-const CHANNEL_LABELS: Record<NotificationChannel, string> = {
-  email: "Email",
-  sms: "SMS",
-  push: "Push",
-};
-
-const STATUS_VARIANT: Record<
-  NotificationStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  sent: "default",
-  delivered: "default",
-  failed: "destructive",
-  pending: "secondary",
-  bounced: "destructive",
-};
-
-const STATUS_STYLES: Record<NotificationStatus, string> = {
+const STATUS_STYLES: Record<string, string> = {
   sent: "bg-blue-50 text-blue-700 border-blue-200",
   delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
   failed: "bg-red-50 text-red-700 border-red-200",
@@ -93,10 +74,9 @@ export function NotificationLogTable() {
     channel: channelFilter !== "all" ? channelFilter : undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
     page,
-    pageSize: PAGE_SIZE,
   });
 
-  const notifications: NotificationLog[] = data?.data ?? [];
+  const notifications: Notification[] = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -106,7 +86,6 @@ export function NotificationLogTable() {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 gap-2">
           <div className="relative flex-1 max-w-sm">
@@ -168,7 +147,6 @@ export function NotificationLogTable() {
         </Button>
       </div>
 
-      {/* Table */}
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
@@ -211,7 +189,7 @@ export function NotificationLogTable() {
                 >
                   <TableCell>
                     <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-muted text-muted-foreground">
-                      {CHANNEL_ICONS[n.channel]}
+                      {CHANNEL_ICONS[n.channel as NotificationChannel]}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -231,14 +209,14 @@ export function NotificationLogTable() {
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={`text-xs font-medium capitalize ${STATUS_STYLES[n.status]}`}
+                      className={`text-xs font-medium capitalize ${STATUS_STYLES[n.status as string]}`}
                     >
                       {n.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <span className="text-xs text-muted-foreground">
-                      {formatters.dateTime(n.sentAt)}
+                      {formatDate(n.sentAt)}
                     </span>
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
@@ -263,7 +241,6 @@ export function NotificationLogTable() {
         </Table>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">

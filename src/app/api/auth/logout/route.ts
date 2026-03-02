@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLomashApiClient } from "@/lib/api-client";
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     const client = createLomashApiClient();
     await client.auth.logout();

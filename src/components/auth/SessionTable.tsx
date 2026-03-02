@@ -45,10 +45,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSessions } from "@/hooks/useSessions";
-import { formatters } from "@/utils/formatters";
+import { useSessions, useRevokeSession, useRevokeAllSessions } from "@/hooks/useSessions";
+import { formatDate } from "@/utils/formatters";
 
-
+type Session = {
+  id: string;
+  isActive: boolean;
+  deviceInfo?: string;
+  ipAddress?: string;
+  location?: string;
+  userName?: string;
+  userEmail?: string;
+  createdAt: string;
+  expiresAt?: string;
+};
 
 const PAGE_SIZE = 20;
 
@@ -62,7 +72,7 @@ function DeviceIcon({ device }: { device?: string }) {
 }
 
 interface SessionTableProps {
-  userId?: string; // optional filter by user
+  userId?: string;
 }
 
 export function SessionTable({ userId }: SessionTableProps) {
@@ -73,16 +83,18 @@ export function SessionTable({ userId }: SessionTableProps) {
   const [revokeId, setRevokeId] = useState<string | null>(null);
   const [revokeAll, setRevokeAll] = useState(false);
 
-  const { data, isLoading, revokeSession, revokeAllSessions, refetch } = useSessions({
+  const { data: rawData, isLoading, refetch } = useSessions({
     userId,
     search,
     activeOnly,
     page,
-    pageSize: PAGE_SIZE,
   });
+  const { mutateAsync: revokeSession } = useRevokeSession();
+  const { mutateAsync: revokeAllSessions } = useRevokeAllSessions();
 
-  const sessions = data?.data ?? [];
-  const total = data?.meta?.total ?? 0;
+  const anyData = rawData as any;
+  const sessions: Session[] = anyData?.data ?? anyData ?? [];
+  const total: number = anyData?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const handleRevoke = async () => {
@@ -92,14 +104,13 @@ export function SessionTable({ userId }: SessionTableProps) {
   };
 
   const handleRevokeAll = async () => {
-    await revokeAllSessions(userId);
+    await revokeAllSessions(userId ?? undefined);
     setRevokeAll(false);
   };
 
   return (
     <>
       <div className="space-y-4">
-        {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-1 gap-2 items-center">
             <div className="relative flex-1 max-w-sm">
@@ -133,7 +144,6 @@ export function SessionTable({ userId }: SessionTableProps) {
           </Button>
         </div>
 
-        {/* Table */}
         <div className="rounded-md border bg-white">
           <Table>
             <TableHeader>
@@ -167,7 +177,7 @@ export function SessionTable({ userId }: SessionTableProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                sessions.map((session) => (
+                sessions.map((session: Session) => (
                   <TableRow
                     key={session.id}
                     className="cursor-pointer hover:bg-muted/30 transition-colors"
@@ -205,12 +215,12 @@ export function SessionTable({ userId }: SessionTableProps) {
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">
-                        {formatters.dateTime(session.createdAt)}
+                        {formatDate(session.createdAt)}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">
-                        {session.expiresAt ? formatters.dateTime(session.expiresAt) : "—"}
+                        {session.expiresAt ? formatDate(session.expiresAt) : "—"}
                       </span>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -242,7 +252,6 @@ export function SessionTable({ userId }: SessionTableProps) {
           </Table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
@@ -260,8 +269,7 @@ export function SessionTable({ userId }: SessionTableProps) {
         )}
       </div>
 
-      {/* Revoke single */}
-      <AlertDialog open={!!revokeId} onOpenChange={(open) => !open && setRevokeId(null)}>
+      <AlertDialog open={!!revokeId} onOpenChange={(open: boolean) => !open && setRevokeId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revoke Session</AlertDialogTitle>
@@ -278,8 +286,7 @@ export function SessionTable({ userId }: SessionTableProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Revoke all */}
-      <AlertDialog open={revokeAll} onOpenChange={setRevokeAll}>
+      <AlertDialog open={revokeAll} onOpenChange={(open: boolean) => setRevokeAll(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revoke All Sessions</AlertDialogTitle>

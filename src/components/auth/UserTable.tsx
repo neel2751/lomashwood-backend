@@ -56,9 +56,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useUsers } from "@/hooks/useUsers";
-import { formatters } from "@/utils/formatters";
+import { formatDate, formatDateTime } from "@/utils/formatters";
 
-
+// ✅ Added User type
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  roleName?: string | null;
+  lastLoginAt?: string | null;
+  createdAt: string;
+}
 
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -94,7 +103,7 @@ export function UserTable() {
     pageSize: PAGE_SIZE,
   });
 
-  const users = data?.data ?? [];
+  const users: User[] = data?.data ?? []; // ✅ Typed as User[]
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const roles = data?.meta?.roles ?? [];
@@ -108,7 +117,6 @@ export function UserTable() {
   return (
     <>
       <div className="space-y-4">
-        {/* Filters */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-1 gap-2">
             <div className="relative flex-1 max-w-sm">
@@ -150,7 +158,6 @@ export function UserTable() {
           </Button>
         </div>
 
-        {/* Table */}
         <div className="rounded-md border bg-white">
           <Table>
             <TableHeader>
@@ -182,7 +189,7 @@ export function UserTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                users.map((user) => (
+                users.map((user: User) => ( // ✅ Annotated as User
                   <TableRow
                     key={user.id}
                     className="cursor-pointer hover:bg-muted/30 transition-colors"
@@ -217,12 +224,12 @@ export function UserTable() {
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">
-                        {user.lastLoginAt ? formatters.dateTime(user.lastLoginAt) : "Never"}
+                        {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : "Never"}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">
-                        {formatters.date(user.createdAt)}
+                        {formatDate(user.createdAt)}
                       </span>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -266,7 +273,6 @@ export function UserTable() {
           </Table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
@@ -284,7 +290,7 @@ export function UserTable() {
         )}
       </div>
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={(open: boolean) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete User</AlertDialogTitle>

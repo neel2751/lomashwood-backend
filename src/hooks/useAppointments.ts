@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { appointmentService } from "@/services/appointmentService";
-import type { AppointmentFilters, CreateAppointmentPayload, UpdateAppointmentPayload } from "@/types/appointment.types";
+import type { AppointmentFilterParams, CreateAppointmentPayload, UpdateAppointmentPayload } from "@/types/appointment.types";
 
-export function useAppointments(filters?: AppointmentFilters) {
+export function useAppointments(filters?: AppointmentFilterParams) {
   return useQuery({
     queryKey: ["appointments", filters],
     queryFn: () => appointmentService.getAll(filters),
@@ -34,7 +34,7 @@ export function useUpdateAppointment() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateAppointmentPayload }) =>
       appointmentService.update(id, payload),
-    onSuccess: (_data, { id }) => {
+    onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
       queryClient.invalidateQueries({ queryKey: ["appointments", id] });
     },
@@ -45,7 +45,7 @@ export function useDeleteAppointment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => appointmentService.delete(id),
+    mutationFn: (id: string) => appointmentService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },

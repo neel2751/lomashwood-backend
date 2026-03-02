@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-
 import {
   CalendarOff, Plus, Trash2, ChevronDown,
-  CalendarCheck, Save, AlertTriangle,
+  CalendarCheck, Save, AlertTriangle, CheckCircle2,
 } from "lucide-react";
-
 import { cn } from "@/lib/utils";
-
 import { TimeSlotEditor } from "./TimeSlotEditor";
 
 interface DateOverride {
@@ -35,12 +32,11 @@ export function AvailabilityManager() {
   const [overrides, setOverrides]   = useState<DateOverride[]>(DEFAULT_OVERRIDES);
   const [showAddOverride, setShow]  = useState(false);
 
-  // New override form state
-  const [newDate, setNewDate]   = useState("");
-  const [newType, setNewType]   = useState<"closed" | "custom_hours">("closed");
-  const [newFrom, setNewFrom]   = useState("09:00");
-  const [newTo, setNewTo]       = useState("17:00");
-  const [newReason, setNewReason] = useState("");
+  const [newDate, setNewDate]         = useState("");
+  const [newType, setNewType]         = useState<"closed" | "custom_hours">("closed");
+  const [newFrom, setNewFrom]         = useState("09:00");
+  const [newTo, setNewTo]             = useState("17:00");
+  const [newReason, setNewReason]     = useState("");
   const [overrideSaved, setOverrideSaved] = useState(false);
 
   const addOverride = () => {
@@ -68,6 +64,14 @@ export function AvailabilityManager() {
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Saved confirmation banner */}
+      {overrideSaved && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-[12.5px] font-medium">
+          <CheckCircle2 size={14} />
+          Override saved successfully
+        </div>
+      )}
+
       {/* Consultant selector */}
       <div className="flex items-center gap-3 flex-wrap">
         <p className="text-[13px] font-medium text-[#C8B99A]">Managing availability for:</p>
@@ -100,7 +104,8 @@ export function AvailabilityManager() {
           </div>
           <button
             onClick={() => setShow((v) => !v)}
-            className="flex items-center gap-2 h-9 px-3 rounded-[9px] bg-[#C8924A] text-white text-[12px] font-medium hover:bg-[#B87E3E] transition-colors">
+            className="flex items-center gap-2 h-9 px-3 rounded-[9px] bg-[#C8924A] text-white text-[12px] font-medium hover:bg-[#B87E3E] transition-colors"
+          >
             <Plus size={13} /> Add Override
           </button>
         </div>
@@ -117,7 +122,7 @@ export function AvailabilityManager() {
               <div>
                 <label className="block text-[10px] uppercase tracking-wider text-[#3D2E1E] mb-1">Type</label>
                 <div className="relative">
-                  <select value={newType} onChange={(e) => setNewType(e.target.value as any)}
+                  <select value={newType} onChange={(e) => setNewType(e.target.value as "closed" | "custom_hours")}
                     className={cn(inputCls, "w-full appearance-none pr-7")}>
                     <option value="closed" className="bg-[#1C1611]">Closed</option>
                     <option value="custom_hours" className="bg-[#1C1611]">Custom Hours</option>

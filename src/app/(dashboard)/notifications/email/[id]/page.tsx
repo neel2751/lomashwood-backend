@@ -15,7 +15,7 @@ export default function EmailNotificationDetailPage() {
         description="View the details of this email notification."
         backHref="/notifications/email"
       />
-      <NotificationDetail id={id} channel="email" />
+      <NotificationDetail id={id} />
     </div>
   );
 }

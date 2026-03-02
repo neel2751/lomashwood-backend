@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   FileText,
@@ -55,12 +56,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTemplates } from "@/hooks/useTemplates";
-import { type NotificationChannel } from "@/types/notification.types";
-import { formatters } from "@/utils/formatters";
+import { type NotificationChannel, type NotificationTemplate } from "@/types/notification.types";
 
-
-
-const CHANNEL_ICONS: Record<NotificationChannel, React.ReactNode> = {
+const CHANNEL_ICONS: Record<NotificationChannel, JSX.Element> = {
   email: <Mail className="h-3.5 w-3.5" />,
   sms: <MessageSquare className="h-3.5 w-3.5" />,
   push: <Smartphone className="h-3.5 w-3.5" />,
@@ -74,28 +72,50 @@ const CHANNEL_STYLES: Record<NotificationChannel, string> = {
 
 const PAGE_SIZE = 20;
 
+async function deleteTemplateById(id: string): Promise<void> {
+  const res = await fetch(`/api/templates/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete template");
+}
+
 export function TemplateTable() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [channelFilter, setChannelFilter] = useState<NotificationChannel | "all">("all");
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data, isLoading, deleteTemplate } = useTemplates({
+  const { data, isLoading } = useTemplates({
     search,
     channel: channelFilter !== "all" ? channelFilter : undefined,
     page,
     pageSize: PAGE_SIZE,
   });
 
-  const templates = data?.data ?? [];
+  const { mutateAsync: deleteTemplate } = useMutation<void, Error, string>({
+  mutationFn: deleteTemplateById,
+  onSuccess: () => {
+    void queryClient.invalidateQueries({ queryKey: ["templates"] });
+  },
+});
+
+  const templates: NotificationTemplate[] = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const handleDelete = async () => {
-    if (!deleteId) return;
-    await deleteTemplate(deleteId);
-    setDeleteId(null);
+  if (!deleteId) return;
+  await deleteTemplate(deleteId!);
+  setDeleteId(null);
+};
+
+  const formatUpdatedAt = (dateStr?: string | null): string => {
+    if (!dateStr) return "—";
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   return (
@@ -174,7 +194,7 @@ export function TemplateTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                templates.map((tpl) => (
+                templates.map((tpl: NotificationTemplate) => (
                   <TableRow
                     key={tpl.id}
                     className="cursor-pointer hover:bg-muted/30 transition-colors"
@@ -182,11 +202,6 @@ export function TemplateTable() {
                   >
                     <TableCell>
                       <p className="font-medium text-sm">{tpl.name}</p>
-                      {tpl.description && (
-                        <p className="text-xs text-muted-foreground truncate max-w-[160px]">
-                          {tpl.description}
-                        </p>
-                      )}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -199,13 +214,13 @@ export function TemplateTable() {
                     </TableCell>
                     <TableCell>
                       <p className="text-sm truncate max-w-[200px] text-muted-foreground">
-                        {tpl.subject ?? tpl.bodyPreview ?? "—"}
+                        {tpl.subject ?? "—"}
                       </p>
                     </TableCell>
                     <TableCell>
                       {tpl.variables && tpl.variables.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {tpl.variables.slice(0, 3).map((v) => (
+                          {tpl.variables.slice(0, 3).map((v: string) => (
                             <Badge key={v} variant="secondary" className="text-xs font-mono">
                               {`{{${v}}}`}
                             </Badge>
@@ -233,7 +248,7 @@ export function TemplateTable() {
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">
-                        {formatters.dateTime(tpl.updatedAt)}
+                        {formatUpdatedAt(tpl.updatedAt)}
                       </span>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -289,7 +304,7 @@ export function TemplateTable() {
       </div>
 
       {/* Delete Confirm */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={(open: boolean) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Template</AlertDialogTitle>

@@ -34,15 +34,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSessions } from "@/hooks/useSessions";
-import { formatters } from "@/utils/formatters";
-
-
-
+import { useSessions, useRevokeSession } from "@/hooks/useSessions";
+import { formatDate } from "@/utils/formatters";
 
 interface SessionDetailProps {
   sessionId: string;
 }
+
+export type Session = {
+  id: string;
+  isActive: boolean;
+  expiresAt?: string;
+  updatedAt?: string;
+  createdAt: string;
+  deviceInfo?: string;
+  browser?: string;
+  ipAddress?: string;
+  location?: string;
+  userAgent?: string;
+  userName?: string;
+  userEmail?: string;
+  userRole?: string;
+  userId?: string;
+};
 
 function DeviceIcon({ device }: { device?: string }) {
   if (!device) return <Globe className="h-5 w-5" />;
@@ -57,7 +71,13 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
   const router = useRouter();
   const [showRevoke, setShowRevoke] = useState(false);
 
-  const { data: session, isLoading, isError, revokeSession } = useSessions({ id: sessionId });
+  const { data: rawData, isLoading, isError } = useSessions({ id: sessionId });
+  const data = rawData as unknown as { data?: Session[]; } | Session[] | null;
+  const session: Session | null = Array.isArray(data)
+    ? (data as Session[])[0] ?? null
+    : (data as { data?: Session[] })?.data?.[0] ?? null;
+
+  const { mutateAsync: revokeSession } = useRevokeSession();
 
   if (isLoading) {
     return (
@@ -90,7 +110,6 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
   return (
     <>
       <div className="space-y-6">
-        {/* Back + actions */}
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" className="-ml-2" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4 mr-1.5" />
@@ -109,7 +128,6 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
           )}
         </div>
 
-        {/* Status banner */}
         <div
           className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${
             session.isActive
@@ -124,14 +142,13 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
             </p>
             <p className="text-xs mt-0.5">
               {session.isActive
-                ? `Expires ${formatters.dateTime(session.expiresAt)}`
-                : `Ended ${formatters.dateTime(session.expiresAt ?? session.updatedAt)}`}
+                ? `Expires ${formatDate(session.expiresAt)}`
+                : `Ended ${formatDate(session.expiresAt ?? session.updatedAt)}`}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Device & network */}
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
@@ -181,7 +198,6 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
             </CardContent>
           </Card>
 
-          {/* Timing & user */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -236,12 +252,12 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
                 <Separator />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Created</span>
-                  <span>{formatters.dateTime(session.createdAt)}</span>
+                  <span>{formatDate(session.createdAt)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Expires</span>
-                  <span>{session.expiresAt ? formatters.dateTime(session.expiresAt) : "—"}</span>
+                  <span>{session.expiresAt ? formatDate(session.expiresAt) : "—"}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between">

@@ -24,16 +24,21 @@ interface Product {
   status: ProductStatus;
   images: number;
   updatedAt: string;
+  sizeId?: string;
+}
+
+interface ProductTableProps {
+  sizeFilter?: string;
 }
 
 const MOCK_PRODUCTS: Product[] = [
-  { id: "1", title: "Luna White",        category: "Kitchen",  range: "Luna",    colours: ["#FFFFFF","#F5F0EB","#E8E0D8"], price: 8400,  status: "active",   images: 6, updatedAt: "28 Feb 2026" },
-  { id: "2", title: "Halo Oak",          category: "Bedroom",  range: "Halo",    colours: ["#C8924A","#8B6B4A","#5E4230"], price: 6200,  status: "active",   images: 4, updatedAt: "27 Feb 2026" },
-  { id: "3", title: "Slate Grey Gloss",  category: "Kitchen",  range: "Slate",   colours: ["#6B7280","#4B5563","#374151"], price: 9100,  status: "active",   images: 5, updatedAt: "26 Feb 2026" },
-  { id: "4", title: "Nordic Birch",      category: "Bedroom",  range: "Nordic",  colours: ["#D4B896","#C4A882","#A8896A"], price: 4800,  status: "active",   images: 3, updatedAt: "25 Feb 2026" },
-  { id: "5", title: "Pebble J-Pull",     category: "Kitchen",  range: "Classic", colours: ["#9CA3AF","#6B7280"],           price: 7300,  status: "draft",    images: 2, updatedAt: "24 Feb 2026" },
-  { id: "6", title: "Ash Handleless",    category: "Kitchen",  range: "Ash",     colours: ["#D1C4B0","#B8A898"],           price: 10200, status: "active",   images: 7, updatedAt: "23 Feb 2026" },
-  { id: "7", title: "Linen Shaker",      category: "Bedroom",  range: "Shaker",  colours: ["#E8DDD0","#D4C8B8"],           price: 3900,  status: "archived", images: 4, updatedAt: "20 Feb 2026" },
+  { id: "1", title: "Luna White",        category: "Kitchen",  range: "Luna",    colours: ["#FFFFFF","#F5F0EB","#E8E0D8"], price: 8400,  status: "active",   images: 6, updatedAt: "28 Feb 2026", sizeId: "base-600" },
+  { id: "2", title: "Halo Oak",          category: "Bedroom",  range: "Halo",    colours: ["#C8924A","#8B6B4A","#5E4230"], price: 6200,  status: "active",   images: 4, updatedAt: "27 Feb 2026", sizeId: "wardrobe-1800" },
+  { id: "3", title: "Slate Grey Gloss",  category: "Kitchen",  range: "Slate",   colours: ["#6B7280","#4B5563","#374151"], price: 9100,  status: "active",   images: 5, updatedAt: "26 Feb 2026", sizeId: "base-600" },
+  { id: "4", title: "Nordic Birch",      category: "Bedroom",  range: "Nordic",  colours: ["#D4B896","#C4A882","#A8896A"], price: 4800,  status: "active",   images: 3, updatedAt: "25 Feb 2026", sizeId: "wardrobe-1800" },
+  { id: "5", title: "Pebble J-Pull",     category: "Kitchen",  range: "Classic", colours: ["#9CA3AF","#6B7280"],           price: 7300,  status: "draft",    images: 2, updatedAt: "24 Feb 2026", sizeId: "base-900" },
+  { id: "6", title: "Ash Handleless",    category: "Kitchen",  range: "Ash",     colours: ["#D1C4B0","#B8A898"],           price: 10200, status: "active",   images: 7, updatedAt: "23 Feb 2026", sizeId: "wall-600" },
+  { id: "7", title: "Linen Shaker",      category: "Bedroom",  range: "Shaker",  colours: ["#E8DDD0","#D4C8B8"],           price: 3900,  status: "archived", images: 4, updatedAt: "20 Feb 2026", sizeId: "wardrobe-1800" },
 ];
 
 const STATUS_STYLES: Record<ProductStatus, string> = {
@@ -42,7 +47,7 @@ const STATUS_STYLES: Record<ProductStatus, string> = {
   archived: "bg-[#3D2E1E] text-[#5A4232]",
 };
 
-export function ProductTable() {
+export function ProductTable({ sizeFilter }: ProductTableProps) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<"All" | Category>("All");
   const [statusFilter, setStatusFilter] = useState<"All" | ProductStatus>("All");
@@ -55,7 +60,8 @@ export function ProductTable() {
       p.range.toLowerCase().includes(search.toLowerCase());
     const matchCat = categoryFilter === "All" || p.category === categoryFilter;
     const matchStatus = statusFilter === "All" || p.status === statusFilter;
-    return matchSearch && matchCat && matchStatus;
+    const matchSize = !sizeFilter || p.sizeId === sizeFilter;
+    return matchSearch && matchCat && matchStatus && matchSize;
   });
 
   const toggleSelect = (id: string) =>
@@ -146,111 +152,119 @@ export function ProductTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#2E231A]">
-            {filtered.map((product) => (
-              <tr key={product.id} className="group hover:bg-[#221A12] transition-colors">
-                <td className="px-5 py-3.5">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(product.id)}
-                    onChange={() => toggleSelect(product.id)}
-                    className="w-4 h-4 rounded accent-[#C8924A] cursor-pointer"
-                  />
-                </td>
-
-                {/* Product */}
-                <td className="px-3 py-3.5">
-                  <div>
-                    <Link
-                      href={`/products/${product.id}`}
-                      className="text-[13px] font-medium text-[#C8B99A] hover:text-[#E8D5B7] transition-colors"
-                    >
-                      {product.title}
-                    </Link>
-                    <p className="text-[11px] text-[#5A4232] mt-0.5">{product.range} Range</p>
-                  </div>
-                </td>
-
-                {/* Category */}
-                <td className="px-3 py-3.5">
-                  <span className={cn(
-                    "text-[10.5px] px-2 py-0.5 rounded-full font-medium",
-                    product.category === "Kitchen"
-                      ? "bg-[#C8924A]/15 text-[#C8924A]"
-                      : "bg-[#6B8A9A]/15 text-[#6B8A9A]"
-                  )}>
-                    {product.category}
-                  </span>
-                </td>
-
-                {/* Colours */}
-                <td className="px-3 py-3.5">
-                  <div className="flex items-center gap-1">
-                    {product.colours.slice(0, 4).map((hex, i) => (
-                      <span
-                        key={i}
-                        className="w-4 h-4 rounded-full border border-[#3D2E1E] shrink-0"
-                        style={{ background: hex }}
-                        title={hex}
-                      />
-                    ))}
-                    {product.colours.length > 4 && (
-                      <span className="text-[10px] text-[#5A4232]">+{product.colours.length - 4}</span>
-                    )}
-                  </div>
-                </td>
-
-                {/* Price */}
-                <td className="px-3 py-3.5">
-                  <span className="text-[13px] font-semibold text-[#E8D5B7]">
-                    £{product.price.toLocaleString()}
-                  </span>
-                </td>
-
-                {/* Images */}
-                <td className="px-3 py-3.5">
-                  <span className="text-[12px] text-[#7A6045]">{product.images} imgs</span>
-                </td>
-
-                {/* Status */}
-                <td className="px-3 py-3.5">
-                  <span className={cn("text-[10.5px] px-2 py-0.5 rounded-full font-medium capitalize", STATUS_STYLES[product.status])}>
-                    {product.status}
-                  </span>
-                </td>
-
-                {/* Updated */}
-                <td className="px-3 py-3.5">
-                  <span className="text-[11px] text-[#5A4232]">{product.updatedAt}</span>
-                </td>
-
-                {/* Actions */}
-                <td className="px-3 py-3.5 relative">
-                  <button
-                    onClick={() => setOpenMenu(openMenu === product.id ? null : product.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#3D2E1E] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all opacity-0 group-hover:opacity-100"
-                  >
-                    <MoreHorizontal size={14} />
-                  </button>
-                  {openMenu === product.id && (
-                    <div className="absolute right-3 top-full mt-1 z-20 w-[150px] bg-[#1C1611] border border-[#2E231A] rounded-[10px] shadow-xl overflow-hidden">
-                      {[
-                        { icon: Eye,    label: "View",   href: `/products/${product.id}` },
-                        { icon: Pencil, label: "Edit",   href: `/products/${product.id}` },
-                      ].map(({ icon: Icon, label, href }) => (
-                        <Link key={label} href={href} onClick={() => setOpenMenu(null)}
-                          className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#7A6045] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all"
-                        >
-                          <Icon size={13} /> {label}
-                        </Link>
-                      ))}
-                      <button className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-red-400 hover:bg-red-400/10 transition-all">
-                        <Trash2 size={13} /> Delete
-                      </button>
-                    </div>
-                  )}
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="px-5 py-10 text-center text-[13px] text-[#5A4232]">
+                  No products found{sizeFilter ? ` for this size` : ""}.
                 </td>
               </tr>
-            ))}
+            ) : (
+              filtered.map((product) => (
+                <tr key={product.id} className="group hover:bg-[#221A12] transition-colors">
+                  <td className="px-5 py-3.5">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(product.id)}
+                      onChange={() => toggleSelect(product.id)}
+                      className="w-4 h-4 rounded accent-[#C8924A] cursor-pointer"
+                    />
+                  </td>
+
+                  {/* Product */}
+                  <td className="px-3 py-3.5">
+                    <div>
+                      <Link
+                        href={`/products/${product.id}`}
+                        className="text-[13px] font-medium text-[#C8B99A] hover:text-[#E8D5B7] transition-colors"
+                      >
+                        {product.title}
+                      </Link>
+                      <p className="text-[11px] text-[#5A4232] mt-0.5">{product.range} Range</p>
+                    </div>
+                  </td>
+
+                  {/* Category */}
+                  <td className="px-3 py-3.5">
+                    <span className={cn(
+                      "text-[10.5px] px-2 py-0.5 rounded-full font-medium",
+                      product.category === "Kitchen"
+                        ? "bg-[#C8924A]/15 text-[#C8924A]"
+                        : "bg-[#6B8A9A]/15 text-[#6B8A9A]"
+                    )}>
+                      {product.category}
+                    </span>
+                  </td>
+
+                  {/* Colours */}
+                  <td className="px-3 py-3.5">
+                    <div className="flex items-center gap-1">
+                      {product.colours.slice(0, 4).map((hex, i) => (
+                        <span
+                          key={i}
+                          className="w-4 h-4 rounded-full border border-[#3D2E1E] shrink-0"
+                          style={{ background: hex }}
+                          title={hex}
+                        />
+                      ))}
+                      {product.colours.length > 4 && (
+                        <span className="text-[10px] text-[#5A4232]">+{product.colours.length - 4}</span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Price */}
+                  <td className="px-3 py-3.5">
+                    <span className="text-[13px] font-semibold text-[#E8D5B7]">
+                      £{product.price.toLocaleString()}
+                    </span>
+                  </td>
+
+                  {/* Images */}
+                  <td className="px-3 py-3.5">
+                    <span className="text-[12px] text-[#7A6045]">{product.images} imgs</span>
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-3 py-3.5">
+                    <span className={cn("text-[10.5px] px-2 py-0.5 rounded-full font-medium capitalize", STATUS_STYLES[product.status])}>
+                      {product.status}
+                    </span>
+                  </td>
+
+                  {/* Updated */}
+                  <td className="px-3 py-3.5">
+                    <span className="text-[11px] text-[#5A4232]">{product.updatedAt}</span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-3 py-3.5 relative">
+                    <button
+                      onClick={() => setOpenMenu(openMenu === product.id ? null : product.id)}
+                      className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#3D2E1E] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <MoreHorizontal size={14} />
+                    </button>
+                    {openMenu === product.id && (
+                      <div className="absolute right-3 top-full mt-1 z-20 w-[150px] bg-[#1C1611] border border-[#2E231A] rounded-[10px] shadow-xl overflow-hidden">
+                        {[
+                          { icon: Eye,    label: "View", href: `/products/${product.id}` },
+                          { icon: Pencil, label: "Edit", href: `/products/${product.id}` },
+                        ].map(({ icon: Icon, label, href }) => (
+                          <Link key={label} href={href} onClick={() => setOpenMenu(null)}
+                            className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#7A6045] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all"
+                          >
+                            <Icon size={13} /> {label}
+                          </Link>
+                        ))}
+                        <button className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-red-400 hover:bg-red-400/10 transition-all">
+                          <Trash2 size={13} /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

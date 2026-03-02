@@ -12,9 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
 
-// ------------------------------------------------------------------
-// Permission map aligned with Lomash Wood service architecture
-// ------------------------------------------------------------------
 export const PERMISSION_MODULES: {
   key: string;
   label: string;
@@ -397,7 +394,6 @@ export const PERMISSION_MODULES: {
   },
 ];
 
-// Build permission key: "resource:action"
 function permKey(resource: string, action: string) {
   return `${resource}:${action}`;
 }
@@ -510,7 +506,7 @@ export function PermissionsMatrix({ value, onChange }: PermissionsMatrixProps) {
 
       <Separator />
 
-      {/* Modules */}
+    
       <div className="space-y-3">
         {filteredModules.map((module) => {
           const modulePerms = module.resources.flatMap((r) =>
@@ -550,7 +546,7 @@ export function PermissionsMatrix({ value, onChange }: PermissionsMatrixProps) {
                 </button>
               </div>
 
-              {/* Resources */}
+             
               {!isCollapsed && (
                 <div className="divide-y">
                   {module.resources.map((resource) => {
@@ -572,7 +568,7 @@ export function PermissionsMatrix({ value, onChange }: PermissionsMatrixProps) {
 
                         <Separator orientation="vertical" className="h-5" />
 
-                        {/* Individual actions */}
+                      
                         <div className="flex flex-wrap gap-x-5 gap-y-2">
                           {resource.actions.map((action) => {
                             const perm = permKey(resource.key, action.key);

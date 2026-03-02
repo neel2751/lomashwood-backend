@@ -1,33 +1,33 @@
 import { useCallback } from "react";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { PERMISSIONS } from "@/config/permissions";
 import { hasPermission, hasAnyPermission, hasAllPermissions } from "@/utils/permission-helpers";
-import type { Permission } from "@/types/auth.types";
+
+type PermissionKey = Parameters<typeof hasPermission>[1];
 
 export function usePermissions() {
   const user = useAuthStore((s) => s.user);
   const role = user?.role ?? null;
 
   const can = useCallback(
-    (permission: Permission): boolean => {
+    (permission: PermissionKey): boolean => {
       if (!role) return false;
-      return hasPermission(role, permission, PERMISSIONS);
+      return hasPermission(role, permission);
     },
     [role]
   );
 
   const canAny = useCallback(
-    (permissions: Permission[]): boolean => {
+    (permissions: PermissionKey[]): boolean => {
       if (!role) return false;
-      return hasAnyPermission(role, permissions, PERMISSIONS);
+      return hasAnyPermission(role, permissions);
     },
     [role]
   );
 
   const canAll = useCallback(
-    (permissions: Permission[]): boolean => {
+    (permissions: PermissionKey[]): boolean => {
       if (!role) return false;
-      return hasAllPermissions(role, permissions, PERMISSIONS);
+      return hasAllPermissions(role, permissions);
     },
     [role]
   );

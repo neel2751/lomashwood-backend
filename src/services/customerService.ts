@@ -1,32 +1,25 @@
-import { customerClient } from "@/lib/api-client";
-import type { Customer } from "@/lib/api-client";
 import { axiosInstance } from "@/lib/axios";
-import type { ApiResponse } from "@/lib/api-client";
+
+import type { CustomerFilterParams } from "@/types/customer.types";
 
 export const customerService = {
-  getAll: (params?: Record<string, unknown>) =>
-    customerClient.customers.getAll(params),
+  getAll: async (params?: CustomerFilterParams) => {
+    const response = await axiosInstance.get("/customers", { params });
+    return response.data;
+  },
 
-  getById: (id: string) => customerClient.customers.getById(id),
+  getById: async (id: string) => {
+    const response = await axiosInstance.get(`/customers/${id}`);
+    return response.data;
+  },
 
-  create: (payload: Partial<Customer>) =>
-    customerClient.customers.create(payload),
+  update: async (id: string, payload: Record<string, unknown>) => {
+    const response = await axiosInstance.put(`/customers/${id}`, payload);
+    return response.data;
+  },
 
-  update: (id: string, payload: Partial<Customer>) =>
-    customerClient.customers.update(id, payload),
-
-  patch: (id: string, payload: Partial<Customer>) =>
-    customerClient.customers.patch(id, payload),
-
-  remove: (id: string) => customerClient.customers.remove(id),
-
-  getTimeline: (id: string) =>
-    axiosInstance
-      .get(`/customers/${id}/timeline`)
-      .then((r) => r.data),
-
-  exportCsv: (): Promise<Blob> =>
-    axiosInstance
-      .get("/customers/export", { responseType: "blob" })
-      .then((r) => r.data as Blob),
-};
+  remove: async (id: string) => {
+    const response = await axiosInstance.delete(`/customers/${id}`);
+    return response.data;
+  },
+} as const;

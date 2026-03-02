@@ -89,7 +89,13 @@ export default function PricingDetailPage({ params }: Props) {
           <div className="form-card">
             <h2 className="form-card__title">Edit rule</h2>
             <Suspense fallback={<div className="form-skeleton" />}>
-              <PricingForm pricingId={params.id} defaultValues={{ name: rule.name, ruleType: rule.ruleType, basePrice: rule.basePrice, compareAt: rule.compareAt, discount: rule.discount, appliesTo: rule.appliesTo }} />
+              <PricingForm
+                initialData={{
+                  basePrice: rule.basePrice,
+                  salePrice: rule.compareAt ?? undefined,
+                }}
+                isEdit={true}
+              />
             </Suspense>
           </div>
         </div>

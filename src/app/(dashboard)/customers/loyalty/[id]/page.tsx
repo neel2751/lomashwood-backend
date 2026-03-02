@@ -15,7 +15,7 @@ export default function LoyaltyDetailPage() {
         description="View and adjust loyalty points for this customer."
         backHref="/customers/loyalty"
       />
-      <LoyaltyAdjustForm id={id} />
+      <LoyaltyAdjustForm prefilledCustomerId={id} />
     </div>
   );
 }

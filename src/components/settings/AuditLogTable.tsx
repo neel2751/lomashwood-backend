@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   Search,
@@ -58,11 +59,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { formatters } from "@/utils/formatters";
+import { axiosInstance } from "@/lib/axios";
 
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 type AuditAction =
   | "create"
@@ -102,7 +102,76 @@ type AuditResource =
   | "loyalty"
   | "showroom";
 
-// ── Display config ─────────────────────────────────────────────────────────────
+interface AuditLog {
+  id: string;
+  action: AuditAction;
+  resource: AuditResource;
+  resourceId?: string;
+  resourceLabel?: string;
+  userName?: string;
+  userEmail?: string;
+  userRole?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  changes?: Record<string, { from: unknown; to: unknown }>;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
+interface AuditLogResponse {
+  data: AuditLog[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+}
+
+interface UseAuditLogsParams {
+  search?: string;
+  action?: string;
+  resource?: string;
+  userId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+interface ExportLogsParams {
+  search?: string;
+  action?: string;
+  resource?: string;
+}
+
+
+
+function useAuditLogs(params: UseAuditLogsParams) {
+  const query = useQuery<AuditLogResponse>({
+    queryKey: ["audit-logs", params],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/audit-logs", { params });
+      return response.data;
+    },
+  });
+
+  const exportLogs = async (filters: ExportLogsParams) => {
+    const response = await axiosInstance.get("/audit-logs/export", {
+      params: filters,
+      responseType: "blob",
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "audit-logs.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  return { ...query, exportLogs };
+}
+
+
 
 const ACTION_CONFIG: Record<AuditAction, { label: string; icon: React.ReactNode; style: string }> = {
   create: {
@@ -210,11 +279,10 @@ function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
-// ── Detail panel ──────────────────────────────────────────────────────────────
 
-function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClose: () => void }) {
+function AuditLogDetail({ log, open, onClose }: { log: AuditLog | null; open: boolean; onClose: () => void }) {
   if (!log) return null;
-  const actionCfg = ACTION_CONFIG[log.action as AuditAction];
+  const actionCfg = ACTION_CONFIG[log.action];
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -225,13 +293,9 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
         </SheetHeader>
 
         <div className="space-y-4">
-          {/* Action + resource */}
           <div className="flex flex-wrap gap-2">
             {actionCfg && (
-              <Badge
-                variant="outline"
-                className={`flex items-center gap-1.5 ${actionCfg.style}`}
-              >
+              <Badge variant="outline" className={`flex items-center gap-1.5 ${actionCfg.style}`}>
                 {actionCfg.icon}
                 {actionCfg.label}
               </Badge>
@@ -241,7 +305,6 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
             </Badge>
           </div>
 
-          {/* User */}
           <Card>
             <CardContent className="pt-4 space-y-3 text-sm">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Actor</p>
@@ -276,7 +339,6 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
             </CardContent>
           </Card>
 
-          {/* Target */}
           <Card>
             <CardContent className="pt-4 space-y-3 text-sm">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Target</p>
@@ -301,7 +363,6 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
             </CardContent>
           </Card>
 
-          {/* Changes */}
           {log.changes && Object.keys(log.changes).length > 0 && (
             <Card>
               <CardContent className="pt-4">
@@ -309,7 +370,7 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
                   Changes
                 </p>
                 <div className="space-y-2">
-                  {Object.entries(log.changes).map(([key, change]: [string, any]) => (
+                  {Object.entries(log.changes).map(([key, change]) => (
                     <div key={key} className="text-sm">
                       <p className="text-xs font-medium text-muted-foreground mb-1 capitalize">
                         {key.replace(/_/g, " ")}
@@ -329,7 +390,6 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
             </Card>
           )}
 
-          {/* Metadata */}
           {log.metadata && (
             <Card>
               <CardContent className="pt-4">
@@ -343,7 +403,6 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
             </Card>
           )}
 
-          {/* Timestamps */}
           <div className="text-xs text-muted-foreground space-y-1">
             <div className="flex justify-between">
               <span>Log ID</span>
@@ -360,7 +419,7 @@ function AuditLogDetail({ log, open, onClose }: { log: any; open: boolean; onClo
   );
 }
 
-// ── Main table ────────────────────────────────────────────────────────────────
+
 
 export function AuditLogTable() {
   const [search, setSearch] = useState("");
@@ -368,7 +427,7 @@ export function AuditLogTable() {
   const [resourceFilter, setResourceFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
   const { data, isLoading, refetch, exportLogs } = useAuditLogs({
     search,
@@ -386,7 +445,6 @@ export function AuditLogTable() {
   return (
     <>
       <div className="space-y-4">
-        {/* Filters */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-1 gap-2">
@@ -461,7 +519,6 @@ export function AuditLogTable() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="rounded-md border bg-white">
           <Table>
             <TableHeader>
@@ -494,9 +551,9 @@ export function AuditLogTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                logs.map((log: any) => {
-                  const actionCfg = ACTION_CONFIG[log.action as AuditAction];
-                  const resourceIcon = RESOURCE_ICONS[log.resource as AuditResource];
+                logs.map((log) => {
+                  const actionCfg = ACTION_CONFIG[log.action];
+                  const resourceIcon = RESOURCE_ICONS[log.resource];
                   return (
                     <TableRow
                       key={log.id}
@@ -581,7 +638,6 @@ export function AuditLogTable() {
           </Table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
@@ -591,12 +647,8 @@ export function AuditLogTable() {
               <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              {/* Jump to page numbers */}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = Math.min(
-                  Math.max(1, page - 2) + i,
-                  totalPages
-                );
+                const pageNum = Math.min(Math.max(1, page - 2) + i, totalPages);
                 return (
                   <Button
                     key={pageNum}
@@ -617,7 +669,6 @@ export function AuditLogTable() {
         )}
       </div>
 
-      {/* Detail panel */}
       <AuditLogDetail
         log={selectedLog}
         open={!!selectedLog}

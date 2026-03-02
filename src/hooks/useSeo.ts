@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { seoService } from "@/services/seoService";
-import type { UpdateSeoPayload } from "@/types/content.types";
+import type { UpsertSeoPayload } from "@/types/content.types";
 
 export function useSeo() {
   return useQuery({
@@ -21,10 +21,9 @@ export function useUpdateSeo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateSeoPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: UpsertSeoPayload }) =>
       seoService.update(id, payload),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["seo"] });
+    onSuccess: (_data: unknown, { id }: { id: string; payload: UpsertSeoPayload }) => {      queryClient.invalidateQueries({ queryKey: ["seo"] });
       queryClient.invalidateQueries({ queryKey: ["seo", id] });
     },
   });

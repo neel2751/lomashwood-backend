@@ -78,3 +78,24 @@ export type TableColumn<T> = {
   sortable?: boolean;
   width?: number | string;
 };
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  roleId?: string;
+  roleName?: string;
+  status: string;
+  lastLoginAt?: string;
+  createdAt: string;
+  activeSessionCount?: number;
+};
+
+export type Session = {
+  id: string;
+  userId: string;
+  deviceInfo?: string;
+  ipAddress?: string;
+  isActive: boolean;
+  createdAt: string;
+  expiresAt?: string;
+};

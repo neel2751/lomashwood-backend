@@ -20,42 +20,36 @@ interface ErrorBoundaryProps {
   className?: string
 }
 
-export class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = { hasError: false, error: null, errorInfo: null }
+    this.reset = this.reset.bind(this)
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  override componentDidCatch(error: Error, info: React.ErrorInfo) {
     this.setState({ errorInfo: info })
     this.props.onError?.(error, info)
   }
 
-  componentDidUpdate(prevProps: ErrorBoundaryProps) {
-    if (
-      this.state.hasError &&
-      prevProps.resetKeys !== this.props.resetKeys
-    ) {
+  override componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    if (this.state.hasError && prevProps.resetKeys !== this.props.resetKeys) {
       this.reset()
     }
   }
 
-  reset = () => {
+  reset() {
     this.setState({ hasError: false, error: null, errorInfo: null })
     this.props.onReset?.()
   }
 
-  render() {
+   override render(): React.ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback
-
       return (
         <ErrorFallback
           error={this.state.error}
@@ -64,7 +58,6 @@ export class ErrorBoundary extends React.Component<
         />
       )
     }
-
     return this.props.children
   }
 }
@@ -91,10 +84,7 @@ export function ErrorFallback({
         <AlertTriangle className="h-4 w-4 flex-shrink-0" />
         <span>{error?.message ?? "Something went wrong"}</span>
         {onReset && (
-          <button
-            onClick={onReset}
-            className="underline underline-offset-2 hover:no-underline ml-1"
-          >
+          <button onClick={onReset} className="underline underline-offset-2 hover:no-underline ml-1">
             Retry
           </button>
         )}
@@ -131,7 +121,7 @@ export function ErrorFallback({
           </Button>
         )}
         {isPage && (
-          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}>
+          <Button variant="ghost" size="sm" onClick={() => { window.location.href = "/" }}>
             <Home className="h-4 w-4 mr-1.5" />
             Go home
           </Button>

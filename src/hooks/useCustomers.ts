@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { customerService } from "@/services/customerService";
-import type { CustomerFilters, UpdateCustomerPayload } from "@/types/customer.types";
+import type { CustomerFilterParams } from "@/types/customer.types";
 
-export function useCustomers(filters?: CustomerFilters) {
+export function useCustomers(filters?: CustomerFilterParams) {
   return useQuery({
     queryKey: ["customers", filters],
     queryFn: () => customerService.getAll(filters),
@@ -21,9 +21,9 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateCustomerPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       customerService.update(id, payload),
-    onSuccess: (_data, { id }) => {
+    onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["customers", id] });
     },
@@ -34,7 +34,7 @@ export function useDeleteCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => customerService.delete(id),
+    mutationFn: (id: string) => customerService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
     },

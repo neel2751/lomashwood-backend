@@ -62,12 +62,12 @@ const quickLinks = [
 ]
 
 const metrics = [
-  { label: 'Page Views', value: '142,830', delta: '+9.3%', trend: 'up' as const },
-  { label: 'Unique Visitors', value: '38,210', delta: '+14.1%', trend: 'up' as const },
-  { label: 'Avg. Session', value: '3m 42s', delta: '+0:18', trend: 'up' as const },
-  { label: 'Bounce Rate', value: '41.2%', delta: '-2.8%', trend: 'up' as const },
-  { label: 'Conversion Rate', value: '3.84%', delta: '+0.41%', trend: 'up' as const },
-  { label: 'Goal Completions', value: '1,468', delta: '+22.6%', trend: 'up' as const },
+  { title: 'Page Views', value: '142,830', delta: '+9.3%', trend: 'up' as const },
+  { title: 'Unique Visitors', value: '38,210', delta: '+14.1%', trend: 'up' as const },
+  { title: 'Avg. Session', value: '3m 42s', delta: '+0:18', trend: 'up' as const },
+  { title: 'Bounce Rate', value: '41.2%', delta: '-2.8%', trend: 'up' as const },
+  { title: 'Conversion Rate', value: '3.84%', delta: '+0.41%', trend: 'up' as const },
+  { title: 'Goal Completions', value: '1,468', delta: '+22.6%', trend: 'up' as const },
 ]
 
 export default function AnalyticsPage() {
@@ -88,10 +88,10 @@ export default function AnalyticsPage() {
 
       <section className="analytics-overview__metrics">
         {metrics.map((m) => (
-          <Suspense key={m.label} fallback={<div className="metric-skeleton" />}>
-            <MetricCard {...m} />
-          </Suspense>
-        ))}
+  <Suspense key={m.title} fallback={<div className="metric-skeleton" />}>
+    <MetricCard {...m} />
+  </Suspense>
+))}
       </section>
 
       <section className="analytics-overview__nav">

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { categoryService } from "@/services/categoryService";
-import type { CreateCategoryPayload, UpdateCategoryPayload } from "@/types/product.types";
+import type { CreateCategoryPayload } from "@/types/product.types";
 
 export function useCategories() {
   return useQuery({
@@ -32,7 +32,7 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateCategoryPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: CreateCategoryPayload }) =>
       categoryService.update(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -45,7 +45,7 @@ export function useDeleteCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => categoryService.delete(id),
+    mutationFn: (id: string) => categoryService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     },

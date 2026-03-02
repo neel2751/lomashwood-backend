@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { notificationService } from "@/services/notificationService";
-import type { NotificationFilters } from "@/types/notification.types";
+import type { NotificationFilterParams } from "@/types/notification.types";
 
-export function useNotifications(filters?: NotificationFilters) {
+export function useNotifications(filters?: NotificationFilterParams) {
   return useQuery({
     queryKey: ["notifications", filters],
     queryFn: () => notificationService.getAll(filters),
@@ -17,21 +17,21 @@ export function useNotification(id: string) {
   });
 }
 
-export function useEmailNotifications(filters?: NotificationFilters) {
+export function useEmailNotifications(filters?: NotificationFilterParams) {
   return useQuery({
     queryKey: ["notifications", "email", filters],
     queryFn: () => notificationService.getByChannel("email", filters),
   });
 }
 
-export function useSmsNotifications(filters?: NotificationFilters) {
+export function useSmsNotifications(filters?: NotificationFilterParams) {
   return useQuery({
     queryKey: ["notifications", "sms", filters],
     queryFn: () => notificationService.getByChannel("sms", filters),
   });
 }
 
-export function usePushNotifications(filters?: NotificationFilters) {
+export function usePushNotifications(filters?: NotificationFilterParams) {
   return useQuery({
     queryKey: ["notifications", "push", filters],
     queryFn: () => notificationService.getByChannel("push", filters),

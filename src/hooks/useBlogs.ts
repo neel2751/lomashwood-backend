@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { blogService } from "@/services/blogService";
-import type { BlogFilters, CreateBlogPayload, UpdateBlogPayload } from "@/types/content.types";
+import type { CreateBlogPostPayload, UpdateBlogPostPayload } from "@/types/content.types";
+
+
+type BlogFilters = Record<string, unknown>;
 
 export function useBlogs(filters?: BlogFilters) {
   return useQuery({
@@ -21,7 +24,7 @@ export function useCreateBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateBlogPayload) => blogService.create(payload),
+    mutationFn: (payload: CreateBlogPostPayload) => blogService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
     },
@@ -32,9 +35,9 @@ export function useUpdateBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateBlogPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateBlogPostPayload }) =>
       blogService.update(id, payload),
-    onSuccess: (_data, { id }) => {
+    onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
       queryClient.invalidateQueries({ queryKey: ["blogs", id] });
     },
@@ -45,7 +48,8 @@ export function useDeleteBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => blogService.delete(id),
+    
+    mutationFn: (id: string) => blogService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
     },

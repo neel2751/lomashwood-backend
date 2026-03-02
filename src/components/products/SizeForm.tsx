@@ -6,17 +6,30 @@ import { Save, Loader2, Upload } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+interface SizeFormDefaultValues {
+  name: string;
+  category: string;
+  width: number;
+  height: number;
+  depth: number;
+  description: string;
+}
+
 interface SizeFormProps {
+  sizeId?: string;
+  defaultValues?: SizeFormDefaultValues;
   initialData?: { title?: string; description?: string; imageUrl?: string; category?: "Kitchen" | "Bedroom" };
   onSave?: (data: any) => void;
   isEdit?: boolean;
 }
 
-export function SizeForm({ initialData, onSave, isEdit = false }: SizeFormProps) {
-  const [title, setTitle] = useState(initialData?.title ?? "");
-  const [description, setDescription] = useState(initialData?.description ?? "");
+export function SizeForm({ sizeId, defaultValues, initialData, onSave, isEdit = false }: SizeFormProps) {
+  const [title, setTitle] = useState(defaultValues?.name ?? initialData?.title ?? "");
+  const [description, setDescription] = useState(defaultValues?.description ?? initialData?.description ?? "");
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl ?? "");
-  const [category, setCategory] = useState<"Kitchen" | "Bedroom">(initialData?.category ?? "Kitchen");
+  const [category, setCategory] = useState<"Kitchen" | "Bedroom">(
+    (defaultValues?.category as "Kitchen" | "Bedroom") ?? initialData?.category ?? "Kitchen"
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -26,7 +39,16 @@ export function SizeForm({ initialData, onSave, isEdit = false }: SizeFormProps)
     await new Promise((r) => setTimeout(r, 900));
     setSaving(false);
     setSaved(true);
-    onSave?.({ title, description, imageUrl, category });
+    onSave?.({
+      sizeId,
+      title,
+      description,
+      imageUrl,
+      category,
+      width: defaultValues?.width,
+      height: defaultValues?.height,
+      depth: defaultValues?.depth,
+    });
     setTimeout(() => setSaved(false), 2000);
   };
 
@@ -88,6 +110,28 @@ export function SizeForm({ initialData, onSave, isEdit = false }: SizeFormProps)
           <input value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Standard, Large, Double…" className={inputCls} />
         </div>
+
+        {/* Dimensions (read-only display if provided via defaultValues) */}
+        {defaultValues && (
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Width (mm)", value: defaultValues.width },
+              { label: "Height (mm)", value: defaultValues.height },
+              { label: "Depth (mm)", value: defaultValues.depth },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+                  {label}
+                </label>
+                <input
+                  type="number"
+                  defaultValue={value}
+                  className={inputCls}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Description */}
         <div>

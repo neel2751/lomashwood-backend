@@ -23,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotification } from "@/hooks/useNotifications";
 import { type NotificationChannel } from "@/types/notification.types";
-import { formatters } from "@/utils/formatters";
+import { formatDate } from "@/utils/formatters";
 
 interface NotificationDetailProps {
   id: string;
@@ -85,20 +85,17 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
     );
   }
 
-  const channelMeta = CHANNEL_META[notification.channel];
+  const channelMeta = CHANNEL_META[notification.channel as NotificationChannel];
 
   return (
     <div className="space-y-6">
-      {/* Back */}
       <Button variant="ghost" size="sm" className="-ml-2" onClick={() => router.back()}>
         <ArrowLeft className="h-4 w-4 mr-1.5" />
         Back to Notifications
       </Button>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Main content */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Header card */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-4">
@@ -116,7 +113,7 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
                   </Badge>
                 </div>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {formatters.dateTime(notification.sentAt)}
+                  {formatDate(notification.sentAt)}
                 </span>
               </div>
               {notification.subject && (
@@ -125,7 +122,6 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
             </CardHeader>
           </Card>
 
-          {/* Body */}
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -146,7 +142,6 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
             </CardContent>
           </Card>
 
-          {/* Error details */}
           {notification.errorMessage && (
             <Card className="border-red-200 bg-red-50/30">
               <CardHeader className="pb-2">
@@ -162,9 +157,7 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
           )}
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-4">
-          {/* Recipient */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
@@ -189,7 +182,6 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
             </CardContent>
           </Card>
 
-          {/* Metadata */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
@@ -213,7 +205,7 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
                   <Clock className="h-3.5 w-3.5" />
                   Sent At
                 </span>
-                <span className="text-right">{formatters.dateTime(notification.sentAt)}</span>
+                <span className="text-right">{formatDate(notification.sentAt)}</span>
               </div>
               {notification.deliveredAt && (
                 <>
@@ -223,7 +215,7 @@ export function NotificationDetail({ id }: NotificationDetailProps) {
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Delivered At
                     </span>
-                    <span className="text-right">{formatters.dateTime(notification.deliveredAt)}</span>
+                    <span className="text-right">{formatDate(notification.deliveredAt)}</span>
                   </div>
                 </>
               )}

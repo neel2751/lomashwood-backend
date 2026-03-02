@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { invoiceService } from "@/services/invoiceService";
-import type { InvoiceFilters } from "@/types/order.types";
 
-export function useInvoices(filters?: InvoiceFilters) {
+export function useInvoices(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: ["invoices", filters],
     queryFn: () => invoiceService.getAll(filters),

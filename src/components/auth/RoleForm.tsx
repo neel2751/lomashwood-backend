@@ -23,14 +23,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useRoles } from "@/hooks/useRoles";
+import { useRole, useCreateRole, useUpdateRole } from "@/hooks/useRoles";
 import { roleSchema } from "@/schemas/role.schema";
+import type { Role } from "@/types/auth.types";
 
 import { PermissionsMatrix } from "./PermissionsMatrix";
 
-
-
 type RoleFormData = z.infer<typeof roleSchema>;
+
+// Extend Role locally — permissions may come from the API but not be in the base type
+type RoleWithPermissions = Role & { permissions?: string[] };
 
 interface RoleFormProps {
   roleId?: string;
@@ -40,7 +42,14 @@ export function RoleForm({ roleId }: RoleFormProps) {
   const router = useRouter();
   const isEditing = !!roleId;
 
-  const { getRole, createRole, updateRole, isSubmitting } = useRoles();
+  // useRole takes a single string argument — use the non-null assertion and
+  // guard consumption with the isEditing flag so it never runs with undefined
+  const { data: roleData } = useRole(roleId!);
+  const role = isEditing ? (roleData as RoleWithPermissions | undefined) : undefined;
+
+  const { mutateAsync: createRole, isPending: isCreating } = useCreateRole();
+  const { mutateAsync: updateRole, isPending: isUpdating } = useUpdateRole();
+  const isSubmitting = isCreating || isUpdating;
 
   const form = useForm<RoleFormData>({
     resolver: zodResolver(roleSchema),
@@ -52,22 +61,18 @@ export function RoleForm({ roleId }: RoleFormProps) {
   });
 
   useEffect(() => {
-    if (isEditing) {
-      getRole(roleId).then((role) => {
-        if (role) {
-          form.reset({
-            name: role.name,
-            description: role.description ?? "",
-            permissions: role.permissions ?? [],
-          });
-        }
+    if (role) {
+      form.reset({
+        name: role.name,
+        description: role.description ?? "",
+        permissions: Array.isArray(role.permissions) ? role.permissions : [],
       });
     }
-  }, [roleId, isEditing]);
+  }, [role, form]);
 
   const onSubmit = async (data: RoleFormData) => {
-    if (isEditing) {
-      await updateRole(roleId, data);
+    if (isEditing && roleId) {
+      await updateRole({ id: roleId, payload: data });
     } else {
       await createRole(data);
     }

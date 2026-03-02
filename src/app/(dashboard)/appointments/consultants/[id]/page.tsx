@@ -1,271 +1,206 @@
-import { Suspense } from 'react'
+'use client'
 
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
+// components/appointments/ConsultantForm.tsx
 
-import { AppointmentTable } from '@/components/appointments/AppointmentTable'
-import { ConsultantForm } from '@/components/appointments/ConsultantForm'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { useState } from 'react'
 
-import type { Metadata } from 'next'
+const ALL_SHOWROOMS = ['London Mayfair', 'Manchester', 'Birmingham']
+const ALL_ROLES     = ['Junior Consultant', 'Design Consultant', 'Senior Consultant']
 
-type Props = { params: { id: string } }
-
-const CONSULTANTS: Record<string, {
-  name: string
-  email: string
-  phone: string
-  role: string
-  showrooms: string[]
-  types: string[]
-  status: 'active' | 'inactive'
-  bio: string
-  appointmentsThisMonth: number
-  appointmentsTotal: number
-  rating: number
-  joinedAt: string
-  avatar: string
-  avatarColor: string
-}> = {
-  'james-thornton': {
-    name: 'James Thornton', email: 'james@lomashwood.co.uk', phone: '07700 900100',
-    role: 'Senior Consultant', showrooms: ['London Mayfair'], types: ['home', 'online', 'showroom'],
-    status: 'active', bio: 'James has over 12 years of kitchen and bedroom design experience, specialising in open-plan and contemporary styles.',
-    appointmentsThisMonth: 48, appointmentsTotal: 842, rating: 4.9, joinedAt: 'Jan 2019', avatar: 'JT', avatarColor: '#8B6914',
-  },
-  'sarah-mitchell': {
-    name: 'Sarah Mitchell', email: 'sarah@lomashwood.co.uk', phone: '07700 900200',
-    role: 'Design Consultant', showrooms: ['Manchester'], types: ['online', 'showroom'],
-    status: 'active', bio: 'Sarah specialises in bedroom design and has a background in interior architecture.',
-    appointmentsThisMonth: 34, appointmentsTotal: 421, rating: 4.8, joinedAt: 'Mar 2021', avatar: 'SM', avatarColor: '#2980B9',
-  },
-  'david-walsh': {
-    name: 'David Walsh', email: 'david@lomashwood.co.uk', phone: '07700 900300',
-    role: 'Design Consultant', showrooms: ['Birmingham'], types: ['home', 'showroom'],
-    status: 'active', bio: 'David focuses on kitchen design for period properties and listed buildings.',
-    appointmentsThisMonth: 29, appointmentsTotal: 310, rating: 4.7, joinedAt: 'Jun 2021', avatar: 'DW', avatarColor: '#27AE60',
-  },
-  'priya-patel': {
-    name: 'Priya Patel', email: 'priya.p@lomashwood.co.uk', phone: '07700 900400',
-    role: 'Junior Consultant', showrooms: ['London Mayfair', 'Birmingham'], types: ['online'],
-    status: 'active', bio: 'Priya joined the team in 2023 and has quickly built a strong reputation for online consultations.',
-    appointmentsThisMonth: 21, appointmentsTotal: 98, rating: 4.6, joinedAt: 'Feb 2023', avatar: 'PP', avatarColor: '#7B3FA0',
-  },
-  'robert-ford': {
-    name: 'Robert Ford', email: 'robert@lomashwood.co.uk', phone: '07700 900500',
-    role: 'Senior Consultant', showrooms: ['Manchester'], types: ['home', 'online', 'showroom'],
-    status: 'inactive', bio: 'Robert is currently on extended leave.',
-    appointmentsThisMonth: 0, appointmentsTotal: 1240, rating: 4.9, joinedAt: 'Sep 2015', avatar: 'RF', avatarColor: '#C0392B',
-  },
+const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  home:     { label: 'Home Measurement', color: '#8B6914', bg: '#FFF8E6' },
+  online:   { label: 'Online',           color: '#2980B9', bg: '#EBF4FB' },
+  showroom: { label: 'Showroom',         color: '#27AE60', bg: '#EAF7EF' },
 }
 
-const TYPE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  home:     { color: '#8B6914', bg: '#FFF8E6', label: 'Home Measurement' },
-  online:   { color: '#2980B9', bg: '#EBF4FB', label: 'Online' },
-  showroom: { color: '#27AE60', bg: '#EAF7EF', label: 'Showroom' },
+export type ConsultantFormProps = {
+  consultantId: string
+  defaultValues: {
+    name:      string
+    email:     string
+    phone:     string
+    role:      string
+    showrooms: string[]
+    types:     string[]
+    bio:       string
+  }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const c = CONSULTANTS[params.id]
-  return { title: c ? `${c.name} | Consultants` : 'Consultant | Appointments' }
-}
+export function ConsultantForm({ consultantId: _consultantId, defaultValues }: ConsultantFormProps) {
+  const [values, setValues] = useState(defaultValues)
+  const [saved, setSaved]   = useState(false)
 
-export default function ConsultantDetailPage({ params }: Props) {
-  const c = CONSULTANTS[params.id]
-  if (!c) notFound()
+  function setField<K extends keyof typeof values>(key: K, val: typeof values[K]) {
+    setValues(prev => ({ ...prev, [key]: val }))
+    setSaved(false)
+  }
+
+  function toggleArray(key: 'showrooms' | 'types', item: string) {
+    setValues(prev => {
+      const arr = prev[key] as string[]
+      return {
+        ...prev,
+        [key]: arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item],
+      }
+    })
+    setSaved(false)
+  }
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    // Wire up to your API here
+    setSaved(true)
+  }
 
   return (
-    <div className="consultant-detail">
-      <div className="consultant-detail__topbar">
-        <PageHeader
-          title={c.name}
-          description={`${c.role} · ${c.showrooms.join(', ')}`}
-          backHref="/appointments/consultants"
-          backLabel="Consultants"
-        />
-        <div className="consultant-detail__actions">
-          {c.status === 'active'
-            ? <button className="btn-ghost-danger">Deactivate</button>
-            : <button className="btn-success">Reactivate</button>
-          }
-          <button className="btn-primary">Save Changes</button>
+    <form className="cf" onSubmit={handleSave}>
+      <div className="cf__grid">
+        <div className="cf__field">
+          <label className="cf__label" htmlFor="cf-name">Full Name</label>
+          <input
+            id="cf-name"
+            className="cf__input"
+            type="text"
+            value={values.name}
+            onChange={e => setField('name', e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="cf__field">
+          <label className="cf__label" htmlFor="cf-role">Role</label>
+          <select
+            id="cf-role"
+            className="cf__input cf__select"
+            value={values.role}
+            onChange={e => setField('role', e.target.value)}
+          >
+            {ALL_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </div>
+
+        <div className="cf__field">
+          <label className="cf__label" htmlFor="cf-email">Email</label>
+          <input
+            id="cf-email"
+            className="cf__input"
+            type="email"
+            value={values.email}
+            onChange={e => setField('email', e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="cf__field">
+          <label className="cf__label" htmlFor="cf-phone">Phone</label>
+          <input
+            id="cf-phone"
+            className="cf__input"
+            type="tel"
+            value={values.phone}
+            onChange={e => setField('phone', e.target.value)}
+          />
         </div>
       </div>
 
-      <div className="consultant-hero">
-        <div className="consultant-hero__avatar" style={{ background: c.avatarColor }}>
-          {c.avatar}
-        </div>
-        <div className="consultant-hero__info">
-          <div className="consultant-hero__name-row">
-            <h2 className="consultant-hero__name">{c.name}</h2>
-            <span className={`hero-status${c.status === 'inactive' ? ' hero-status--inactive' : ''}`}>
-              {c.status === 'active' ? 'Active' : 'Inactive'}
-            </span>
-          </div>
-          <p className="consultant-hero__role">{c.role}</p>
-          <div className="consultant-hero__types">
-            {c.types.map(t => (
-              <span key={t} className="type-pill" style={{ color: TYPE_CONFIG[t].color, background: TYPE_CONFIG[t].bg }}>
-                {TYPE_CONFIG[t].label}
-              </span>
-            ))}
-          </div>
-          <p className="consultant-hero__bio">{c.bio}</p>
-        </div>
-        <div className="consultant-hero__kpis">
-          {[
-            { label: 'This Month', value: c.appointmentsThisMonth.toString() },
-            { label: 'All Time', value: c.appointmentsTotal.toLocaleString() },
-            { label: 'Rating', value: `${c.rating}★` },
-          ].map(({ label, value }) => (
-            <div key={label} className="hero-kpi">
-              <span className="hero-kpi__value">{value}</span>
-              <span className="hero-kpi__label">{label}</span>
-            </div>
+      <div className="cf__field cf__field--full">
+        <label className="cf__label" htmlFor="cf-bio">Bio</label>
+        <textarea
+          id="cf-bio"
+          className="cf__input cf__textarea"
+          value={values.bio}
+          rows={3}
+          onChange={e => setField('bio', e.target.value)}
+        />
+      </div>
+
+      <div className="cf__field cf__field--full">
+        <span className="cf__label">Showrooms</span>
+        <div className="cf__toggle-group">
+          {ALL_SHOWROOMS.map(s => (
+            <button
+              key={s}
+              type="button"
+              className={`cf__toggle${values.showrooms.includes(s) ? ' cf__toggle--on' : ''}`}
+              onClick={() => toggleArray('showrooms', s)}
+            >
+              {s}
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="consultant-detail__layout">
-        <div className="consultant-detail__main">
-          <div className="form-card">
-            <h2 className="form-card__title">Consultant Details</h2>
-            <Suspense fallback={<div className="form-skeleton" />}>
-              <ConsultantForm
-                consultantId={params.id}
-                defaultValues={{
-                  name: c.name, email: c.email, phone: c.phone,
-                  role: c.role, showrooms: c.showrooms, types: c.types, bio: c.bio,
-                }}
-              />
-            </Suspense>
-          </div>
-
-          <div className="appointments-section">
-            <h2 className="section-label">Upcoming Appointments ({c.appointmentsThisMonth})</h2>
-            <Suspense fallback={<div className="table-skeleton" />}>
-              <AppointmentTable consultantFilter={params.id} />
-            </Suspense>
-          </div>
+      <div className="cf__field cf__field--full">
+        <span className="cf__label">Appointment Types</span>
+        <div className="cf__toggle-group">
+          {Object.entries(TYPE_CONFIG).map(([key, conf]) => {
+            const on = values.types.includes(key)
+            return (
+              <button
+                key={key}
+                type="button"
+                className="cf__toggle cf__toggle--typed"
+                style={on ? { background: conf.bg, color: conf.color, borderColor: conf.color } : undefined}
+                onClick={() => toggleArray('types', key)}
+              >
+                {conf.label}
+              </button>
+            )
+          })}
         </div>
+      </div>
 
-        <aside className="consultant-detail__sidebar">
-          <div className="sidebar-card">
-            <h3 className="sidebar-card__title">Stats</h3>
-            <div className="sidebar-big-stat">
-              <span className="sidebar-big-stat__value" style={{ color: c.avatarColor }}>
-                {c.appointmentsThisMonth}
-              </span>
-              <span className="sidebar-big-stat__label">appointments this month</span>
-            </div>
-            <div className="sidebar-rating">
-              <span className="sidebar-rating__value">{c.rating}</span>
-              <div className="sidebar-rating__stars" aria-label={`${c.rating} out of 5 stars`}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < Math.floor(c.rating) ? '#C9A84C' : '#E8E6E1'} stroke="none">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                  </svg>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-card__title">Info</h3>
-            {[
-              { key: 'Email',   val: c.email },
-              { key: 'Phone',   val: c.phone },
-              { key: 'Joined',  val: c.joinedAt },
-              { key: 'Total',   val: c.appointmentsTotal.toLocaleString() + ' appts' },
-            ].map(({ key, val }) => (
-              <div key={key} className="sidebar-info-row">
-                <span className="sidebar-info-key">{key}</span>
-                <span className="sidebar-info-val">{val}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-card__title">Quick Actions</h3>
-            <div className="sidebar-actions">
-              <Link href={`/appointments/availability?consultant=${params.id}`} className="sidebar-action-link">
-                View availability
-              </Link>
-              <Link href={`/appointments?consultant=${params.id}`} className="sidebar-action-link">
-                All appointments
-              </Link>
-            </div>
-          </div>
-        </aside>
+      <div className="cf__footer">
+        {saved && <span className="cf__saved">✓ Changes saved</span>}
+        <button type="submit" className="cf__submit">Save Changes</button>
       </div>
 
       <style>{`
-        .consultant-detail { display: flex; flex-direction: column; gap: 24px; }
-        .consultant-detail__topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        .consultant-detail__actions { display: flex; gap: 10px; padding-top: 4px; }
+        .cf { display: flex; flex-direction: column; gap: 16px; }
 
-        .btn-primary { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; background: #1A1A18; color: #F5F0E8; border: none; border-radius: 8px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-        .btn-primary:hover { background: #2E2E2A; }
-        .btn-success { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; background: #27AE60; color: #fff; border: none; border-radius: 8px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-        .btn-success:hover { background: #229A55; }
-        .btn-ghost-danger { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; background: none; border: 1.5px solid #F5C6C6; border-radius: 8px; color: #C0392B; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
-        .btn-ghost-danger:hover { background: #FDF2F2; }
+        .cf__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 600px) { .cf__grid { grid-template-columns: 1fr; } }
 
-        .consultant-hero { display: flex; gap: 24px; padding: 24px; background: #FFFFFF; border: 1.5px solid #E8E6E1; border-radius: 14px; align-items: flex-start; flex-wrap: wrap; }
+        .cf__field { display: flex; flex-direction: column; gap: 6px; }
+        .cf__field--full { grid-column: 1 / -1; }
 
-        .consultant-hero__avatar { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 700; color: #FFFFFF; flex-shrink: 0; }
+        .cf__label { font-size: 0.8125rem; font-weight: 600; color: #6B6B68; }
 
-        .consultant-hero__info { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 200px; }
-        .consultant-hero__name-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .consultant-hero__name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.375rem; font-weight: 700; color: #1A1A18; }
-        .hero-status { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; background: #EAF7EF; color: #27AE60; }
-        .hero-status--inactive { background: #F0EDE8; color: #6B6B68; }
-        .consultant-hero__role { font-size: 0.9375rem; color: #6B6B68; }
-        .consultant-hero__types { display: flex; gap: 6px; flex-wrap: wrap; }
-        .type-pill { font-size: 0.6875rem; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
-        .consultant-hero__bio { font-size: 0.875rem; color: #6B6B68; line-height: 1.6; }
+        .cf__input {
+          height: 40px; padding: 0 12px;
+          border: 1.5px solid #E8E6E1; border-radius: 8px;
+          background: #FAFAF8; color: #1A1A18;
+          font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem;
+          outline: none; transition: border-color 0.15s;
+          width: 100%; box-sizing: border-box;
+        }
+        .cf__input:focus { border-color: #8B6914; background: #FFFFFF; }
+        .cf__select { cursor: pointer; }
+        .cf__textarea { height: auto; padding: 10px 12px; resize: vertical; }
 
-        .consultant-hero__kpis { display: flex; gap: 0; background: #F7F5F0; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
-        .hero-kpi { display: flex; flex-direction: column; gap: 3px; align-items: center; padding: 16px 20px; border-right: 1px solid #E8E6E1; }
-        .hero-kpi:last-child { border-right: none; }
-        .hero-kpi__value { font-size: 1.375rem; font-weight: 700; color: #1A1A18; font-variant-numeric: tabular-nums; }
-        .hero-kpi__label { font-size: 0.6875rem; color: #6B6B68; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; white-space: nowrap; }
+        .cf__toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .cf__toggle {
+          height: 34px; padding: 0 14px;
+          border: 1.5px solid #E8E6E1; border-radius: 8px;
+          background: #FAFAF8; color: #6B6B68;
+          font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500;
+          cursor: pointer; transition: all 0.15s;
+        }
+        .cf__toggle--on { background: #1A1A18; color: #F5F0E8; border-color: #1A1A18; }
+        .cf__toggle--typed { /* colours set inline */ }
+        .cf__toggle:hover:not(.cf__toggle--on) { border-color: #B8B5AE; }
 
-        .consultant-detail__layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
-        @media (max-width: 900px) { .consultant-detail__layout { grid-template-columns: 1fr; } }
-        .consultant-detail__main { display: flex; flex-direction: column; gap: 16px; }
-
-        .form-card { background: #FFFFFF; border: 1.5px solid #E8E6E1; border-radius: 14px; padding: 24px; }
-        .form-card__title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.0625rem; font-weight: 700; color: #1A1A18; margin-bottom: 16px; }
-        .form-skeleton { height: 280px; border-radius: 8px; background: linear-gradient(90deg, #EEECE8 25%, #F5F3EF 50%, #EEECE8 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-        .table-skeleton { height: 320px; border-radius: 12px; background: linear-gradient(90deg, #EEECE8 25%, #F5F3EF 50%, #EEECE8 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-
-        .section-label { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B6B68; margin-bottom: 12px; }
-
-        .sidebar-card { background: #FFFFFF; border: 1.5px solid #E8E6E1; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
-        .sidebar-card:last-child { margin-bottom: 0; }
-        .sidebar-card__title { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6B6B68; }
-
-        .sidebar-big-stat { display: flex; flex-direction: column; gap: 2px; }
-        .sidebar-big-stat__value { font-size: 2.5rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-        .sidebar-big-stat__label { font-size: 0.8125rem; color: #6B6B68; }
-
-        .sidebar-rating { display: flex; align-items: center; gap: 10px; }
-        .sidebar-rating__value { font-size: 1.25rem; font-weight: 700; color: #1A1A18; }
-        .sidebar-rating__stars { display: flex; gap: 2px; }
-
-        .sidebar-info-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #F5F3EF; }
-        .sidebar-info-row:last-child { border-bottom: none; }
-        .sidebar-info-key { font-size: 0.8125rem; color: #6B6B68; }
-        .sidebar-info-val { font-size: 0.8125rem; font-weight: 500; color: #1A1A18; max-width: 160px; overflow: hidden; text-overflow: ellipsis; text-align: right; }
-
-        .sidebar-actions { display: flex; flex-direction: column; gap: 2px; }
-        .sidebar-action-link { display: flex; align-items: center; padding: 9px 10px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; color: #1A1A18; text-decoration: none; transition: background 0.15s; }
-        .sidebar-action-link:hover { background: #F5F3EF; }
-
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .cf__footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 4px; }
+        .cf__saved { font-size: 0.875rem; color: #27AE60; font-weight: 500; }
+        .cf__submit {
+          height: 38px; padding: 0 20px;
+          background: #1A1A18; color: #F5F0E8;
+          border: none; border-radius: 8px;
+          font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600;
+          cursor: pointer; transition: background 0.15s;
+        }
+        .cf__submit:hover { background: #2E2E2A; }
       `}</style>
-    </div>
+    </form>
   )
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { dashboardService } from "@/services/dashboardService";
-import type { CreateDashboardPayload, UpdateDashboardPayload } from "@/types/analytics.types";
+import type { CreateDashboardPayload } from "@/types/analytics.types";
 
 export function useDashboards() {
   return useQuery({
@@ -32,7 +32,7 @@ export function useUpdateDashboard() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateDashboardPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: CreateDashboardPayload }) =>
       dashboardService.update(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["dashboards"] });
@@ -45,7 +45,7 @@ export function useDeleteDashboard() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => dashboardService.delete(id),
+    mutationFn: (id: string) => dashboardService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dashboards"] });
     },

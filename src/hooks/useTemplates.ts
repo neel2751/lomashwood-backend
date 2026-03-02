@@ -34,7 +34,7 @@ export function useUpdateTemplate() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateTemplatePayload }) =>
       templateService.update(id, payload),
-    onSuccess: (_data, { id }) => {
+    onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       queryClient.invalidateQueries({ queryKey: ["templates", id] });
     },
@@ -45,7 +45,7 @@ export function useDeleteTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => templateService.delete(id),
+    mutationFn: (id: string) => templateService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },

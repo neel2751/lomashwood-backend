@@ -15,7 +15,7 @@ export default function NotificationTemplateDetailPage() {
         description="Update this notification template."
         backHref="/notifications/templates"
       />
-      <TemplateEditor id={id} />
+      <TemplateEditor templateId={id} />
     </div>
   );
 }

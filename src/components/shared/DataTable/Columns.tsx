@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   ColumnDef,
   Column,
-  Row,
+  
 } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
@@ -302,10 +302,11 @@ export function DateCell({
 }) {
   if (!value) return <span className="text-xs text-muted-foreground">—</span>
 
-  const display =
-    format === "datetime" ? formatters.dateTime(value as string)
-    : format === "relative" ? formatters.relative?.(value as string) ?? formatters.date(value as string)
-    : formatters.date(value as string)
+  // Option A — cast formatters to include relative (quick fix):
+const display =
+  format === "datetime" ? formatters.dateTime(value as string)
+  : format === "relative" ? (formatters as typeof formatters & { relative?: (v: string) => string }).relative?.(value as string) ?? formatters.date(value as string)
+  : formatters.date(value as string)
 
   return (
     <Tooltip>

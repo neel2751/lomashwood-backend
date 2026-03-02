@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { consultantService } from "@/services/consultantService";
-import type { CreateConsultantPayload, UpdateConsultantPayload } from "@/types/appointment.types";
+import type { CreateConsultantPayload } from "@/types/appointment.types";
 
 export function useConsultants() {
   return useQuery({
@@ -32,12 +32,12 @@ export function useUpdateConsultant() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateConsultantPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: CreateConsultantPayload }) =>
       consultantService.update(id, payload),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["consultants"] });
-      queryClient.invalidateQueries({ queryKey: ["consultants", id] });
-    },
+    onSuccess: (_data: unknown, { id }: { id: string; payload: CreateConsultantPayload }) => {
+  queryClient.invalidateQueries({ queryKey: ["consultants"] });
+  queryClient.invalidateQueries({ queryKey: ["consultants", id] });
+},
   });
 }
 
@@ -45,7 +45,7 @@ export function useDeleteConsultant() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => consultantService.delete(id),
+    mutationFn: (id: string) => consultantService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["consultants"] });
     },

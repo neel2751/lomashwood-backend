@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 
 import { DateRangePicker } from '@/components/analytics/DateRangePicker'
-import { ExportModal } from '@/components/analytics/ExportModal'
 import { PageHeader } from '@/components/layout/PageHeader'
 
 import type { Metadata } from 'next'
@@ -22,7 +21,7 @@ type ExportRecord = {
   requestedBy: string
 }
 
-const exports: ExportRecord[] = [
+const EXPORTS: ExportRecord[] = [
   {
     id: 'exp-001',
     name: 'All Events — Oct 2024',
@@ -69,19 +68,19 @@ const exports: ExportRecord[] = [
   },
 ]
 
-const TYPE_ICONS: Record<string, string> = {
-  csv: 'CSV',
+const TYPE_ICONS: Record<'csv' | 'excel' | 'json', string> = {
+  csv:   'CSV',
   excel: 'XLS',
-  json: 'JSON',
+  json:  'JSON',
 }
 
-const TYPE_COLORS: Record<string, { color: string; bg: string }> = {
+const TYPE_COLORS: Record<'csv' | 'excel' | 'json', { color: string; bg: string }> = {
   csv:   { color: '#27AE60', bg: '#EAF7EF' },
   excel: { color: '#1D6F42', bg: '#E6F4EA' },
   json:  { color: '#2980B9', bg: '#EBF4FB' },
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<'ready' | 'processing' | 'failed', { label: string; color: string; bg: string }> = {
   ready:      { label: 'Ready',      color: '#27AE60', bg: '#EAF7EF' },
   processing: { label: 'Processing', color: '#D4820A', bg: '#FFF3DC' },
   failed:     { label: 'Failed',     color: '#C0392B', bg: '#FDF2F2' },
@@ -101,18 +100,15 @@ export default function ExportsPage() {
           <Suspense fallback={null}>
             <DateRangePicker />
           </Suspense>
-          <Suspense fallback={null}>
-            <ExportModal />
-          </Suspense>
         </div>
       </div>
 
       <div className="exports-summary">
         {[
-          { label: 'Total Exports', value: exports.length.toString() },
-          { label: 'Ready', value: exports.filter(e => e.status === 'ready').length.toString() },
-          { label: 'Processing', value: exports.filter(e => e.status === 'processing').length.toString() },
-          { label: 'Storage Used', value: '25.0 MB' },
+          { label: 'Total Exports',  value: EXPORTS.length.toString() },
+          { label: 'Ready',          value: EXPORTS.filter(e => e.status === 'ready').length.toString() },
+          { label: 'Processing',     value: EXPORTS.filter(e => e.status === 'processing').length.toString() },
+          { label: 'Storage Used',   value: '25.0 MB' },
         ].map(({ label, value }) => (
           <div key={label} className="exports-summary__tile">
             <span className="exports-summary__label">{label}</span>
@@ -137,9 +133,9 @@ export default function ExportsPage() {
             </tr>
           </thead>
           <tbody>
-            {exports.map((exp) => {
-              const typeStyle = TYPE_COLORS[exp.type]
-              const statusStyle = STATUS_CONFIG[exp.status]
+            {EXPORTS.map((exp) => {
+              const typeStyle  = TYPE_COLORS[exp.type]      // never undefined — type is 'csv'|'excel'|'json'
+              const statusStyle = STATUS_CONFIG[exp.status]  // never undefined — status is 'ready'|'processing'|'failed'
               return (
                 <tr key={exp.id}>
                   <td className="td-name">{exp.name}</td>
@@ -218,7 +214,6 @@ export default function ExportsPage() {
           flex-direction: column;
           gap: 24px;
         }
-
         .exports-page__topbar {
           display: flex;
           align-items: flex-start;
@@ -226,7 +221,6 @@ export default function ExportsPage() {
           gap: 16px;
           flex-wrap: wrap;
         }
-
         .exports-page__actions {
           display: flex;
           align-items: center;
@@ -234,17 +228,14 @@ export default function ExportsPage() {
           flex-shrink: 0;
           padding-top: 4px;
         }
-
         .exports-summary {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 12px;
         }
-
         @media (max-width: 900px) {
           .exports-summary { grid-template-columns: repeat(2, 1fr); }
         }
-
         .exports-summary__tile {
           background: #FFFFFF;
           border: 1.5px solid #E8E6E1;
@@ -254,7 +245,6 @@ export default function ExportsPage() {
           flex-direction: column;
           gap: 4px;
         }
-
         .exports-summary__label {
           font-size: 0.75rem;
           font-weight: 600;
@@ -262,14 +252,12 @@ export default function ExportsPage() {
           text-transform: uppercase;
           color: #6B6B68;
         }
-
         .exports-summary__value {
           font-size: 1.5rem;
           font-weight: 700;
           color: #1A1A18;
           font-variant-numeric: tabular-nums;
         }
-
         .exports-table-wrapper {
           background: #FFFFFF;
           border: 1.5px solid #E8E6E1;
@@ -277,18 +265,15 @@ export default function ExportsPage() {
           overflow: hidden;
           overflow-x: auto;
         }
-
         .exports-table {
           width: 100%;
           border-collapse: collapse;
           font-size: 0.875rem;
           white-space: nowrap;
         }
-
         .exports-table thead tr {
           border-bottom: 1.5px solid #E8E6E1;
         }
-
         .exports-table th {
           padding: 12px 16px;
           text-align: left;
@@ -299,46 +284,33 @@ export default function ExportsPage() {
           color: #6B6B68;
           background: #FAFAF8;
         }
-
         .exports-table tbody tr {
           border-bottom: 1px solid #F0EDE8;
           transition: background 0.1s;
         }
-
         .exports-table tbody tr:last-child {
           border-bottom: none;
         }
-
         .exports-table tbody tr:hover {
           background: #FAFAF8;
         }
-
         .exports-table td {
           padding: 13px 16px;
           color: #1A1A18;
           vertical-align: middle;
         }
-
         .td-name {
           font-weight: 500;
           max-width: 240px;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-
-        .td-source {
-          color: #6B6B68;
-        }
-
+        .td-source { color: #6B6B68; }
         .td-mono {
           font-family: 'DM Mono', monospace;
           font-size: 0.8125rem;
         }
-
-        .td-muted {
-          color: #6B6B68;
-        }
-
+        .td-muted { color: #6B6B68; }
         .format-badge {
           font-size: 0.6875rem;
           font-weight: 700;
@@ -346,7 +318,6 @@ export default function ExportsPage() {
           padding: 2px 8px;
           border-radius: 4px;
         }
-
         .status-pill {
           display: inline-flex;
           align-items: center;
@@ -356,7 +327,6 @@ export default function ExportsPage() {
           padding: 3px 10px;
           border-radius: 20px;
         }
-
         .status-spinner {
           width: 10px;
           height: 10px;
@@ -366,17 +336,14 @@ export default function ExportsPage() {
           animation: spin 0.7s linear infinite;
           opacity: 0.7;
         }
-
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
-
         .td-actions {
           display: flex;
           align-items: center;
           gap: 4px;
         }
-
         .action-btn {
           width: 30px;
           height: 30px;
@@ -390,27 +357,10 @@ export default function ExportsPage() {
           color: #6B6B68;
           transition: background 0.15s, color 0.15s;
         }
-
-        .action-btn:hover {
-          background: #F0EDE8;
-          color: #1A1A18;
-        }
-
-        .action-btn--download:hover {
-          background: #EAF7EF;
-          color: #27AE60;
-        }
-
-        .action-btn--retry:hover {
-          background: #FFF3DC;
-          color: #D4820A;
-        }
-
-        .action-btn--delete:hover {
-          background: #FDF2F2;
-          color: #C0392B;
-        }
-
+        .action-btn:hover { background: #F0EDE8; color: #1A1A18; }
+        .action-btn--download:hover { background: #EAF7EF; color: #27AE60; }
+        .action-btn--retry:hover    { background: #FFF3DC; color: #D4820A; }
+        .action-btn--delete:hover   { background: #FDF2F2; color: #C0392B; }
         .exports-note {
           display: flex;
           align-items: center;
@@ -419,6 +369,23 @@ export default function ExportsPage() {
           color: #6B6B68;
           padding: 0 2px;
         }
+        .btn-primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          height: 38px;
+          padding: 0 16px;
+          background: #1A1A18;
+          color: #F5F0E8;
+          border: none;
+          border-radius: 8px;
+          font-family: 'DM Sans', system-ui, sans-serif;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .btn-primary:hover { background: #2E2E2A; }
       `}</style>
     </div>
   )

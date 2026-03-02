@@ -1,5 +1,7 @@
 import { Suspense } from 'react'
 
+import { PoundSterling, ShoppingCart, CalendarCheck, Users } from 'lucide-react'
+
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
 import { AppointmentsChart } from '@/components/dashboard/AppointmentsChart'
 import { OrdersChart } from '@/components/dashboard/OrdersChart'
@@ -18,36 +20,41 @@ export const metadata: Metadata = {
 
 const stats = [
   {
-    label: 'Total Revenue',
-    value: '£284,320',
-    delta: '+12.4%',
-    trend: 'up' as const,
-    period: 'vs last month',
-    icon: 'revenue',
+    title: 'Total Revenue',
+    value: '284,320',
+    prefix: '£',
+    change: 12.4,
+    changeLabel: 'vs last month',
+    icon: PoundSterling,
+    iconColor: 'text-[#C8924A]',
+    iconBg: 'bg-[#C8924A]/15',
   },
   {
-    label: 'Orders',
+    title: 'Orders',
     value: '1,284',
-    delta: '+8.1%',
-    trend: 'up' as const,
-    period: 'vs last month',
-    icon: 'orders',
+    change: 8.1,
+    changeLabel: 'vs last month',
+    icon: ShoppingCart,
+    iconColor: 'text-emerald-400',
+    iconBg: 'bg-emerald-400/10',
   },
   {
-    label: 'Appointments',
+    title: 'Appointments',
     value: '342',
-    delta: '-3.2%',
-    trend: 'down' as const,
-    period: 'vs last month',
-    icon: 'appointments',
+    change: -3.2,
+    changeLabel: 'vs last month',
+    icon: CalendarCheck,
+    iconColor: 'text-[#6B8A9A]',
+    iconBg: 'bg-[#6B8A9A]/15',
   },
   {
-    label: 'New Customers',
+    title: 'New Customers',
     value: '891',
-    delta: '+18.7%',
-    trend: 'up' as const,
-    period: 'vs last month',
-    icon: 'customers',
+    change: 18.7,
+    changeLabel: 'vs last month',
+    icon: Users,
+    iconColor: 'text-violet-400',
+    iconBg: 'bg-violet-400/10',
   },
 ]
 
@@ -61,7 +68,7 @@ export default function DashboardOverviewPage() {
 
       <section className="overview__stats">
         {stats.map((stat) => (
-          <Suspense key={stat.label} fallback={<div className="stat-skeleton" />}>
+          <Suspense key={stat.title} fallback={<div className="stat-skeleton" />}>
             <StatsCard {...stat} />
           </Suspense>
         ))}

@@ -13,12 +13,14 @@ const APPT_SUBNAV = [
   { href: '/appointments/reminders', label: 'Reminders' },
 ]
 
+type AppointmentType = 'home' | 'online' | 'showroom'
+
 type Reminder = {
   id: string
   name: string
   trigger: string
   channel: ('email' | 'sms')[]
-  types: ('home' | 'online' | 'showroom')[]
+  types: AppointmentType[]
   status: 'active' | 'paused'
   sentThisMonth: number
   openRate: number | null
@@ -94,7 +96,7 @@ const REMINDERS: Reminder[] = [
   },
 ]
 
-const TYPE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+const TYPE_CONFIG: Record<AppointmentType, { color: string; bg: string; label: string }> = {
   home:     { color: '#8B6914', bg: '#FFF8E6', label: 'Home' },
   online:   { color: '#2980B9', bg: '#EBF4FB', label: 'Online' },
   showroom: { color: '#27AE60', bg: '#EAF7EF', label: 'Showroom' },
@@ -105,7 +107,7 @@ export default function RemindersListPage() {
 
   function toggleStatus(id: string) {
     setReminders(r => r.map(rem => rem.id === id
-      ? { ...rem, status: rem.status === 'active' ? 'paused' : 'active' }
+      ? { ...rem, status: rem.status === 'active' ? 'paused' : 'active' } as Reminder
       : rem
     ))
   }
@@ -185,11 +187,14 @@ export default function RemindersListPage() {
                     {ch === 'email' ? 'Email' : 'SMS'}
                   </span>
                 ))}
-                {r.types.map(t => (
-                  <span key={t} className="type-chip" style={{ color: TYPE_CONFIG[t].color, background: TYPE_CONFIG[t].bg }}>
-                    {TYPE_CONFIG[t].label}
-                  </span>
-                ))}
+                {r.types.map(t => {
+                  const typeConf = TYPE_CONFIG[t]
+                  return (
+                    <span key={t} className="type-chip" style={{ color: typeConf.color, background: typeConf.bg }}>
+                      {typeConf.label}
+                    </span>
+                  )
+                })}
               </div>
             </div>
 

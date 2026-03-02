@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -77,7 +76,9 @@ const REMINDERS: Record<string, {
 
 const TEMPLATE_VARS = ['{{customer_name}}', '{{appointment_type}}', '{{date}}', '{{time}}', '{{consultant_name}}', '{{booking_link}}', '{{quote_link}}']
 
-const TYPE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+type AppointmentType = 'home' | 'online' | 'showroom'
+
+const TYPE_CONFIG: Record<AppointmentType, { color: string; bg: string; label: string }> = {
   home:     { color: '#8B6914', bg: '#FFF8E6', label: 'Home' },
   online:   { color: '#2980B9', bg: '#EBF4FB', label: 'Online' },
   showroom: { color: '#27AE60', bg: '#EAF7EF', label: 'Showroom' },
@@ -157,12 +158,15 @@ export default function ReminderDetailPage({ params }: Props) {
             <div className="field">
               <label>Appointment Types</label>
               <div className="type-checkboxes">
-                {(['home', 'online', 'showroom'] as const).map(t => (
-                  <label key={t} className={`type-check${reminder.types.includes(t) ? ' type-check--checked' : ''}`}>
-                    <input type="checkbox" defaultChecked={reminder.types.includes(t)} />
-                    <span style={{ color: TYPE_CONFIG[t].color }}>{TYPE_CONFIG[t].label}</span>
-                  </label>
-                ))}
+                {(['home', 'online', 'showroom'] as const).map(t => {
+                  const typeConf = TYPE_CONFIG[t]
+                  return (
+                    <label key={t} className={`type-check${reminder.types.includes(t) ? ' type-check--checked' : ''}`}>
+                      <input type="checkbox" defaultChecked={reminder.types.includes(t)} />
+                      <span style={{ color: typeConf.color }}>{typeConf.label}</span>
+                    </label>
+                  )
+                })}
               </div>
             </div>
 

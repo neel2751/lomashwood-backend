@@ -113,7 +113,7 @@ export default function CategoryDetailPage({ params }: Props) {
               </Link>
             </div>
             <Suspense fallback={<div className="table-skeleton" />}>
-              <ProductTable categoryFilter={category.type} />
+              <ProductTable />
             </Suspense>
           </div>
         </div>

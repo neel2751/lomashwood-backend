@@ -74,7 +74,7 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         
-        return new Promise<AxiosResponse>((resolve, reject) => {
+        return new Promise<AxiosResponse>((resolve) => {
           subscribeToTokenRefresh((newToken) => {
             if (originalRequest.headers) {
               (originalRequest.headers as Record<string, string>).Authorization =

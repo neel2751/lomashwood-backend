@@ -38,7 +38,7 @@ export function arrayToCsv<T extends Record<string, unknown>>(
   columns?: (keyof T)[],
 ): string {
   if (!rows.length) return "";
-  const keys = columns ?? (Object.keys(rows[0]) as (keyof T)[]);
+  const keys = columns ?? (Object.keys(rows[0] as object) as (keyof T)[]);
   const header = keys.map((k) => escapeCsvCell(String(k))).join(",");
   const body = rows
     .map((row) =>

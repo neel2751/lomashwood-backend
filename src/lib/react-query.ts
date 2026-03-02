@@ -1,4 +1,3 @@
-
 import {
   QueryClient,
   type QueryKey,
@@ -6,19 +5,15 @@ import {
   type UseMutationOptions,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/lib/toast";
 import { ApiError } from "./axios";
-
-
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
- 
-      staleTime: 60_000,           
-      gcTime: 5 * 60_000,          
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
       retry: (failureCount, error) => {
-        
         if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
           return false;
         }
@@ -39,10 +34,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-
-
 export const queryKeys = {
-  
   analytics: {
     all: () => ["analytics"] as const,
     overview: (params?: Record<string, unknown>) =>
@@ -63,7 +55,6 @@ export const queryKeys = {
     },
   },
 
-  
   auth: {
     me: () => ["auth", "me"] as const,
     users: {
@@ -83,7 +74,6 @@ export const queryKeys = {
     },
   },
 
-  
   products: {
     all: () => ["products"] as const,
     list: (params?: Record<string, unknown>) => ["products", "list", params] as const,
@@ -94,10 +84,10 @@ export const queryKeys = {
     list: (params?: Record<string, unknown>) => ["categories", "list", params] as const,
     detail: (id: string) => ["categories", id] as const,
   },
-  colours: {
-    all: () => ["colours"] as const,
-    list: (params?: Record<string, unknown>) => ["colours", "list", params] as const,
-    detail: (id: string) => ["colours", id] as const,
+  colors: {
+    all: () => ["colors"] as const,
+    list: (params?: Record<string, unknown>) => ["colors", "list", params] as const,
+    detail: (id: string) => ["colors", id] as const,
   },
   sizes: {
     all: () => ["sizes"] as const,
@@ -115,7 +105,6 @@ export const queryKeys = {
     detail: (id: string) => ["pricing", id] as const,
   },
 
-  
   orders: {
     all: () => ["orders"] as const,
     list: (params?: Record<string, unknown>) => ["orders", "list", params] as const,
@@ -137,7 +126,6 @@ export const queryKeys = {
     detail: (id: string) => ["refunds", id] as const,
   },
 
-  
   appointments: {
     all: () => ["appointments"] as const,
     list: (params?: Record<string, unknown>) => ["appointments", "list", params] as const,
@@ -160,7 +148,6 @@ export const queryKeys = {
     detail: (id: string) => ["reminders", id] as const,
   },
 
-  
   customers: {
     all: () => ["customers"] as const,
     list: (params?: Record<string, unknown>) => ["customers", "list", params] as const,
@@ -182,7 +169,6 @@ export const queryKeys = {
     detail: (id: string) => ["loyalty", id] as const,
   },
 
-  
   blogs: {
     all: () => ["blogs"] as const,
     list: (params?: Record<string, unknown>) => ["blogs", "list", params] as const,
@@ -209,7 +195,6 @@ export const queryKeys = {
     detail: (id: string) => ["landing-pages", id] as const,
   },
 
-  
   notifications: {
     all: () => ["notifications"] as const,
     list: (params?: Record<string, unknown>) => ["notifications", "list", params] as const,
@@ -221,7 +206,6 @@ export const queryKeys = {
     detail: (id: string) => ["templates", id] as const,
   },
 } as const;
-
 
 export function buildQueryOptions<TData>(
   queryKey: QueryKey,
@@ -235,10 +219,7 @@ export function buildQueryOptions<TData>(
   };
 }
 
-
-
 type InvalidationTarget = QueryKey | QueryKey[];
-
 
 export function invalidateOn(
   targets: InvalidationTarget,
@@ -249,20 +230,19 @@ export function invalidateOn(
   };
 }
 
-
 export function optimisticUpdate<TData, TVariables>(
   queryKey: QueryKey,
   updater: (old: TData | undefined, variables: TVariables) => TData,
 ): Pick<UseMutationOptions<unknown, unknown, TVariables, { previous: TData | undefined }>,
   "onMutate" | "onError" | "onSettled"> {
   return {
-    onMutate: async (variables) => {
+    onMutate: async (variables: TVariables) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<TData>(queryKey);
       queryClient.setQueryData<TData>(queryKey, (old) => updater(old, variables));
       return { previous };
     },
-    onError: (_err, _variables, context) => {
+    onError: (_err: unknown, _variables: TVariables, context: { previous: TData | undefined } | undefined) => {
       if (context?.previous !== undefined) {
         queryClient.setQueryData(queryKey, context.previous);
       }

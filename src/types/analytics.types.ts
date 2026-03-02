@@ -171,8 +171,7 @@ export type ExportParams = DateRangeParams & {
 };
 
 export type AnalyticsFilterParams = PaginationParams & {
-  startDate?: string;
-  endDate?: string;
+  dateRange?: DateRangeParams;  
   groupBy?: GroupByPeriod;
 };
 

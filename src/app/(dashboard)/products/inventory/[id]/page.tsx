@@ -82,7 +82,14 @@ export default function InventoryDetailPage({ params }: Props) {
           <div className="form-card">
             <h2 className="form-card__title">Update stock</h2>
             <Suspense fallback={<div className="form-skeleton" />}>
-              <InventoryForm inventoryId={params.id} defaultValues={{ stock: item.stock, threshold: item.threshold }} />
+              <InventoryForm
+                initialData={{
+                  productTitle: item.productName,
+                  sku: item.sku,
+                  currentStock: item.stock,
+                  minThreshold: item.threshold,
+                }}
+              />
             </Suspense>
           </div>
         </div>

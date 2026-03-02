@@ -4,8 +4,6 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 
-import { AvailabilityManager } from '@/components/appointments/AvailabilityManager'
-import { TimeSlotEditor } from '@/components/appointments/TimeSlotEditor'
 import { PageHeader } from '@/components/layout/PageHeader'
 
 const APPT_SUBNAV = [
@@ -32,16 +30,32 @@ const DEFAULT_SCHEDULE: Record<string, DayConfig> = {
 const BLOCKED_DATES = ['2026-03-15', '2026-03-16', '2026-04-01']
 
 export default function AvailabilityPage() {
-  const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE)
+  const [schedule, setSchedule] = useState<Record<string, DayConfig>>(DEFAULT_SCHEDULE)
   const [activeTab, setActiveTab] = useState<'weekly' | 'blocked' | 'slots'>('weekly')
   const [saved, setSaved] = useState(false)
 
   function toggleDay(day: string) {
-    setSchedule(s => ({ ...s, [day]: { ...s[day], enabled: !s[day].enabled } }))
+    setSchedule(s => {
+      const current = s[day]
+      if (!current) return s
+      return { ...s, [day]: { ...current, enabled: !current.enabled } as DayConfig }
+    })
   }
 
   function updateTime(day: string, field: 'start' | 'end', val: string) {
-    setSchedule(s => ({ ...s, [day]: { ...s[day], [field]: val } }))
+    setSchedule(s => {
+      const current = s[day]
+      if (!current) return s
+      return { ...s, [day]: { ...current, [field]: val } as DayConfig }
+    })
+  }
+
+  function updateSlotDuration(day: string, val: number) {
+    setSchedule(s => {
+      const current = s[day]
+      if (!current) return s
+      return { ...s, [day]: { ...current, slotDuration: val } as DayConfig }
+    })
   }
 
   function handleSave() {
@@ -103,7 +117,8 @@ export default function AvailabilityPage() {
           </div>
           <div className="avail-schedule-grid">
             {DAYS.map(day => {
-              const cfg = schedule[day]
+              const cfg: DayConfig | undefined = schedule[day]
+              if (!cfg) return null
               return (
                 <div key={day} className={`day-row${!cfg.enabled ? ' day-row--disabled' : ''}`}>
                   <div className="day-row__head">
@@ -122,7 +137,7 @@ export default function AvailabilityPage() {
                     <select
                       value={cfg.slotDuration}
                       disabled={!cfg.enabled}
-                      onChange={e => setSchedule(s => ({ ...s, [day]: { ...s[day], slotDuration: Number(e.target.value) } }))}
+                      onChange={e => updateSlotDuration(day, Number(e.target.value))}
                       className="slot-select"
                     >
                       <option value={30}>30 min slots</option>

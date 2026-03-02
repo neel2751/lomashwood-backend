@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { loyaltyService } from "@/services/loyaltyService";
-import type { AdjustLoyaltyPayload } from "@/types/customer.types";
+import type { AdjustLoyaltyPointsPayload } from "@/types/customer.types";
 
 export function useLoyalty(customerId?: string) {
   return useQuery({
     queryKey: ["loyalty", customerId],
-    queryFn: () => loyaltyService.getAll(customerId),
+    queryFn: () => loyaltyService.getAll(customerId ? { customerId } : undefined),
   });
 }
 
@@ -21,8 +21,8 @@ export function useAdjustLoyalty() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: AdjustLoyaltyPayload }) =>
-      loyaltyService.adjust(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: AdjustLoyaltyPointsPayload }) =>
+      loyaltyService.adjustPoints(id, payload),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["loyalty"] });
       queryClient.invalidateQueries({ queryKey: ["loyalty", id] });

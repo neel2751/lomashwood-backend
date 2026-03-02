@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { funnelService } from "@/services/funnelService";
-import type { CreateFunnelPayload, UpdateFunnelPayload } from "@/types/analytics.types";
+import type { CreateFunnelPayload } from "@/types/analytics.types";
 
 export function useFunnels() {
   return useQuery({
@@ -32,20 +32,21 @@ export function useUpdateFunnel() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateFunnelPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: CreateFunnelPayload }) =>
       funnelService.update(id, payload),
-    onSuccess: (_data, { id }) => {
+    onSuccess: (_data, { id }) => {  // ← remove the manual type annotation entirely
       queryClient.invalidateQueries({ queryKey: ["funnels"] });
       queryClient.invalidateQueries({ queryKey: ["funnels", id] });
     },
   });
 }
 
+
 export function useDeleteFunnel() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => funnelService.delete(id),
+    mutationFn: (id: string) => funnelService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["funnels"] });
     },

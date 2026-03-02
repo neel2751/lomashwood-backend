@@ -193,6 +193,6 @@ export function getServicePath(
 
 export function isUploadAllowed(file: File): boolean {
   const { acceptedImageTypes, acceptedVideoTypes, maxFileSizeBytes } = apiConfig.upload;
-  const allowedTypes = [...acceptedImageTypes, ...acceptedVideoTypes];
+  const allowedTypes = [...acceptedImageTypes, ...acceptedVideoTypes] as readonly string[];
   return file.size <= maxFileSizeBytes && allowedTypes.includes(file.type);
 }

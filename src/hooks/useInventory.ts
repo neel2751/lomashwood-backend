@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { inventoryService } from "@/services/inventoryService";
-import type { UpdateInventoryPayload } from "@/types/product.types";
 
 export function useInventory(productId?: string) {
   return useQuery({
     queryKey: ["inventory", productId],
-    queryFn: () => inventoryService.getAll(productId),
+    queryFn: () => inventoryService.getAll(productId ? { productId } : undefined),
   });
 }
 
@@ -21,9 +20,9 @@ export function useUpdateInventory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateInventoryPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       inventoryService.update(id, payload),
-    onSuccess: (_data, { id }) => {
+    onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["inventory", id] });
     },

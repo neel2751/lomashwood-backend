@@ -1,11 +1,6 @@
 'use client'
-
 import { useState, useTransition } from 'react'
-
 import Link from 'next/link'
-
-import type { Metadata } from 'next'
-
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)

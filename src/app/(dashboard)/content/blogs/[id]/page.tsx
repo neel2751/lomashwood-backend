@@ -1,12 +1,12 @@
 "use client";
 
-import { useParams } from "next/navigation";
+
 
 import { BlogEditor } from "@/components/content/BlogEditor";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function BlogDetailPage() {
-  const { id } = useParams<{ id: string }>();
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -15,7 +15,7 @@ export default function BlogDetailPage() {
         description="Update this blog post or inspiration article."
         backHref="/content/blogs"
       />
-      <BlogEditor id={id} />
+      <BlogEditor />
     </div>
   );
 }

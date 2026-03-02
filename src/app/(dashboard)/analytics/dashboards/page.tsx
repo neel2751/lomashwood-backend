@@ -1,5 +1,3 @@
-import { Suspense } from 'react'
-
 import Link from 'next/link'
 
 import { PageHeader } from '@/components/layout/PageHeader'

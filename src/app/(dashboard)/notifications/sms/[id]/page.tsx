@@ -15,7 +15,7 @@ export default function SmsNotificationDetailPage() {
         description="View the details of this SMS notification."
         backHref="/notifications/sms"
       />
-      <NotificationDetail id={id} channel="sms" />
+      <NotificationDetail id={id}  />
     </div>
   );
 }

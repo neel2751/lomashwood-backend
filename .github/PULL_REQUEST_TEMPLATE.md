@@ -1,8 +1,3 @@
-## Summary
-
-<!-- Describe what this PR does and why -->
-
-## Type of Change
 
 - [ ] Bug fix (non-breaking change that fixes an issue)
 - [ ] New feature (non-breaking change that adds functionality)
@@ -11,23 +6,7 @@
 - [ ] Documentation update
 - [ ] CI/CD or tooling change
 
-## Related Issues
-
-Closes #<!-- issue number -->
-
-## Changes Made
-
-<!-- List specific changes -->
-
--
--
--
-
-## Screenshots / Recordings
-
-<!-- If UI changes, add before/after screenshots or a Loom recording -->
-
-## Testing Checklist
+Closes #
 
 - [ ] I have tested this locally
 - [ ] Unit tests added / updated
@@ -35,10 +14,6 @@ Closes #<!-- issue number -->
 - [ ] `pnpm lint` passes
 - [ ] `pnpm type-check` passes
 - [ ] `pnpm test` passes
-
-## Service Impact
-
-<!-- Which backend service(s) does this touch? -->
 
 - [ ] auth-service
 - [ ] product-service
@@ -49,11 +24,3 @@ Closes #<!-- issue number -->
 - [ ] notification-service
 - [ ] analytics-service
 - [ ] None / Frontend only
-
-## Deployment Notes
-
-<!-- Anything reviewers or deployers should know — env vars, migrations, feature flags, etc. -->
-
-## Reviewer Notes
-
-<!-- Anything specific you want reviewers to focus on -->

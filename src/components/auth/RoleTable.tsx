@@ -46,14 +46,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRoles } from "@/hooks/useRoles";
-import { formatters } from "@/utils/formatters";
+import { useRoles, useDeleteRole } from "@/hooks/useRoles";
+import { formatDate } from "@/utils/formatters";
+import type { Role } from "@/types/auth.types";
 
-
+interface PaginatedRolesResponse {
+  data: Role[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+}
 
 const PAGE_SIZE = 20;
 
-// Colour accent per role name heuristic
 function getRoleAccent(name: string): string {
   const n = name.toLowerCase();
   if (n.includes("super") || n.includes("admin")) return "bg-red-50 text-red-700 border-red-200";
@@ -70,15 +77,22 @@ export function RoleTable() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteRoleName, setDeleteRoleName] = useState("");
 
-  const { data, isLoading, deleteRole } = useRoles({
-    search,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const { data: rolesResponse, isLoading } = useRoles();
+  const { mutateAsync: deleteRole } = useDeleteRole();
 
-  const roles = data?.data ?? [];
-  const total = data?.meta?.total ?? 0;
+  const response = rolesResponse as PaginatedRolesResponse | undefined;
+  const allRoles: Role[] = response?.data ?? [];
+
+  const filtered = search.trim()
+    ? allRoles.filter((r) =>
+        r.name.toLowerCase().includes(search.toLowerCase()) ||
+        (r.description ?? "").toLowerCase().includes(search.toLowerCase())
+      )
+    : allRoles;
+
+  const total: number = filtered.length;
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const roles: Role[] = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -89,7 +103,6 @@ export function RoleTable() {
   return (
     <>
       <div className="space-y-4">
-        {/* Filters + New */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -125,7 +138,9 @@ export function RoleTable() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     {Array.from({ length: 7 }).map((__, j) => (
-                      <TableCell key={j}><div className="h-4 bg-muted animate-pulse rounded" /></TableCell>
+                      <TableCell key={j}>
+                        <div className="h-4 bg-muted animate-pulse rounded" />
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -139,7 +154,7 @@ export function RoleTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                roles.map((role) => (
+                roles.map((role: Role) => (
                   <TableRow
                     key={role.id}
                     className="cursor-pointer hover:bg-muted/30 transition-colors"
@@ -147,7 +162,9 @@ export function RoleTable() {
                   >
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {role.isSystem && <Lock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />}
+                        {role.isSystem && (
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        )}
                         <Badge
                           variant="outline"
                           className={`font-medium text-xs ${getRoleAccent(role.name)}`}
@@ -181,7 +198,7 @@ export function RoleTable() {
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">
-                        {formatters.date(role.createdAt)}
+                        {formatDate(role.createdAt)}
                       </span>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -192,7 +209,9 @@ export function RoleTable() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => router.push(`/auth/roles/${role.id}`)}>
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/auth/roles/${role.id}`)}
+                          >
                             <Eye className="h-4 w-4 mr-2" />View
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -229,10 +248,22 @@ export function RoleTable() {
               Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
             </p>
             <div className="flex gap-1">
-              <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -240,7 +271,7 @@ export function RoleTable() {
         )}
       </div>
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={(open: boolean) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Role</AlertDialogTitle>
@@ -251,7 +282,10 @@ export function RoleTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={handleDelete}>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

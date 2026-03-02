@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect , useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -40,26 +40,29 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useRoles } from "@/hooks/useRoles";
-import { useUsers } from "@/hooks/useUsers";
-import { userSchema } from "@/schemas/user.schema";
-
-
+import { useCreateUser, useUpdateUser, useUser } from "@/hooks/useUsers";``
+import { userSchema } from "@/schemas/user.schema"; 
+import type { Role } from "@/types/auth.types";
 
 type UserFormData = z.infer<typeof userSchema>;
 
 interface UserFormProps {
   userId?: string;
 }
-
 export function UserForm({ userId }: UserFormProps) {
   const router = useRouter();
   const isEditing = !!userId;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const { getUser, createUser, updateUser, isSubmitting } = useUsers();
+  
+  const { data: existingUser } = useUser(userId); 
+  const { mutateAsync: createUser, isPending: isCreating } = useCreateUser();
+  const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
+  const isSubmitting = isCreating || isUpdating;
+
   const { data: rolesData } = useRoles({ pageSize: 100 });
-  const roles = rolesData?.data ?? [];
+  const roles: Role[] = (rolesData?.data ?? []) as Role[];
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -74,27 +77,24 @@ export function UserForm({ userId }: UserFormProps) {
     },
   });
 
+  // Populate form when editing
   useEffect(() => {
-    if (isEditing) {
-      getUser(userId).then((user) => {
-        if (user) {
-          form.reset({
-            name: user.name,
-            email: user.email,
-            roleId: user.roleId,
-            isActive: user.status === "active",
-            password: "",
-            confirmPassword: "",
-            sendWelcomeEmail: false,
-          });
-        }
+    if (isEditing && existingUser) {
+      form.reset({
+        name: existingUser.name,
+        email: existingUser.email,
+        roleId: existingUser.roleId,
+        isActive: existingUser.status === "active",
+        password: "",
+        confirmPassword: "",
+        sendWelcomeEmail: false,
       });
     }
-  }, [userId, isEditing]);
+  }, [existingUser, isEditing, form]);
 
   const onSubmit = async (data: UserFormData) => {
-    if (isEditing) {
-      await updateUser(userId, data);
+    if (isEditing && userId) {
+      await updateUser({ id: userId, data });
     } else {
       await createUser(data);
     }
@@ -114,6 +114,7 @@ export function UserForm({ userId }: UserFormProps) {
 
             {/* Main fields */}
             <div className="lg:col-span-2 space-y-4">
+
               {/* Profile */}
               <Card>
                 <CardHeader>
@@ -180,7 +181,7 @@ export function UserForm({ userId }: UserFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {roles.map((role) => (
+                            {roles.map((role: Role) => (
                               <SelectItem key={role.id} value={role.id}>
                                 <div>
                                   <p className="font-medium">{role.name}</p>

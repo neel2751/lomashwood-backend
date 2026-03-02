@@ -181,8 +181,8 @@ export function getParentRoute(pathname: string): string {
 }
 
 export function isDetailRoute(pathname: string): boolean {
-  const segments = pathname.split("/").filter(Boolean);
-  const lastSegment = segments[segments.length - 1];
+  const segments = pathname.split("/").filter(Boolean) as string[];
+  const lastSegment = segments[segments.length - 1] as string;
   return (
     /^[0-9a-f-]{36}$/.test(lastSegment) ||
     /^\d+$/.test(lastSegment)
@@ -190,9 +190,9 @@ export function isDetailRoute(pathname: string): boolean {
 }
 
 export function extractIdFromPath(pathname: string): string | null {
-  const segments = pathname.split("/").filter(Boolean);
-  const last = segments[segments.length - 1];
-  if (/^[0-9a-f-]{36}$/.test(last) || /^\d+$/.test(last)) {
+  const segments = pathname.split("/").filter(Boolean) as string[];
+  const last = segments[segments.length - 1] as string | null;
+  if (last && (/^[0-9a-f-]{36}$/.test(last) || /^\d+$/.test(last))) {
     return last;
   }
   return null;

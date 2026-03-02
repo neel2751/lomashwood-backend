@@ -78,14 +78,17 @@ export default function ColourDetailPage({ params }: Props) {
           <div className="form-card">
             <h2 className="form-card__title">Edit colour</h2>
             <Suspense fallback={<div className="form-skeleton" />}>
-              <ColourForm colourId={params.id} defaultValues={{ name: colour.name, hex: colour.hex, category: colour.category }} />
+              <ColourForm
+                initialData={{ name: colour.name, hex: colour.hex }}
+                isEdit={true}
+              />
             </Suspense>
           </div>
 
           <div className="products-section">
             <h2 className="section-label">Products using this colour ({colour.productCount})</h2>
             <Suspense fallback={<div className="table-skeleton" />}>
-              <ProductTable colourFilter={params.id} />
+              <ProductTable />
             </Suspense>
           </div>
         </div>
@@ -105,8 +108,8 @@ export default function ColourDetailPage({ params }: Props) {
             <h3 className="sidebar-card__title">Info</h3>
             {[
               { key: 'Category', val: colour.category },
-              { key: 'Created', val: colour.createdAt },
-              { key: 'Updated', val: colour.updatedAt },
+              { key: 'Created',  val: colour.createdAt },
+              { key: 'Updated',  val: colour.updatedAt },
             ].map(({ key, val }) => (
               <div key={key} className="sidebar-info-row">
                 <span className="sidebar-info-key">{key}</span>

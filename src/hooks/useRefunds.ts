@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { refundService } from "@/services/refundService";
-import type { CreateRefundPayload, RefundFilters } from "@/types/order.types";
+import type { CreateRefundPayload } from "@/types/order.types";
 
-export function useRefunds(filters?: RefundFilters) {
+export function useRefunds(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: ["refunds", filters],
     queryFn: () => refundService.getAll(filters),

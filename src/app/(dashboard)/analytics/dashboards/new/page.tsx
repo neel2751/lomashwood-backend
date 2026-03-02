@@ -4,10 +4,8 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 
-import { DashboardBuilder } from '@/components/analytics/DashboardBuilder'
 import { PageHeader } from '@/components/layout/PageHeader'
 
-import type { Metadata } from 'next'
 
 const WIDGET_TYPES = [
   {

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import {
   ArrowLeft, Send, CheckCircle, AlertTriangle,
-  ChevronDown, User, Headphones, Paperclip, Clock,
+  ChevronDown, Headphones, Paperclip, Clock,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";

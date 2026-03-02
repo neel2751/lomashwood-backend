@@ -15,7 +15,7 @@ export default function UserDetailPage() {
         description="View and edit this user account."
         backHref="/auth/users"
       />
-      <UserDetail id={id} />
+      <UserDetail userId={id} />
     </div>
   );
 }

@@ -178,7 +178,7 @@ export function DataTable<TData, TValue = unknown>({
       const selectedRows = Object.keys(next)
         .filter((k) => next[k])
         .map((k) => data[parseInt(k)])
-        .filter(Boolean)
+        .filter((row): row is TData => row !== undefined)
       onRowSelectionChange(next, selectedRows)
     }
   }

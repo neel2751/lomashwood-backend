@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-
 import { CalendarDays, ChevronDown } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 
 export interface DateRange {
@@ -13,8 +11,8 @@ export interface DateRange {
 }
 
 interface DateRangePickerProps {
-  value: DateRange;
-  onChange: (range: DateRange) => void;
+  value?: DateRange;
+  onChange?: (range: DateRange) => void;
   className?: string;
 }
 
@@ -46,21 +44,33 @@ function formatDate(d: Date) {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function DateRangePicker({ value, onChange, className }: DateRangePickerProps) {
+// After
+export function DateRangePicker({ value: valueProp, onChange: onChangeProp, className }: DateRangePickerProps) {
+  const [internalValue, setInternalValue] = useState<DateRange>((valueProp ?? PRESETS[2]) as DateRange);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  const value: DateRange = valueProp !== undefined ? valueProp : internalValue;
+  const onChange = (range: DateRange) => {
+    if (onChangeProp) {
+      onChangeProp(range);
+    } else {
+      setInternalValue(range);
+    }
+  };
+
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      {/* Trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
         className={cn(
@@ -79,7 +89,6 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
         <ChevronDown size={13} className={cn("text-[#5A4232] transition-transform", open && "rotate-180")} />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[220px] bg-[#1C1611] border border-[#2E231A] rounded-[14px] shadow-2xl shadow-black/50 overflow-hidden">
           <div className="p-1.5">
@@ -107,8 +116,6 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
               </button>
             ))}
           </div>
-
-          {/* Custom range hint */}
           <div className="border-t border-[#2E231A] px-4 py-2.5">
             <p className="text-[11px] text-[#3D2E1E]">Custom range coming soon</p>
           </div>

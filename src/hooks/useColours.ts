@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { colourService } from "@/services/colourService";
-import type { CreateColourPayload, UpdateColourPayload } from "@/types/product.types";
+import type { CreateColourPayload } from "@/types/product.types";
 
 export function useColours() {
   return useQuery({
@@ -32,12 +32,12 @@ export function useUpdateColour() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateColourPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: CreateColourPayload }) =>
       colourService.update(id, payload),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["colours"] });
-      queryClient.invalidateQueries({ queryKey: ["colours", id] });
-    },
+    onSuccess: (_data: unknown, { id }: { id: string; payload: CreateColourPayload }) => {
+  queryClient.invalidateQueries({ queryKey: ["colours"] });
+  queryClient.invalidateQueries({ queryKey: ["colours", id] });
+},
   });
 }
 
@@ -45,7 +45,7 @@ export function useDeleteColour() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => colourService.delete(id),
+    mutationFn: (id: string) => colourService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["colours"] });
     },

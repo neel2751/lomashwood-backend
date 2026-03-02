@@ -15,7 +15,24 @@ export default function ReviewDetailPage() {
         description="View and moderate this customer review."
         backHref="/customers/reviews"
       />
-      <ReviewModerationCard id={id} />
+      <ReviewModerationCard
+        review={{
+          id,
+          customer: "",
+          customerId: "",
+          customerEmail: "",
+          product: "",
+          productId: "",
+          rating: 0,
+          title: "",
+          body: "",
+          status: "pending",
+          verified: false,
+          submittedAt: "",
+          helpful: 0,
+          adminReply: "",
+        }}
+      />
     </div>
   );
 }

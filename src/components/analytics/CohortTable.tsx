@@ -7,8 +7,6 @@ interface CohortRow {
   size: number;
   weeks: (number | null)[];
 }
-
-// Each value is retention % for that week (null = future)
 const COHORT_DATA: CohortRow[] = [
   { cohort: "Jan W1", size: 342, weeks: [100, 62, 48, 41, 36, 33, 30, 28] },
   { cohort: "Jan W2", size: 289, weeks: [100, 58, 44, 38, 33, 29, 27, null] },

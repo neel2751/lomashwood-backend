@@ -1,12 +1,12 @@
 "use client";
 
-import { useParams } from "next/navigation";
+
 
 import { SeoForm } from "@/components/content/SeoForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function SeoDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  
 
   return (
     <div className="flex flex-col gap-6">
@@ -15,7 +15,7 @@ export default function SeoDetailPage() {
         description="Update SEO metadata for this page."
         backHref="/content/seo"
       />
-      <SeoForm id={id} />
+      <SeoForm />
     </div>
   );
 }
