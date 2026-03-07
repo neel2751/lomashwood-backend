@@ -1,7 +1,5 @@
 import { Suspense } from 'react'
 
-import { PoundSterling, ShoppingCart, CalendarCheck, Users } from 'lucide-react'
-
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
 import { AppointmentsChart } from '@/components/dashboard/AppointmentsChart'
 import { OrdersChart } from '@/components/dashboard/OrdersChart'
@@ -25,7 +23,7 @@ const stats = [
     prefix: '£',
     change: 12.4,
     changeLabel: 'vs last month',
-    icon: PoundSterling,
+    iconName: 'PoundSterling' as const,
     iconColor: 'text-[#C8924A]',
     iconBg: 'bg-[#C8924A]/15',
   },
@@ -34,7 +32,7 @@ const stats = [
     value: '1,284',
     change: 8.1,
     changeLabel: 'vs last month',
-    icon: ShoppingCart,
+    iconName: 'ShoppingCart' as const,
     iconColor: 'text-emerald-400',
     iconBg: 'bg-emerald-400/10',
   },
@@ -43,7 +41,7 @@ const stats = [
     value: '342',
     change: -3.2,
     changeLabel: 'vs last month',
-    icon: CalendarCheck,
+    iconName: 'CalendarCheck' as const,
     iconColor: 'text-[#6B8A9A]',
     iconBg: 'bg-[#6B8A9A]/15',
   },
@@ -52,7 +50,7 @@ const stats = [
     value: '891',
     change: 18.7,
     changeLabel: 'vs last month',
-    icon: Users,
+    iconName: 'Users' as const,
     iconColor: 'text-violet-400',
     iconBg: 'bg-violet-400/10',
   },

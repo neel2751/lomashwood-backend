@@ -146,6 +146,7 @@ const NAV_GROUPS: NavSection[] = [
         icon: ShieldCheck,
         children: [
           { label: "Users", href: "/auth/users" },
+          { label: "Register New", href: "/auth/register" },
           { label: "Roles", href: "/auth/roles" },
           { label: "Sessions", href: "/auth/sessions" },
         ],

@@ -1,17 +1,26 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, PoundSterling, ShoppingCart, CalendarCheck, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 import type { LucideIcon } from "lucide-react";
+
+const ICON_MAP = {
+  PoundSterling,
+  ShoppingCart,
+  CalendarCheck,
+  Users,
+} satisfies Record<string, LucideIcon>;
+
+export type StatIconName = keyof typeof ICON_MAP;
 
 interface StatsCardProps {
   title: string;
   value: string;
   change: number;
   changeLabel?: string;
-  icon: LucideIcon;
+  iconName: StatIconName;
   iconColor?: string;
   iconBg?: string;
   prefix?: string;
@@ -24,7 +33,7 @@ export function StatsCard({
   value,
   change,
   changeLabel = "vs last month",
-  icon: Icon,
+  iconName,
   iconColor = "text-[#C8924A]",
   iconBg = "bg-[#C8924A]/15",
   prefix,
@@ -34,6 +43,7 @@ export function StatsCard({
   const isPositive = change > 0;
   const isNeutral = change === 0;
 
+  const Icon = ICON_MAP[iconName];
   const TrendIcon = isNeutral ? Minus : isPositive ? TrendingUp : TrendingDown;
   const trendColor = isNeutral
     ? "text-[#5A4232]"
