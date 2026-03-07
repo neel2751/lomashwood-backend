@@ -38,6 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSessions } from "@/hooks/useSessions";
 import { useUser, useDeleteUser, useUpdateUser } from "@/hooks/useUsers";
 import { formatDate, formatDateTime } from "@/utils/formatters";
+
 import type { Session, User } from "@/types/auth.types";
 
 interface UserDetailProps {

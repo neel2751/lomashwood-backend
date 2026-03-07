@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { integrationService } from "@/services/integrationService";
-import type { Integration } from "@/services/integrationService";
+
 import type { IntegrationId } from "@/components/settings/IntegrationCard";
+import type { Integration } from "@/services/integrationService";
 
 export type IntegrationEntry = {
   status: "connected" | "disconnected" | "error";
@@ -23,7 +25,7 @@ export const useIntegrations = () => {
     mutationFn: ({ id, payload }: { id: string; payload: Partial<Integration> }) =>
       integrationService.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      void queryClient.invalidateQueries({ queryKey: ["integrations"] });
     },
   });
 

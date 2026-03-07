@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: lomashwood_staging
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_staging_data:/data
+
+  api-gateway:
+    image: lomashwood/api-gateway:staging
+    environment:
+      NODE_ENV: staging
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  auth-service:
+    image: lomashwood/auth-service:staging
+    environment:
+      NODE_ENV: staging
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  product-service:
+    image: lomashwood/product-service:staging
+    environment:
+      NODE_ENV: staging
+      DB_HOST: postgres
+    depends_on:
+      - postgres
+
+  notification-service:
+    image: lomashwood/notification-service:staging
+    environment:
+      NODE_ENV: staging
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  analytics-service:
+    image: lomashwood/analytics-service:staging
+    environment:
+      NODE_ENV: staging
+      DB_HOST: postgres
+    depends_on:
+      - postgres
+
+  upload-service:
+    image: lomashwood/upload-service:staging
+    environment:
+      NODE_ENV: staging
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: us-east-1
+
+volumes:
+  postgres_staging_data:
+  redis_staging_data:

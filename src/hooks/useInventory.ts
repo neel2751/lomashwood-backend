@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { inventoryService } from "@/services/inventoryService";
 
 export function useInventory(productId?: string) {
@@ -23,8 +24,8 @@ export function useUpdateInventory() {
     mutationFn: ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       inventoryService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["inventory", id] });
+      void queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      void queryClient.invalidateQueries({ queryKey: ["inventory", id] });
     },
   });
 }

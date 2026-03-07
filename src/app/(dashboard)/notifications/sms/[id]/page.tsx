@@ -19,3 +19,4 @@ export default function SmsNotificationDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

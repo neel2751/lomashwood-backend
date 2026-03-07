@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lomashwood
+  labels:
+    name: lomashwood
+    environment: production

@@ -28,15 +28,18 @@ type UserFilters = {
 };
 
 const userService = {
-  getAll: async (_filters?: UserFilters): Promise<UsersResponse> => ({
-    data: [],
-    meta: { total: 0, roles: [] },
-  }),
-  getById: async (_id: string): Promise<User | null> => null,
-  create: async (_payload: Record<string, unknown>): Promise<User | null> => null,
-  update: async (_id: string, _payload: Record<string, unknown>): Promise<User | null> => null,
-  remove: async (_id: string): Promise<void> => {},
-  updateStatus: async (_id: string, _status: string): Promise<void> => {},
+  getAll: (_filters?: UserFilters): Promise<UsersResponse> =>
+    Promise.resolve({ data: [], meta: { total: 0, roles: [] } }),
+  getById: (_id: string): Promise<User | null> =>
+    Promise.resolve(null),
+  create: (_payload: Record<string, unknown>): Promise<User | null> =>
+    Promise.resolve(null),
+  update: (_id: string, _payload: Record<string, unknown>): Promise<User | null> =>
+    Promise.resolve(null),
+  remove: (_id: string): Promise<void> =>
+    Promise.resolve(),
+  updateStatus: (_id: string, _status: string): Promise<void> =>
+    Promise.resolve(),
 };
 
 export function useUsers(filters?: UserFilters) {
@@ -49,13 +52,13 @@ export function useUsers(filters?: UserFilters) {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => userService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       userService.updateStatus(id, status),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 
   return {
@@ -78,7 +81,7 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: Record<string, unknown>) => userService.create(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 }
 
@@ -88,8 +91,8 @@ export function useUpdateUser() {
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       userService.update(id, data),
     onSuccess: (_data: unknown, { id }: { id: string; data: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["users", id] });
+      void queryClient.invalidateQueries({ queryKey: ["users"] });
+      void queryClient.invalidateQueries({ queryKey: ["users", id] });
     },
   });
 }
@@ -98,6 +101,6 @@ export function useDeleteUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => userService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 }

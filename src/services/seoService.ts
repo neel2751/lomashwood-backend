@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
-import type { SeoMeta } from "@/lib/api-client";
 import axios from "@/lib/axios";
-import type { ApiResponse } from "@/lib/api-client";
+
+import type { ApiResponse, SeoMeta } from "@/lib/api-client";
 
 export const seoService = {
   getAll: (params?: Record<string, unknown>) =>

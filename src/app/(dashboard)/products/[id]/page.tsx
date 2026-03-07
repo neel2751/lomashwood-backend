@@ -528,3 +528,4 @@ export default function ProductDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

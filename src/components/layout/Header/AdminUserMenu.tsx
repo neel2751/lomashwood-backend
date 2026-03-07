@@ -47,11 +47,11 @@ export function AdminUserMenu() {
         .slice(0, 2)
     : "LW";
 
-  const handleLogout = async () => {
-  setOpen(false);
-  clearUser();
-  router.push("/login");
-}
+  const handleLogout = () => {
+    setOpen(false);
+    clearUser();
+    router.push("/login");
+  };
 
   // Close on outside click
   useEffect(() => {

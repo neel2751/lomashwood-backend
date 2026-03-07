@@ -1,7 +1,9 @@
 import { apiClient } from "@/lib/api-client";
+import axios from "@/lib/axios";
+
 import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
 import type { PricingRule } from "@/types/product.types";
-import axios from "@/lib/axios";
+
 
 export const pricingService = {
   getAll: (params?: Record<string, unknown>) =>

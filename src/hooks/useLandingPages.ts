@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { landingPageService } from "@/services/landingPageService";
+
 import type { CreateLandingPagePayload } from "@/types/content.types";
 
 export function useLandingPages() {
@@ -23,7 +25,7 @@ export function useCreateLandingPage() {
   return useMutation({
     mutationFn: (payload: CreateLandingPagePayload) => landingPageService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
+      void queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateLandingPage() {
     mutationFn: ({ id, payload }: { id: string; payload: CreateLandingPagePayload }) =>
       landingPageService.update(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
-      queryClient.invalidateQueries({ queryKey: ["landing-pages", id] });
+      void queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
+      void queryClient.invalidateQueries({ queryKey: ["landing-pages", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteLandingPage() {
   return useMutation({
     mutationFn: (id: string) => landingPageService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
+      void queryClient.invalidateQueries({ queryKey: ["landing-pages"] });
     },
   });
 }

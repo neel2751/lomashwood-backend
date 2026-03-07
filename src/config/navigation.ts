@@ -42,10 +42,12 @@ import {
   Sliders,
   Plug,
   ClipboardList,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { PERMISSIONS } from "@/lib/constants";
-import type { PermissionKey } from "@/lib/constants";
+} from "lucide-react"
+
+import { PERMISSIONS } from "@/lib/constants"
+
+import type { PermissionKey } from "@/lib/constants"
+import type { LucideIcon } from "lucide-react"
 
 export type NavItem = {
   label: string;

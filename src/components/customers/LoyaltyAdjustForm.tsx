@@ -81,7 +81,14 @@ const MOCK_AUDIT: AuditEntry[] = [
 
 interface LoyaltyAdjustFormProps {
   prefilledCustomerId?: string;
-  onSave?: (data: any) => void;
+  onSave?: (data: {
+    customerId: string;
+    adjType: AdjustmentType;
+    amount: number;
+    reason: AdjustmentReason;
+    note: string;
+    notify: boolean;
+  }) => void;
 }
 
 export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjustFormProps) {
@@ -151,7 +158,7 @@ export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjust
               <Gift size={15} className="text-[#C8924A]" />
               Adjust Loyalty Points
             </h2>
-            <p className="text-[12px] text-[#5A4232] mt-0.5">Manually add, remove, or set a customer's loyalty balance</p>
+            <p className="text-[12px] text-[#5A4232] mt-0.5">Manually add, remove, or set a customer&apos;s loyalty balance</p>
           </div>
           <button
             onClick={handleSave}
@@ -171,11 +178,12 @@ export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjust
         <div className="p-6 flex flex-col gap-5">
           {/* Customer selector */}
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+            <label htmlFor="customer-select" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
               Customer <span className="text-[#C8924A]">*</span>
             </label>
             <div className="relative">
               <select
+                id="customer-select"
                 value={customerId}
                 onChange={(e) => { setCustomerId(e.target.value); setAmount(""); }}
                 className={selectCls}
@@ -223,9 +231,9 @@ export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjust
 
           {/* Adjustment type */}
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+            <p className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
               Adjustment Type
-            </label>
+            </p>
             <div className="grid grid-cols-3 gap-2">
               {([
                 { value: "add",    label: "Add Points",    icon: Plus,      desc: "Credit to balance",  color: "text-emerald-400" },
@@ -261,13 +269,14 @@ export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjust
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Points amount */}
             <div>
-              <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+              <label htmlFor="points-amount" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
                 {adjType === "set" ? "New Balance" : "Points"}{" "}
                 <span className="text-[#C8924A]">*</span>
               </label>
               <div className="relative">
                 <Star size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#C8924A]" />
                 <input
+                  id="points-amount"
                   type="number"
                   min={0}
                   max={adjType === "remove" ? currentPoints : undefined}
@@ -286,11 +295,11 @@ export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjust
 
             {/* Reason */}
             <div>
-              <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+              <label htmlFor="adjustment-reason" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
                 Reason <span className="text-[#C8924A]">*</span>
               </label>
               <div className="relative">
-                <select value={reason} onChange={(e) => setReason(e.target.value as AdjustmentReason)} className={selectCls}>
+                <select id="adjustment-reason" value={reason} onChange={(e) => setReason(e.target.value as AdjustmentReason)} className={selectCls}>
                   {(Object.entries(REASON_LABELS) as [AdjustmentReason, string][]).map(([v, l]) => (
                     <option key={v} value={v} className="bg-[#1C1611]">{l}</option>
                   ))}
@@ -302,10 +311,11 @@ export function LoyaltyAdjustForm({ prefilledCustomerId, onSave }: LoyaltyAdjust
 
           {/* Internal note */}
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+            <label htmlFor="internal-note" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
               Internal Note
             </label>
             <textarea
+              id="internal-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}

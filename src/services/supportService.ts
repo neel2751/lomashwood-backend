@@ -1,8 +1,9 @@
 import { apiClient } from "@/lib/api-client";
-import type { SupportTicket } from "@/lib/api-client";
 import axios from "@/lib/axios";
-import type { ApiResponse } from "@/lib/api-client";
+
+import type { ApiResponse, SupportTicket } from "@/lib/api-client";
 import type { SupportStatus } from "@/lib/constants";
+
 
 export const supportService = {
   getAll: (params?: Record<string, unknown>) =>

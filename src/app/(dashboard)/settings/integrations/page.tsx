@@ -15,3 +15,4 @@ export default function IntegrationsSettingsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

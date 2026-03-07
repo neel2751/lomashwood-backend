@@ -60,6 +60,15 @@ type Session = {
   expiresAt?: string;
 };
 
+type SessionResponse = {
+  data: Session[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
+};
+
 const PAGE_SIZE = 20;
 
 function DeviceIcon({ device }: { device?: string }) {
@@ -92,9 +101,21 @@ export function SessionTable({ userId }: SessionTableProps) {
   const { mutateAsync: revokeSession } = useRevokeSession();
   const { mutateAsync: revokeAllSessions } = useRevokeAllSessions();
 
-  const anyData = rawData as any;
-  const sessions: Session[] = anyData?.data ?? anyData ?? [];
-  const total: number = anyData?.meta?.total ?? 0;
+  const isSessionResponse = (data: unknown): data is SessionResponse => {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "data" in data &&
+      Array.isArray((data as SessionResponse).data)
+    );
+  };
+
+  const sessions: Session[] = isSessionResponse(rawData)
+    ? rawData.data
+    : Array.isArray(rawData)
+      ? rawData
+      : [];
+  const total: number = isSessionResponse(rawData) ? rawData.meta.total : 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const handleRevoke = async () => {

@@ -1,9 +1,10 @@
 import * as React from "react"
+
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// ── Base skeleton pulse ───────────────────────────────────────────────────────
+
 
 const skeletonVariants = cva(
   "animate-pulse rounded-md bg-muted",
@@ -34,9 +35,6 @@ function Skeleton({ className, variant, ...props }: SkeletonProps) {
   )
 }
 
-// ── Composite skeletons for Lomash Wood admin screens ────────────────────────
-
-/** Single table row — matches the dense row height used across all admin tables */
 function SkeletonTableRow({
   columns = 5,
   className,
@@ -57,7 +55,6 @@ function SkeletonTableRow({
   )
 }
 
-/** Full table skeleton with header + N body rows */
 function SkeletonTable({
   rows = 8,
   columns = 5,
@@ -82,8 +79,6 @@ function SkeletonTable({
     </div>
   )
 }
-
-/** Stats card — used on the overview dashboard */
 function SkeletonStatsCard({ className }: { className?: string }) {
   return (
     <div className={cn("rounded-xl border bg-white p-6 space-y-3", className)}>
@@ -97,7 +92,6 @@ function SkeletonStatsCard({ className }: { className?: string }) {
   )
 }
 
-/** Product / content card — used in grid listings */
 function SkeletonCard({ className }: { className?: string }) {
   return (
     <div className={cn("rounded-xl border bg-white overflow-hidden", className)}>
@@ -115,7 +109,6 @@ function SkeletonCard({ className }: { className?: string }) {
   )
 }
 
-/** Detail page — two-column layout with sidebar */
 function SkeletonDetailPage({ className }: { className?: string }) {
   return (
     <div className={cn("space-y-6", className)}>
@@ -169,7 +162,6 @@ function SkeletonDetailPage({ className }: { className?: string }) {
   )
 }
 
-/** Form page skeleton — matches the section-card layout used across all admin forms */
 function SkeletonForm({
   sections = 3,
   fieldsPerSection = 4,
@@ -224,12 +216,12 @@ function SkeletonForm({
   )
 }
 
-/** Appointment calendar skeleton */
+
 function SkeletonCalendar({ className }: { className?: string }) {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
   return (
     <div className={cn("rounded-xl border bg-white p-4 space-y-3", className)}>
-      {/* Header */}
+      
       <div className="flex items-center justify-between pb-1">
         <Skeleton className="h-5 w-32" />
         <div className="flex gap-1">
@@ -237,13 +229,13 @@ function SkeletonCalendar({ className }: { className?: string }) {
           <Skeleton className="h-7 w-7 rounded-md" />
         </div>
       </div>
-      {/* Day labels */}
+     
       <div className="grid grid-cols-7 gap-1">
         {days.map((d) => (
           <Skeleton key={d} className="h-3 mx-auto w-6" />
         ))}
       </div>
-      {/* Calendar cells */}
+     
       {Array.from({ length: 5 }).map((_, week) => (
         <div key={week} className="grid grid-cols-7 gap-1">
           {Array.from({ length: 7 }).map((_, day) => (
@@ -261,7 +253,6 @@ function SkeletonCalendar({ className }: { className?: string }) {
   )
 }
 
-/** Notification / activity feed item */
 function SkeletonFeedItem({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-start gap-3 py-3", className)}>
@@ -275,7 +266,6 @@ function SkeletonFeedItem({ className }: { className?: string }) {
   )
 }
 
-/** Page header with title, description and action buttons */
 function SkeletonPageHeader({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-start justify-between", className)}>
@@ -291,7 +281,7 @@ function SkeletonPageHeader({ className }: { className?: string }) {
   )
 }
 
-/** Chart / analytics card */
+
 function SkeletonChart({ className }: { className?: string }) {
   return (
     <div className={cn("rounded-xl border bg-white p-6 space-y-4", className)}>

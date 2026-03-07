@@ -85,10 +85,13 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
 
       <div className="p-6 flex flex-col gap-5">
         {/* Large preview swatch */}
-        <div
-          className="relative h-32 rounded-[12px] flex items-end p-3 transition-colors duration-300 cursor-pointer"
+        <button
+          type="button"
+          aria-label="Open colour picker"
+          className="relative h-32 rounded-[12px] flex items-end p-3 transition-colors duration-300 w-full text-left"
           style={{ background: hex }}
           onClick={() => pickerRef.current?.click()}
+          onKeyDown={(e) => e.key === "Enter" && pickerRef.current?.click()}
         >
           <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium ${light ? "bg-black/15 text-black/70" : "bg-white/15 text-white/90"}`}>
             <Pipette size={13} />
@@ -102,15 +105,18 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
             value={hex}
             onChange={(e) => { setHex(e.target.value); setHexInput(e.target.value.toUpperCase()); }}
             className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+            aria-hidden="true"
+            tabIndex={-1}
           />
-        </div>
+        </button>
 
         {/* Name */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label htmlFor="colour-name" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             Colour Name <span className="text-[#C8924A]">*</span>
           </label>
           <input
+            id="colour-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -121,12 +127,13 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
 
         {/* Hex code */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label htmlFor="colour-hex" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             Hex Code <span className="text-[#C8924A]">*</span>
           </label>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-[9px] border border-[#3D2E1E] shrink-0" style={{ background: hex }} />
             <input
+              id="colour-hex"
               type="text"
               value={hexInput}
               onChange={(e) => handleHexInput(e.target.value)}
@@ -139,9 +146,9 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
 
         {/* Preset swatches */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
             Presets
-          </label>
+          </p>
           <div className="grid grid-cols-8 gap-2">
             {PRESET_COLOURS.map((preset) => (
               <button

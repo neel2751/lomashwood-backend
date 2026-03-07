@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import Image from "next/image";
+
 import {
   Save, Loader2, Globe, Share2,
   Twitter, CheckCircle, AlertTriangle, Info,
@@ -94,10 +96,6 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
     score >= 80 ? "text-emerald-400" :
     score >= 55 ? "text-[#C8924A]"   :
     score >= 30 ? "text-amber-400"   : "text-red-400";
-  const scoreFill =
-    score >= 80 ? "bg-emerald-400" :
-    score >= 55 ? "bg-[#C8924A]"   :
-    score >= 30 ? "bg-amber-400"   : "bg-red-400";
 
   const handleSave = async () => {
     setSaving(true);
@@ -156,12 +154,12 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
               {/* Meta title */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E]">Meta Title</label>
+                  <label htmlFor="meta-title" className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E]">Meta Title</label>
                   <span className={cn("text-[11px]", titleBar.over ? "text-red-400" : "text-[#3D2E1E]")}>
                     {metaTitle.length}/{TITLE_LIMIT}
                   </span>
                 </div>
-                <input value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)}
+                <input id="meta-title" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)}
                   placeholder="Page title for search engines…" className={inputCls} />
                 <div className="mt-1.5 h-1 rounded-full bg-[#2E231A] overflow-hidden">
                   <div className={cn("h-full rounded-full transition-all", titleBar.color)}
@@ -172,12 +170,12 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
               {/* Meta description */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E]">Meta Description</label>
+                  <label htmlFor="meta-description" className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E]">Meta Description</label>
                   <span className={cn("text-[11px]", descBar.over ? "text-red-400" : "text-[#3D2E1E]")}>
                     {metaDescription.length}/{DESCRIPTION_LIMIT}
                   </span>
                 </div>
-                <textarea value={metaDescription}
+                <textarea id="meta-description" value={metaDescription}
                   onChange={(e) => setMetaDescription(e.target.value)}
                   rows={3} placeholder="Brief summary for search result listings…"
                   className={textareaCls} />
@@ -207,27 +205,27 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
           {activeTab === "og" && (
             <>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">OG Title</label>
-                <input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)}
+                <label htmlFor="og-title" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">OG Title</label>
+                <input id="og-title" value={ogTitle} onChange={(e) => setOgTitle(e.target.value)}
                   placeholder={metaTitle || "Defaults to meta title…"} className={inputCls} />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">OG Description</label>
-                <textarea value={ogDescription} onChange={(e) => setOgDescription(e.target.value)} rows={3}
+                <label htmlFor="og-description" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">OG Description</label>
+                <textarea id="og-description" value={ogDescription} onChange={(e) => setOgDescription(e.target.value)} rows={3}
                   placeholder={metaDescription || "Defaults to meta description…"} className={textareaCls} />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">OG Image URL</label>
-                <input value={ogImage} onChange={(e) => setOgImage(e.target.value)}
+                <label htmlFor="og-image" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">OG Image URL</label>
+                <input id="og-image" value={ogImage} onChange={(e) => setOgImage(e.target.value)}
                   placeholder="https://lomashwood.co.uk/media/…" className={inputCls} />
                 <p className="text-[11px] text-[#3D2E1E] mt-1">Recommended: 1200×630px JPG/PNG</p>
               </div>
 
               {/* OG preview card */}
               <div className="rounded-[12px] bg-[#2E231A] border border-[#3D2E1E] overflow-hidden">
-                <div className="h-[140px] bg-[#3D2E1E] flex items-center justify-center">
+                <div className="h-[140px] bg-[#3D2E1E] flex items-center justify-center overflow-hidden">
                   {ogImage
-                    ? <img src={ogImage} alt="" className="w-full h-full object-cover" />
+                    ? <Image src={ogImage} alt="Open Graph preview" width={300} height={140} className="w-full h-full object-cover" />
                     : <Share2 size={28} className="text-[#5A4232]" />
                   }
                 </div>
@@ -257,18 +255,18 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Twitter Title</label>
-                <input value={twitterTitle} onChange={(e) => setTwitterTitle(e.target.value)}
+                <label htmlFor="twitter-title" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Twitter Title</label>
+                <input id="twitter-title" value={twitterTitle} onChange={(e) => setTwitterTitle(e.target.value)}
                   placeholder={ogTitle || metaTitle || "Defaults to OG / meta title…"} className={inputCls} />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Twitter Description</label>
-                <textarea value={twitterDesc} onChange={(e) => setTwitterDesc(e.target.value)} rows={3}
+                <label htmlFor="twitter-description" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Twitter Description</label>
+                <textarea id="twitter-description" value={twitterDesc} onChange={(e) => setTwitterDesc(e.target.value)} rows={3}
                   placeholder={ogDescription || metaDescription || "Defaults to OG / meta description…"} className={textareaCls} />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Twitter Image URL</label>
-                <input value={twitterImage} onChange={(e) => setTwitterImage(e.target.value)}
+                <label htmlFor="twitter-image" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Twitter Image URL</label>
+                <input id="twitter-image" value={twitterImage} onChange={(e) => setTwitterImage(e.target.value)}
                   placeholder={ogImage || "https://lomashwood.co.uk/media/…"} className={inputCls} />
               </div>
             </>
@@ -278,23 +276,23 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
           {activeTab === "advanced" && (
             <>
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Canonical URL</label>
-                <input value={canonicalUrl} onChange={(e) => setCanonical(e.target.value)} className={inputCls} />
+                <label htmlFor="canonical-url" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Canonical URL</label>
+                <input id="canonical-url" value={canonicalUrl} onChange={(e) => setCanonical(e.target.value)} className={inputCls} />
               </div>
               {/* Robots */}
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-2">Robots Directives</label>
                 <div className="flex flex-col gap-2">
                   {[
-                    { state: noIndex, setter: setNoIndex, label: "noindex", desc: "Prevent this page from appearing in search results" },
-                    { state: noFollow, setter: setNoFollow, label: "nofollow", desc: "Tell crawlers not to follow links on this page" },
-                  ].map(({ state, setter, label, desc }) => (
+                    { state: noIndex, setter: setNoIndex, label: "noindex", desc: "Prevent this page from appearing in search results", id: "robots-noindex" },
+                    { state: noFollow, setter: setNoFollow, label: "nofollow", desc: "Tell crawlers not to follow links on this page", id: "robots-nofollow" },
+                  ].map(({ state, setter, label, desc, id }) => (
                     <div key={label} className="flex items-center justify-between px-4 py-3 rounded-[10px] bg-[#2E231A] border border-[#3D2E1E]">
                       <div>
                         <p className="text-[12.5px] font-semibold text-[#C8B99A] font-mono">{label}</p>
                         <p className="text-[11px] text-[#5A4232] mt-0.5">{desc}</p>
                       </div>
-                      <button onClick={() => setter(!state)}
+                      <button id={id} onClick={() => setter(!state)}
                         className={cn("w-10 h-6 rounded-full border relative transition-all shrink-0",
                           state ? "bg-red-400 border-red-400" : "bg-[#1C1611] border-[#3D2E1E]")}>
                         <div className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
@@ -311,8 +309,8 @@ export function SeoForm({ pageTitle = "Our Showroom", pageSlug = "/showroom", in
               </div>
               {/* Structured data */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Structured Data (JSON-LD)</label>
-                <textarea value={structuredData} onChange={(e) => setStructuredData(e.target.value)} rows={6}
+                <label htmlFor="structured-data" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Structured Data (JSON-LD)</label>
+                <textarea id="structured-data" value={structuredData} onChange={(e) => setStructuredData(e.target.value)} rows={6}
                   placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "WebPage",\n  "name": ""\n}'}
                   className={cn(textareaCls, "font-mono text-[11.5px]")} />
               </div>

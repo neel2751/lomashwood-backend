@@ -1,11 +1,8 @@
 "use client"
 
 import * as React from "react"
+
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -22,7 +19,6 @@ import {
   SlidersHorizontal,
 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -40,19 +36,29 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  Table,
+  Table as TableRoot,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
+
+import type {
+  Column,
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  Table,
+  VisibilityState,
+} from "@tanstack/react-table"
 
 // ── Column header with sort support ──────────────────────────────────────────
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
-  column: import("@tanstack/react-table").Column<TData, TValue>
+  column: Column<TData, TValue>
   title: string
 }
 
@@ -92,7 +98,7 @@ export function DataTableColumnHeader<TData, TValue>({
 // ── Column visibility toggle ──────────────────────────────────────────────────
 
 interface DataTableViewOptionsProps<TData> {
-  table: import("@tanstack/react-table").Table<TData>
+  table: Table<TData>
 }
 
 export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps<TData>) {
@@ -128,7 +134,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
 // ── Pagination controls ───────────────────────────────────────────────────────
 
 interface DataTablePaginationProps<TData> {
-  table: import("@tanstack/react-table").Table<TData>
+  table: Table<TData>
   pageSizeOptions?: number[]
 }
 
@@ -215,7 +221,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   /** Rendered above the table (search input, filters, actions) */
-  toolbar?: (table: import("@tanstack/react-table").Table<TData>) => React.ReactNode
+  toolbar?: (table: Table<TData>) => React.ReactNode
   /** Show column visibility toggle in toolbar */
   showViewOptions?: boolean
   /** Rows per page options */
@@ -280,7 +286,7 @@ export function DataTable<TData, TValue>({
       .getFilteredSelectedRowModel()
       .rows.map((r) => r.original)
     onRowSelectionChange(selectedRows)
-  }, [rowSelection])
+  }, [rowSelection, onRowSelectionChange, table])
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -292,9 +298,9 @@ export function DataTable<TData, TValue>({
         </div>
       )}
 
-      {/* Table */}
+   
       <div className="rounded-md border bg-white">
-        <Table>
+        <TableRoot>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="bg-muted/30 hover:bg-muted/30">
@@ -322,7 +328,7 @@ export function DataTable<TData, TValue>({
                   ))}
                 </TableRow>
               ))
-            ) : table.getRowModel().rows?.length ? (
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -350,10 +356,10 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </TableRoot>
       </div>
 
-      {/* Pagination */}
+     
       <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
     </div>
   )

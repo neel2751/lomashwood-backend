@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
+
 import * as TogglePrimitive from "@radix-ui/react-toggle"
+import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-
-// ── Variants ──────────────────────────────────────────────────────────────────
 
 const toggleVariants = cva(
   [
@@ -64,8 +64,6 @@ const toggleVariants = cva(
   }
 )
 
-// ── Base Toggle ───────────────────────────────────────────────────────────────
-
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
@@ -78,16 +76,6 @@ const Toggle = React.forwardRef<
   />
 ))
 Toggle.displayName = TogglePrimitive.Root.displayName
-
-// ── ToggleGroup helpers (re-exported for convenience) ─────────────────────────
-
-export { Toggle, toggleVariants }
-
-// ── ToggleGroup ───────────────────────────────────────────────────────────────
-// Thin wrapper that wires Radix ToggleGroup with the same variant system.
-// Used for: view-mode switchers (list/grid), time-range pickers, channel filters.
-
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
 
 type ToggleGroupContextValue = VariantProps<typeof toggleVariants>
 
@@ -137,10 +125,6 @@ const ToggleGroupItem = React.forwardRef<
 })
 ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName
 
-export { ToggleGroup, ToggleGroupItem }
-
-
-
 interface SegmentedControlOption<T extends string = string> {
   value: T
   label: React.ReactNode
@@ -187,9 +171,9 @@ function SegmentedControl<T extends string = string>({
               "inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-all",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
               "disabled:pointer-events-none disabled:opacity-40",
-              size === "sm"  && "px-2.5 py-1 text-xs h-7",
+              size === "sm"      && "px-2.5 py-1 text-xs h-7",
               size === "default" && "px-3 py-1.5 text-sm h-8",
-              size === "lg"  && "px-4 py-2 text-sm h-9",
+              size === "lg"      && "px-4 py-2 text-sm h-9",
               isActive
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -211,5 +195,7 @@ function SegmentedControl<T extends string = string>({
   )
 }
 
+export { Toggle, toggleVariants }
+export { ToggleGroup, ToggleGroupItem }
 export { SegmentedControl }
 export type { SegmentedControlOption, SegmentedControlProps }

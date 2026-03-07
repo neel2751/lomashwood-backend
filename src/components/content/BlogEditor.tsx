@@ -43,7 +43,7 @@ const TOOLBAR_ITEMS = [
   { icon: Code,     label: "Code"    },
 ];
 
-export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
+export function BlogEditor({ isEdit = false }: BlogEditorProps) {
   const [title,       setTitle]    = useState(isEdit ? "10 Kitchen Design Trends for 2026" : "");
   const [slug,        setSlug]     = useState(isEdit ? "kitchen-design-trends-2026" : "");
   const [excerpt,     setExcerpt]  = useState(isEdit ? "Discover the bold new directions shaping kitchen design this year, from handleless cabinetry to statement islands." : "");
@@ -189,8 +189,9 @@ export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
 
           {/* Excerpt */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">Excerpt</label>
+            <label htmlFor="excerpt" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">Excerpt</label>
             <textarea
+              id="excerpt"
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               rows={3}
@@ -211,9 +212,9 @@ export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
             <div className="flex flex-col gap-3">
               {/* Status */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
+                <label htmlFor="status" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
                 <div className="relative">
-                  <select value={status} onChange={(e) => setStatus(e.target.value as BlogStatus)} className={selectCls}>
+                  <select id="status" value={status} onChange={(e) => setStatus(e.target.value as BlogStatus)} className={selectCls}>
                     <option value="draft"     className="bg-[#1C1611]">Draft</option>
                     <option value="published" className="bg-[#1C1611]">Published</option>
                     <option value="scheduled" className="bg-[#1C1611]">Scheduled</option>
@@ -226,10 +227,10 @@ export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
               {/* Scheduled date */}
               {status === "scheduled" && (
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1 flex items-center gap-1.5">
+                  <label htmlFor="schedule" className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1 flex items-center gap-1.5">
                     <Clock size={10} /> Publish At
                   </label>
-                  <input type="datetime-local" value={scheduleFor}
+                  <input id="schedule" type="datetime-local" value={scheduleFor}
                     onChange={(e) => setSchedule(e.target.value)}
                     className="w-full h-9 px-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12px] text-[#E8D5B7] focus:outline-none focus:border-[#C8924A]/50 transition-colors" />
                 </div>
@@ -237,9 +238,9 @@ export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
 
               {/* Author */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Author</label>
+                <label htmlFor="author" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Author</label>
                 <div className="relative">
-                  <select value={author} onChange={(e) => setAuthor(e.target.value)} className={selectCls}>
+                  <select id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className={selectCls}>
                     {AUTHORS.map((a) => <option key={a} value={a} className="bg-[#1C1611]">{a}</option>)}
                   </select>
                   <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5A4232] pointer-events-none" />
@@ -248,9 +249,9 @@ export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
 
               {/* Category */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Category</label>
+                <label htmlFor="category" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Category</label>
                 <div className="relative">
-                  <select value={category} onChange={(e) => setCategory(e.target.value as BlogCategory)} className={selectCls}>
+                  <select id="category" value={category} onChange={(e) => setCategory(e.target.value as BlogCategory)} className={selectCls}>
                     {CATEGORY_OPTIONS.map(({ value, label }) => (
                       <option key={value} value={value} className="bg-[#1C1611]">{label}</option>
                     ))}
@@ -288,7 +289,7 @@ export function BlogEditor({ postId, isEdit = false }: BlogEditorProps) {
               {tags.length === 0 && <p className="text-[11px] text-[#3D2E1E] italic">No tags yet</p>}
             </div>
             <div className="flex gap-2">
-              <input value={tagInput}
+              <input id="tag-input" value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
                 placeholder="Add tag…"

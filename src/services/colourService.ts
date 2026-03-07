@@ -10,17 +10,17 @@ type Colour = {
 
 export const colourService = {
   getAll: (params?: Record<string, unknown>) =>
-    apiClient.colours.getAll(params),
+    apiClient.colors.getAll(params),
 
   getById: (id: string) =>
-    apiClient.colours.getById(id),
+    apiClient.colors.getById(id),
 
   create: (payload: Partial<Colour>) =>
-    apiClient.colours.create(payload),
+    apiClient.colors.create(payload),
 
   update: (id: string, payload: Partial<Colour>) =>
-    apiClient.colours.update(id, payload),
+    apiClient.colors.update(id, payload),
 
   remove: (id: string) =>
-    apiClient.colours.delete(id),
+    apiClient.colors.delete(id),
 };

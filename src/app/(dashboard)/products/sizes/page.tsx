@@ -237,3 +237,5 @@ export default function SizesListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

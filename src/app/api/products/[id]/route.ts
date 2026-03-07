@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createLomashApiClient } from "@/lib/api-client";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { createApiClient } from "@/lib/api-client";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createLomashApiClient();
+    const client = createApiClient();
     const data = await client.products.getById(params.id);
 
     return NextResponse.json(data, { status: 200 });
@@ -24,7 +25,7 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const client = createLomashApiClient();
+    const client = createApiClient();
     const data = await client.products.update(params.id, body);
 
     return NextResponse.json(data, { status: 200 });
@@ -41,7 +42,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createLomashApiClient();
+    const client = createApiClient();
     await client.products.delete(params.id);
 
     return NextResponse.json({ message: "Product deleted" }, { status: 200 });

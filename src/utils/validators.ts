@@ -1,5 +1,5 @@
-import { isValidHex } from "@/lib/utils";
-import { ACCEPTED_IMAGE_TYPES, ACCEPTED_VIDEO_TYPES, MAX_FILE_SIZE_BYTES } from "@/lib/constants";
+import { ACCEPTED_IMAGE_TYPES, ACCEPTED_VIDEO_TYPES, MAX_FILE_SIZE_BYTES } from "@/lib/constants"
+import { isValidHex } from "@/lib/utils"
 
 export function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());

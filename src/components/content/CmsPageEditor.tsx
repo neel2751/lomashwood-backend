@@ -73,11 +73,11 @@ function BlockEditor({ block, onUpdate, onDelete }: {
 
   const field = (key: string, placeholder: string, rows?: number) => (
     <div key={key}>
-      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">{key.replace("_", " ")}</label>
+      <label htmlFor={`${block.id}-${key}`} className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">{key.replace("_", " ")}</label>
       {rows
-        ? <textarea value={block.content[key] ?? ""} onChange={(e) => onUpdate(block.id, { ...block.content, [key]: e.target.value })}
+        ? <textarea id={`${block.id}-${key}`} value={block.content[key] ?? ""} onChange={(e) => onUpdate(block.id, { ...block.content, [key]: e.target.value })}
             placeholder={placeholder} rows={rows} className={textareaCls} />
-        : <input value={block.content[key] ?? ""} onChange={(e) => onUpdate(block.id, { ...block.content, [key]: e.target.value })}
+        : <input id={`${block.id}-${key}`} value={block.content[key] ?? ""} onChange={(e) => onUpdate(block.id, { ...block.content, [key]: e.target.value })}
             placeholder={placeholder} className={inputCls} />
       }
     </div>
@@ -248,9 +248,9 @@ export function CmsPageEditor({ isEdit = false }: CmsPageEditorProps) {
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-4">Page Settings</h3>
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
+                <label htmlFor="page-status" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
                 <div className="relative">
-                  <select value={status} onChange={(e) => setStatus(e.target.value as PageStatus)} className={selectCls}>
+                  <select id="page-status" value={status} onChange={(e) => setStatus(e.target.value as PageStatus)} className={selectCls}>
                     <option value="draft"     className="bg-[#1C1611]">Draft</option>
                     <option value="published" className="bg-[#1C1611]">Published</option>
                     <option value="hidden"    className="bg-[#1C1611]">Hidden</option>
@@ -260,9 +260,9 @@ export function CmsPageEditor({ isEdit = false }: CmsPageEditorProps) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Template</label>
+                <label htmlFor="page-template" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Template</label>
                 <div className="relative">
-                  <select value={template} onChange={(e) => setTemplate(e.target.value as PageTemplate)} className={selectCls}>
+                  <select id="page-template" value={template} onChange={(e) => setTemplate(e.target.value as PageTemplate)} className={selectCls}>
                     {TEMPLATES.map(({ value, label }) => (
                       <option key={value} value={value} className="bg-[#1C1611]">{label}</option>
                     ))}

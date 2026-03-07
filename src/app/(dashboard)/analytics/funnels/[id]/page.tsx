@@ -351,3 +351,4 @@ export default async function FunnelDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

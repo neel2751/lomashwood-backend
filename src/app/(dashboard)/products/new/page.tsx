@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState } from 'react'
@@ -606,3 +607,5 @@ export default function NewProductPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

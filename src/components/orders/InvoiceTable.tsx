@@ -82,7 +82,7 @@ export function InvoiceTable() {
         <div className="relative">
           <select
             value={statusFilter}
-            onChange={(e) => setStatus(e.target.value as any)}
+            onChange={(e) => setStatus(e.target.value as "All" | InvoiceStatus)}
             className="appearance-none h-9 px-3 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40"
           >
             <option value="All">All Status</option>

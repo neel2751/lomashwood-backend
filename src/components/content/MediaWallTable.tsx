@@ -55,14 +55,26 @@ function formatBytes(bytes: number) {
   return `${bytes} B`;
 }
 
-function MediaThumbnail({ item, selected }: { item: MediaItem; selected: boolean }) {
+function MediaThumbnail({ item, selected, onToggle }: { item: MediaItem; selected: boolean; onToggle: () => void }) {
   const cfg = TYPE_CONFIG[item.type];
   const Icon = cfg.icon;
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onToggle();
+    }
+  };
+
   return (
-    <div className={cn(
-      "relative rounded-[12px] border-2 overflow-hidden cursor-pointer group transition-all",
-      selected ? "border-[#C8924A]" : "border-[#2E231A] hover:border-[#C8924A]/40"
-    )}>
+    <button
+      onClick={onToggle}
+      onKeyDown={handleKeyDown}
+      className={cn(
+        "relative rounded-[12px] border-2 overflow-hidden cursor-pointer group transition-all text-left w-full",
+        selected ? "border-[#C8924A]" : "border-[#2E231A] hover:border-[#C8924A]/40"
+      )}
+    >
       {/* Thumbnail */}
       <div className={cn("aspect-square flex items-center justify-center", cfg.bg)}>
         {item.type === "image"
@@ -92,7 +104,7 @@ function MediaThumbnail({ item, selected }: { item: MediaItem; selected: boolean
           ×{item.usedIn}
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -189,8 +201,8 @@ export function MediaWallTable() {
       {viewMode === "grid" && (
         <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {filtered.map((item) => (
-            <div key={item.id} onClick={() => toggleSelect(item.id)}>
-              <MediaThumbnail item={item} selected={selected.includes(item.id)} />
+            <div key={item.id}>
+              <MediaThumbnail item={item} selected={selected.includes(item.id)} onToggle={() => toggleSelect(item.id)} />
               <div className="mt-1.5 px-0.5">
                 <p className="text-[10.5px] text-[#7A6045] truncate leading-tight">{item.name}</p>
                 <p className="text-[10px] text-[#3D2E1E]">{formatBytes(item.size)}</p>

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { appointmentService } from "@/services/appointmentService";
+
 import type { AppointmentFilterParams, CreateAppointmentPayload, UpdateAppointmentPayload } from "@/types/appointment.types";
 
 export function useAppointments(filters?: AppointmentFilterParams) {
@@ -23,7 +25,7 @@ export function useCreateAppointment() {
   return useMutation({
     mutationFn: (payload: CreateAppointmentPayload) => appointmentService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateAppointment() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateAppointmentPayload }) =>
       appointmentService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["appointments"] });
-      queryClient.invalidateQueries({ queryKey: ["appointments", id] });
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      void queryClient.invalidateQueries({ queryKey: ["appointments", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteAppointment() {
   return useMutation({
     mutationFn: (id: string) => appointmentService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
 }

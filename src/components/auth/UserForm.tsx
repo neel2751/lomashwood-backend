@@ -40,8 +40,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useRoles } from "@/hooks/useRoles";
-import { useCreateUser, useUpdateUser, useUser } from "@/hooks/useUsers";``
-import { userSchema } from "@/schemas/user.schema"; 
+import { useCreateUser, useUpdateUser, useUser } from "@/hooks/useUsers";
+import { userSchema } from "@/schemas/user.schema";
+
 import type { Role } from "@/types/auth.types";
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -49,14 +50,14 @@ type UserFormData = z.infer<typeof userSchema>;
 interface UserFormProps {
   userId?: string;
 }
+
 export function UserForm({ userId }: UserFormProps) {
   const router = useRouter();
   const isEditing = !!userId;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  
-  const { data: existingUser } = useUser(userId); 
+  const { data: existingUser } = useUser(userId);
   const { mutateAsync: createUser, isPending: isCreating } = useCreateUser();
   const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
   const isSubmitting = isCreating || isUpdating;
@@ -312,7 +313,7 @@ export function UserForm({ userId }: UserFormProps) {
                             <div>
                               <FormLabel>Send Welcome Email</FormLabel>
                               <FormDescription className="text-xs mt-0.5">
-                                Send login credentials to the user's email.
+                                Send login credentials to the user&apos;s email.
                               </FormDescription>
                             </div>
                             <FormControl>

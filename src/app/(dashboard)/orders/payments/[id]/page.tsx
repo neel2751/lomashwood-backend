@@ -1,3 +1,4 @@
+"use client"
 
 
 export default function PaymentDetailPage({ params }: { params: { id: string } }) {
@@ -8,3 +9,4 @@ export default function PaymentDetailPage({ params }: { params: { id: string } }
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

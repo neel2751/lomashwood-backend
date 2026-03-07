@@ -43,9 +43,10 @@ export function PaymentDetail() {
   const [copied, setCopied] = useState(false);
 
   const copyRef = () => {
-    navigator.clipboard.writeText(payment.gatewayRef);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void navigator.clipboard.writeText(payment.gatewayRef).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (

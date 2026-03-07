@@ -15,3 +15,4 @@ export default function SecuritySettingsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

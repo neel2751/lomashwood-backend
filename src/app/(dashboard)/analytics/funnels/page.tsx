@@ -269,3 +269,5 @@ export default function FunnelsListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

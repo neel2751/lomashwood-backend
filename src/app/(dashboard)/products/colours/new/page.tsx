@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState, useTransition } from 'react'
@@ -618,3 +619,5 @@ export default function NewColourPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

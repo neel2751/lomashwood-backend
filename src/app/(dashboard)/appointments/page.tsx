@@ -170,3 +170,5 @@ export default function AppointmentsPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

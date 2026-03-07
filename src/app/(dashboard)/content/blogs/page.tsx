@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { BlogTable } from "@/components/content/BlogTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 
@@ -21,3 +22,4 @@ export default function BlogsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

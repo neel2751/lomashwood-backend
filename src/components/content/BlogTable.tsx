@@ -58,10 +58,13 @@ const CATEGORY_CONFIG: Record<BlogCategory, { label: string; bg: string; text: s
   case_study:  { label: "Case Study",  bg: "bg-blue-400/10",    text: "text-blue-400"   },
 };
 
+type StatusFilterValue = "All" | BlogStatus;
+type CategoryFilterValue = "All" | BlogCategory;
+
 export function BlogTable() {
   const [search, setSearch]       = useState("");
-  const [statusFilter, setStatus] = useState<"All" | BlogStatus>("All");
-  const [catFilter, setCat]       = useState<"All" | BlogCategory>("All");
+  const [statusFilter, setStatus] = useState<StatusFilterValue>("All");
+  const [catFilter, setCat]       = useState<CategoryFilterValue>("All");
   const [openMenu, setOpenMenu]   = useState<string | null>(null);
   const [selected, setSelected]   = useState<string[]>([]);
 
@@ -85,7 +88,6 @@ export function BlogTable() {
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
-      {/* Toolbar */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2E231A] flex-wrap">
         <div className="relative">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
@@ -98,7 +100,7 @@ export function BlogTable() {
 
         <div className="relative">
           <Filter size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
-          <select value={statusFilter} onChange={(e) => setStatus(e.target.value as any)}
+          <select value={statusFilter} onChange={(e) => setStatus(e.target.value as StatusFilterValue)}
             className="appearance-none h-9 pl-8 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40">
             <option value="All">All Status</option>
             {(Object.keys(STATUS_CONFIG) as BlogStatus[]).map((s) => (
@@ -109,7 +111,7 @@ export function BlogTable() {
         </div>
 
         <div className="relative">
-          <select value={catFilter} onChange={(e) => setCat(e.target.value as any)}
+          <select value={catFilter} onChange={(e) => setCat(e.target.value as CategoryFilterValue)}
             className="appearance-none h-9 px-3 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40">
             <option value="All">All Categories</option>
             {(Object.keys(CATEGORY_CONFIG) as BlogCategory[]).map((c) => (
@@ -136,7 +138,7 @@ export function BlogTable() {
         </div>
       </div>
 
-      {/* Table */}
+
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px]">
           <thead>
@@ -164,7 +166,7 @@ export function BlogTable() {
                       className="w-4 h-4 rounded accent-[#C8924A] cursor-pointer" />
                   </td>
 
-                  {/* Post */}
+        
                   <td className="px-3 py-3.5 max-w-[260px]">
                     <Link href={`/content/blog/${post.id}`}
                       className="text-[13px] font-semibold text-[#C8B99A] hover:text-[#E8D5B7] transition-colors line-clamp-1 block">
@@ -173,14 +175,13 @@ export function BlogTable() {
                     <p className="text-[11px] text-[#5A4232] mt-0.5 font-mono">/{post.slug}</p>
                   </td>
 
-                  {/* Category */}
+              
                   <td className="px-3 py-3.5">
                     <span className={cn("text-[10.5px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap", cat.bg, cat.text)}>
                       {cat.label}
                     </span>
                   </td>
 
-                  {/* Author */}
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-1.5">
                       <User size={11} className="text-[#5A4232]" />
@@ -188,7 +189,7 @@ export function BlogTable() {
                     </div>
                   </td>
 
-                  {/* Status */}
+      
                   <td className="px-3 py-3.5">
                     <span className={cn("inline-flex items-center gap-1.5 text-[10.5px] px-2 py-0.5 rounded-full font-medium", st.bg, st.text)}>
                       <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", st.dot)} />
@@ -196,12 +197,12 @@ export function BlogTable() {
                     </span>
                   </td>
 
-                  {/* Read time */}
+     
                   <td className="px-3 py-3.5">
                     <span className="text-[12px] text-[#5A4232]">{post.readTime} min</span>
                   </td>
 
-                  {/* Views */}
+  
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-1">
                       <Eye size={11} className="text-[#5A4232]" />
@@ -209,7 +210,6 @@ export function BlogTable() {
                     </div>
                   </td>
 
-                  {/* Date */}
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-1">
                       <Calendar size={10} className="text-[#3D2E1E]" />
@@ -219,7 +219,6 @@ export function BlogTable() {
                     </div>
                   </td>
 
-                  {/* Actions */}
                   <td className="px-3 py-3.5 relative">
                     <button onClick={() => setOpenMenu(openMenu === post.id ? null : post.id)}
                       className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#3D2E1E] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all opacity-0 group-hover:opacity-100">

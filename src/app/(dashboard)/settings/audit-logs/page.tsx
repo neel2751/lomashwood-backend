@@ -15,3 +15,4 @@ export default function AuditLogsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

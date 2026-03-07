@@ -44,8 +44,9 @@ import {
 } from "@/components/ui/table";
 import { useEmailNotifications } from "@/hooks/useNotifications";
 import { type NotificationStatus, type EmailLog } from "@/types/notification.types";
-import type { PaginatedResponse } from "@/types/api.types";
 import { formatters } from "@/utils/formatters";
+
+import type { PaginatedResponse } from "@/types/api.types";
 
 type ExtendedStatus = NotificationStatus | "delivered" | "pending" | "bounced";
 

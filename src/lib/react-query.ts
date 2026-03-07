@@ -4,9 +4,11 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
   keepPreviousData,
-} from "@tanstack/react-query";
-import { toast } from "@/lib/toast";
-import { ApiError } from "./axios";
+} from "@tanstack/react-query"
+
+import { toast } from "@/lib/toast"
+
+import { ApiError } from "./axios"
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -233,8 +235,10 @@ export function invalidateOn(
 export function optimisticUpdate<TData, TVariables>(
   queryKey: QueryKey,
   updater: (old: TData | undefined, variables: TVariables) => TData,
-): Pick<UseMutationOptions<unknown, unknown, TVariables, { previous: TData | undefined }>,
-  "onMutate" | "onError" | "onSettled"> {
+): Pick<
+  UseMutationOptions<unknown, unknown, TVariables, { previous: TData | undefined }>,
+  "onMutate" | "onError" | "onSettled"
+> {
   return {
     onMutate: async (variables: TVariables) => {
       await queryClient.cancelQueries({ queryKey });
@@ -242,13 +246,17 @@ export function optimisticUpdate<TData, TVariables>(
       queryClient.setQueryData<TData>(queryKey, (old) => updater(old, variables));
       return { previous };
     },
-    onError: (_err: unknown, _variables: TVariables, context: { previous: TData | undefined } | undefined) => {
+    onError: (
+      _err: unknown,
+      _variables: TVariables,
+      context: { previous: TData | undefined } | undefined,
+    ) => {
       if (context?.previous !== undefined) {
         queryClient.setQueryData(queryKey, context.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
+      void queryClient.invalidateQueries({ queryKey });
     },
   };
 }

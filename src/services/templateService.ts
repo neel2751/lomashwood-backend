@@ -1,8 +1,9 @@
 import { apiClient } from "@/lib/api-client";
-import type { NotificationTemplate } from "@/lib/api-client";
 import axios from "@/lib/axios";
-import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
+
+import type { ApiResponse, NotificationTemplate, PaginatedResponse } from "@/lib/api-client";
 import type { NotificationChannel } from "@/lib/constants";
+
 
 export const templateService = {
   getAll: (params?: Record<string, unknown>) =>
@@ -60,4 +61,3 @@ export const templateService = {
       })
       .then((r) => r.data),
 };
-

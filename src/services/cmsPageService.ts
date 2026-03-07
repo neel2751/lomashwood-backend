@@ -1,7 +1,9 @@
 import { apiClient } from "@/lib/api-client";
-import type { ApiResponse } from "@/lib/api-client";
 import axios from "@/lib/axios";
+
+import type { ApiResponse } from "@/lib/api-client";
 import type { ManagedPageSlug } from "@/lib/constants";
+
 
 type CmsPage = {
   id: string;

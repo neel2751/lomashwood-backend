@@ -36,9 +36,18 @@ const REASON_LABELS: Record<RefundReason, string> = {
   other:             "Other",
 };
 
+interface RefundSaveData {
+  orderId: string;
+  reason: RefundReason;
+  type: RefundType;
+  amount: number;
+  notes: string;
+  notifyCustomer: boolean;
+}
+
 interface RefundFormProps {
   prefilledOrderId?: string;
-  onSave?: (data: any) => void;
+  onSave?: (data: RefundSaveData) => void;
 }
 
 export function RefundForm({ prefilledOrderId, onSave }: RefundFormProps) {
@@ -98,11 +107,12 @@ export function RefundForm({ prefilledOrderId, onSave }: RefundFormProps) {
       <div className="p-6 flex flex-col gap-5">
         {/* Order selector */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label htmlFor="refund-order" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             Order <span className="text-[#C8924A]">*</span>
           </label>
           <div className="relative">
             <select
+              id="refund-order"
               value={orderId}
               onChange={(e) => { setOrderId(e.target.value); setAmount(""); }}
               className={selectCls}
@@ -130,11 +140,12 @@ export function RefundForm({ prefilledOrderId, onSave }: RefundFormProps) {
 
         {/* Reason */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label htmlFor="refund-reason" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             Reason <span className="text-[#C8924A]">*</span>
           </label>
           <div className="relative">
             <select
+              id="refund-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value as RefundReason)}
               className={selectCls}
@@ -149,9 +160,9 @@ export function RefundForm({ prefilledOrderId, onSave }: RefundFormProps) {
 
         {/* Refund type */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
             Refund Type
-          </label>
+          </p>
           <div className="flex gap-2">
             {([
               { value: "full",    label: "Full Refund",    desc: `£${maxAmount.toLocaleString()}` },
@@ -181,12 +192,13 @@ export function RefundForm({ prefilledOrderId, onSave }: RefundFormProps) {
         {/* Partial amount */}
         {type === "partial" && (
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+            <label htmlFor="refund-amount" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
               Refund Amount <span className="text-[#C8924A]">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232] text-[13px]">£</span>
               <input
+                id="refund-amount"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -219,10 +231,11 @@ export function RefundForm({ prefilledOrderId, onSave }: RefundFormProps) {
 
         {/* Notes */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label htmlFor="refund-notes" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             Internal Notes
           </label>
           <textarea
+            id="refund-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}

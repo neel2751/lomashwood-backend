@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { availabilityService } from "@/services/availabilityService";
+
 import type { SetAvailabilityPayload } from "@/types/appointment.types";
 
 export function useAvailability(consultantId?: string) {
@@ -24,7 +26,7 @@ export function useUpdateAvailability() {
     mutationFn: ({ id, payload }: { id: string; payload: SetAvailabilityPayload }) =>
       availabilityService.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["availability"] });
+      void queryClient.invalidateQueries({ queryKey: ["availability"] });
     },
   });
 }

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { pricingService } from "@/services/pricingService";
+
 import type { PricingRule } from "@/types/product.types";
 
 export function usePricing(productId?: string) {
@@ -23,7 +25,7 @@ export function useCreatePricing() {
   return useMutation({
     mutationFn: (payload: Partial<PricingRule>) => pricingService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pricing"] });
+      void queryClient.invalidateQueries({ queryKey: ["pricing"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdatePricing() {
     mutationFn: ({ id, payload }: { id: string; payload: Partial<PricingRule> }) =>
       pricingService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Partial<PricingRule> }) => {
-      queryClient.invalidateQueries({ queryKey: ["pricing"] });
-      queryClient.invalidateQueries({ queryKey: ["pricing", id] });
+      void queryClient.invalidateQueries({ queryKey: ["pricing"] });
+      void queryClient.invalidateQueries({ queryKey: ["pricing", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeletePricing() {
   return useMutation({
     mutationFn: (id: string) => pricingService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pricing"] });
+      void queryClient.invalidateQueries({ queryKey: ["pricing"] });
     },
   });
 }

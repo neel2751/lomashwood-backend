@@ -15,3 +15,4 @@ export default function NewCmsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

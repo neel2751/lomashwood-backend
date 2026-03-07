@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { AlertTriangle, RefreshCw, Home } from "lucide-react"
+
+import { AlertTriangle, Home, RefreshCw } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -47,7 +49,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.props.onReset?.()
   }
 
-   override render(): React.ReactNode {
+  override render(): React.ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback
       return (

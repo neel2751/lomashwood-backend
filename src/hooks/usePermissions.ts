@@ -1,15 +1,21 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
+
 import { useAuthStore } from "@/stores/useAuthStore";
 import { hasPermission, hasAnyPermission, hasAllPermissions } from "@/utils/permission-helpers";
-import type { UserWithRole } from "@/utils/permission-helpers";
+
 import type { PermissionKey, RoleName } from "@/lib/constants";
+import type { UserWithRole } from "@/utils/permission-helpers";
 
 export function usePermissions() {
   const user = useAuthStore((s) => s.user);
 
-  const userWithRole: UserWithRole | null = user?.roleName
-    ? { id: user.id, role: user.roleName as RoleName }
-    : null;
+  const userWithRole: UserWithRole | null = useMemo(
+    () =>
+      user?.roleName
+        ? { id: user.id, role: user.roleName as RoleName }
+        : null,
+    [user]
+  );
 
   const can = useCallback(
     (permission: PermissionKey): boolean => {

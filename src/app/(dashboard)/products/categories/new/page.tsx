@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState, useTransition } from 'react'
@@ -448,3 +449,5 @@ export default function NewCategoryPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

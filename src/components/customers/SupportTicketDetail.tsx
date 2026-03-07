@@ -229,17 +229,17 @@ export function SupportTicketDetail() {
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[14px] font-semibold text-[#E8D5B7] mb-4">Ticket Details</h3>
             <div className="flex flex-col gap-3">
-              {/* Status */}
+              {/* Status — display only, no control */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</p>
                 <p className={cn("text-[13px] font-semibold", st.cls)}>{st.label}</p>
               </div>
 
               {/* Priority */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Priority</label>
+                <label htmlFor="ticket-priority" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Priority</label>
                 <div className="relative">
-                  <select value={priority} onChange={(e) => setPriority(e.target.value as TicketPriority)}
+                  <select id="ticket-priority" value={priority} onChange={(e) => setPriority(e.target.value as TicketPriority)}
                     className="appearance-none w-full h-9 px-3 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#E8D5B7] focus:outline-none focus:border-[#C8924A]/50 transition-colors">
                     {PRIORITY_OPTIONS.map((p) => (
                       <option key={p} value={p} className="bg-[#1C1611] capitalize">{PRIORITY_CONFIG[p].label}</option>
@@ -251,9 +251,9 @@ export function SupportTicketDetail() {
 
               {/* Assignee */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Assignee</label>
+                <label htmlFor="ticket-assignee" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Assignee</label>
                 <div className="relative">
-                  <select value={assignee} onChange={(e) => setAssignee(e.target.value)}
+                  <select id="ticket-assignee" value={assignee} onChange={(e) => setAssignee(e.target.value)}
                     className="appearance-none w-full h-9 px-3 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#E8D5B7] focus:outline-none focus:border-[#C8924A]/50 transition-colors">
                     {ASSIGNEES.map((a) => (
                       <option key={a} value={a} className="bg-[#1C1611]">{a}</option>
@@ -263,10 +263,10 @@ export function SupportTicketDetail() {
                 </div>
               </div>
 
-              {/* Due date */}
+              {/* Due date — display only, no control */}
               {ticket.dueAt && (
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Due By</label>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Due By</p>
                   <div className="flex items-center gap-1.5 text-[12.5px] text-amber-400">
                     <Clock size={12} />
                     {ticket.dueAt}
@@ -274,9 +274,9 @@ export function SupportTicketDetail() {
                 </div>
               )}
 
-              {/* Category */}
+              {/* Category — display only, no control */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Category</label>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Category</p>
                 <p className="text-[12.5px] text-[#7A6045] capitalize">{ticket.category.replace("_", " ")}</p>
               </div>
             </div>

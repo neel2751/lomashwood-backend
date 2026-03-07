@@ -151,7 +151,7 @@ export function ReviewModerationCard({
 
         {/* Review content */}
         <div className="rounded-[12px] bg-[#2E231A] border border-[#3D2E1E] p-4">
-          <h4 className="text-[14px] font-semibold text-[#E8D5B7] mb-2">"{review.title}"</h4>
+          <h4 className="text-[14px] font-semibold text-[#E8D5B7] mb-2">&ldquo;{review.title}&rdquo;</h4>
           <p className="text-[13px] text-[#7A6045] leading-relaxed">{review.body}</p>
         </div>
 

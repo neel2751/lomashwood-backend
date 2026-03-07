@@ -125,3 +125,5 @@ export default function PricingListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

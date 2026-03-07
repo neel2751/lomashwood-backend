@@ -341,3 +341,4 @@ export default function DashboardDetailPage({ params, searchParams }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

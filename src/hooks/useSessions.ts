@@ -10,10 +10,10 @@ export type SessionFilters = {
 };
 
 const sessionService = {
-  getAll: async (_filters?: Record<string, unknown>) => [],
-  getById: async (_id: string) => null,
-  revoke: async (_id: string) => null,
-  revokeAll: async (_userId?: string) => null,
+  getAll: (_filters?: Record<string, unknown>): Promise<never[]> => Promise.resolve([]),
+  getById: (_id: string): Promise<null> => Promise.resolve(null),
+  revoke: (_id: string): Promise<null> => Promise.resolve(null),
+  revokeAll: (_userId?: string): Promise<null> => Promise.resolve(null),
 };
 
 export function useSessions(filters?: SessionFilters) {
@@ -37,7 +37,7 @@ export function useRevokeSession() {
   return useMutation({
     mutationFn: (id: string) => sessionService.revoke(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      void queryClient.invalidateQueries({ queryKey: ["sessions"] });
     },
   });
 }
@@ -48,7 +48,7 @@ export function useRevokeAllSessions() {
   return useMutation({
     mutationFn: (userId?: string) => sessionService.revokeAll(userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      void queryClient.invalidateQueries({ queryKey: ["sessions"] });
     },
   });
 }

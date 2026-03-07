@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState } from 'react'
@@ -301,3 +302,5 @@ export default function RemindersListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import type { User } from "@/types/api.types";
 
 async function fetchMe(): Promise<{ user: User }> {
@@ -11,7 +12,6 @@ interface LoginPayload {
   email: string;
   password: string;
 }
-
 
 async function login(payload: LoginPayload): Promise<{ user: User; token: string }> {
   const res = await fetch("/api/auth/login", {
@@ -61,5 +61,4 @@ export function useAuth() {
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
   };
-  
 }

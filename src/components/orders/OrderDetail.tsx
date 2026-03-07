@@ -52,7 +52,7 @@ const STATUS_OPTIONS: OrderStatus[] = [
   "pending","processing","confirmed","dispatched","delivered","completed","cancelled",
 ];
 
-export function OrderDetail({ orderId }: OrderDetailProps) {
+export function OrderDetail({}: OrderDetailProps) {
   const order = MOCK_ORDER;
   const [status, setStatus] = useState<OrderStatus>(order.status);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
@@ -215,7 +215,7 @@ export function OrderDetail({ orderId }: OrderDetailProps) {
           {order.notes && (
             <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
               <h3 className="text-[14px] font-semibold text-[#E8D5B7] mb-3">Notes</h3>
-              <p className="text-[12.5px] text-[#7A6045] leading-relaxed italic">"{order.notes}"</p>
+              <p className="text-[12.5px] text-[#7A6045] leading-relaxed italic">&ldquo;{order.notes}&rdquo;</p>
             </div>
           )}
         </div>

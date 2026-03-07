@@ -189,3 +189,5 @@ export default function DashboardOverviewPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

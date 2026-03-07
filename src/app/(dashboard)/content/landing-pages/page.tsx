@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { LandingPageTable } from "@/components/content/LandingPageTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 
@@ -21,3 +22,4 @@ export default function LandingPagesPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

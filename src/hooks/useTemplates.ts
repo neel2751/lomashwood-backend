@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { templateService } from "@/services/templateService";
+
 import type { CreateTemplatePayload, UpdateTemplatePayload } from "@/types/notification.types";
 
 export function useTemplates() {
@@ -23,7 +25,7 @@ export function useCreateTemplate() {
   return useMutation({
     mutationFn: (payload: CreateTemplatePayload) => templateService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      void queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateTemplate() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateTemplatePayload }) =>
       templateService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
-      queryClient.invalidateQueries({ queryKey: ["templates", id] });
+      void queryClient.invalidateQueries({ queryKey: ["templates"] });
+      void queryClient.invalidateQueries({ queryKey: ["templates", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteTemplate() {
   return useMutation({
     mutationFn: (id: string) => templateService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      void queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
   });
 }

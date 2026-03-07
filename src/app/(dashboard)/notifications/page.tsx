@@ -14,3 +14,4 @@ export default function NotificationsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 
+import Image from "next/image";
+
 import { Upload, X, GripVertical, Star, ImageOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -88,15 +90,18 @@ export function ProductImageUpload({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Drop zone */}
+      {/* Drop zone — rendered as a <button> for full keyboard + screen-reader support */}
       {canAdd && (
-        <div
+        <button
+          type="button"
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+          aria-label="Upload images — click or drag and drop"
           className={cn(
-            "flex flex-col items-center justify-center gap-3 h-36 rounded-[12px] border-2 border-dashed transition-all cursor-pointer",
+            "flex flex-col items-center justify-center gap-3 h-36 rounded-[12px] border-2 border-dashed transition-all cursor-pointer w-full",
             isDragging
               ? "border-[#C8924A] bg-[#C8924A]/10"
               : "border-[#3D2E1E] bg-[#2E231A] hover:border-[#C8924A]/40 hover:bg-[#221A12]"
@@ -124,7 +129,7 @@ export function ProductImageUpload({
             className="hidden"
             onChange={(e) => processFiles(e.target.files)}
           />
-        </div>
+        </button>
       )}
 
       {/* Image grid */}
@@ -139,11 +144,13 @@ export function ProductImageUpload({
               )}
             >
               {/* Image */}
-              <img
+              <Image
                 src={img.url}
                 alt={img.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                unoptimized
               />
 
               {/* Primary badge */}
@@ -190,6 +197,7 @@ export function ProductImageUpload({
           {/* Add more slot */}
           {canAdd && images.length > 0 && (
             <button
+              type="button"
               onClick={() => inputRef.current?.click()}
               className="aspect-square rounded-[10px] border-2 border-dashed border-[#3D2E1E] bg-[#2E231A] flex flex-col items-center justify-center gap-1.5 text-[#3D2E1E] hover:border-[#C8924A]/40 hover:text-[#C8924A] hover:bg-[#221A12] transition-all"
             >

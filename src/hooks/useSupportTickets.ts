@@ -1,52 +1,55 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { sizeService } from "@/services/sizeService";
-import type { CreateSizePayload } from "@/types/product.types";
 
-export function useSizes(productId?: string) {
+import { supportService } from "@/services/supportService";
+
+import type { CreateSupportTicketPayload } from "@/types/customer.types";
+
+export function useSupportTickets(filters?: Record<string, unknown>) {
   return useQuery({
-    queryKey: ["sizes", productId],
-    queryFn: () => sizeService.getAll(productId ? { productId } : undefined),
+    queryKey: ["support-tickets", filters],
+    queryFn: () => supportService.getAll(filters),
   });
 }
 
-export function useSize(id: string) {
+export function useSupportTicket(id: string) {
   return useQuery({
-    queryKey: ["sizes", id],
-    queryFn: () => sizeService.getById(id),
+    queryKey: ["support-tickets", id],
+    queryFn: () => supportService.getById(id),
     enabled: !!id,
   });
 }
 
-export function useCreateSize() {
+export function useCreateSupportTicket() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateSizePayload) => sizeService.create(payload),
+    mutationFn: (payload: CreateSupportTicketPayload) => supportService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sizes"] });
+      void queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
     },
   });
 }
 
-export function useUpdateSize() {
+export function useUpdateSupportTicket() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: CreateSizePayload }) =>
-      sizeService.update(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<CreateSupportTicketPayload> }) =>
+      supportService.update(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["sizes"] });
-      queryClient.invalidateQueries({ queryKey: ["sizes", id] });
+      void queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
+      void queryClient.invalidateQueries({ queryKey: ["support-tickets", id] });
     },
   });
 }
-export function useDeleteSize() {
+
+export function useDeleteSupportTicket() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => sizeService.remove(id),
+    mutationFn: (id: string) => supportService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sizes"] });
+      void queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
     },
   });
 }

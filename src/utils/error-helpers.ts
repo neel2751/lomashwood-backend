@@ -1,5 +1,6 @@
-import { ApiError } from "@/lib/axios";
-import type { ZodError } from "zod";
+import { ApiError } from "@/lib/axios"
+
+import type { ZodError } from "zod"
 
 export type FieldErrors = Record<string, string>;
 

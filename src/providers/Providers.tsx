@@ -1,8 +1,9 @@
 "use client";
 
+import { Toaster } from "sonner";
+
 import { QueryProvider } from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
-import { Toaster } from "sonner";
 
 interface ProvidersProps {
   children: React.ReactNode;

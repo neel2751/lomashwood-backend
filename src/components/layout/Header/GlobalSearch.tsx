@@ -50,7 +50,7 @@ export function GlobalSearch() {
     close();
   };
 
-  // Keyboard shortcut ⌘K / Ctrl+K
+  
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -65,7 +65,7 @@ export function GlobalSearch() {
 
   return (
     <>
-      {/* Trigger button */}
+    
       <button
         onClick={() => setOpen(true)}
         className={cn(
@@ -83,21 +83,21 @@ export function GlobalSearch() {
         </kbd>
       </button>
 
-      {/* Modal overlay */}
+    
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4"
           onClick={close}
         >
-          {/* Backdrop */}
+         
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-          {/* Panel */}
+          
           <div
             className="relative w-full max-w-lg bg-[#1C1611] border border-[#3D2E1E] rounded-[14px] shadow-2xl shadow-black/60 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Search input */}
+           
             <div className="flex items-center gap-3 px-4 py-3 border-b border-[#2E231A]">
               <Search size={16} className="text-[#C8924A] shrink-0" />
               <input
@@ -115,7 +115,7 @@ export function GlobalSearch() {
               )}
             </div>
 
-            {/* Results */}
+          
             <div className="max-h-[340px] overflow-y-auto py-2">
               {filtered.length === 0 ? (
                 <p className="text-center text-[13px] text-[#5A4232] py-8">No results found.</p>
@@ -140,7 +140,7 @@ export function GlobalSearch() {
               )}
             </div>
 
-            {/* Footer hint */}
+         
             <div className="flex items-center gap-3 px-4 py-2 border-t border-[#2E231A]">
               <span className="text-[11px] text-[#3D2E1E]">↑↓ navigate</span>
               <span className="text-[11px] text-[#3D2E1E]">↵ open</span>

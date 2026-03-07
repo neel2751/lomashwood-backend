@@ -1,0 +1,145 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug API Gateway",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/api-gateway/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/api-gateway/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Auth Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/auth-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/auth-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Product Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/product-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/product-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Order Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/order-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/order-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Appointment Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/appointment-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/appointment-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Customer Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/customer-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/customer-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Content Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/content-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/content-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Notification Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/notification-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/notification-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Analytics Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/analytics-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/analytics-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Upload Service",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/upload-service/src/main.ts",
+      "outFiles": ["${workspaceFolder}/services/upload-service/dist/**/*.js"],
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}

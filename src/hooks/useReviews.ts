@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { reviewService } from "@/services/reviewService";
+
 import type { CreateReviewPayload } from "@/types/customer.types";
 
 export function useReviews(filters?: Record<string, unknown>) {
@@ -23,8 +25,9 @@ export function useUpdateReview() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: CreateReviewPayload }) =>
       reviewService.update(id, payload),
-onSuccess: (_data: unknown, { id }: { id: string; payload: CreateReviewPayload }) => {      queryClient.invalidateQueries({ queryKey: ["reviews"] });
-      queryClient.invalidateQueries({ queryKey: ["reviews", id] });
+    onSuccess: (_data: unknown, { id }: { id: string; payload: CreateReviewPayload }) => {
+      void queryClient.invalidateQueries({ queryKey: ["reviews"] });
+      void queryClient.invalidateQueries({ queryKey: ["reviews", id] });
     },
   });
 }
@@ -35,7 +38,7 @@ export function useDeleteReview() {
   return useMutation({
     mutationFn: (id: string) => reviewService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reviews"] });
+      void queryClient.invalidateQueries({ queryKey: ["reviews"] });
     },
   });
 }

@@ -8,6 +8,12 @@ import { cn } from "@/lib/utils";
 
 type AdjustType = "set" | "add" | "subtract";
 
+interface InventoryFormData {
+  stock: number;
+  minThreshold: number;
+  reason: string;
+}
+
 interface InventoryFormProps {
   initialData?: {
     productTitle?: string;
@@ -16,7 +22,7 @@ interface InventoryFormProps {
     reserved?: number;
     minThreshold?: number;
   };
-  onSave?: (data: any) => void;
+  onSave?: (data: InventoryFormData) => void;
 }
 
 export function InventoryForm({ initialData, onSave }: InventoryFormProps) {
@@ -110,10 +116,10 @@ export function InventoryForm({ initialData, onSave }: InventoryFormProps) {
 
         {/* Adjustment type */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
             Adjustment Type
-          </label>
-          <div className="flex gap-2">
+          </p>
+          <div className="flex gap-2" role="group" aria-label="Adjustment Type">
             {([
               { value: "set",      label: "Set",      icon: null    },
               { value: "add",      label: "Add",      icon: Plus    },
@@ -122,6 +128,7 @@ export function InventoryForm({ initialData, onSave }: InventoryFormProps) {
               <button
                 key={value}
                 onClick={() => setAdjustType(value)}
+                aria-pressed={adjustType === value}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1.5 h-10 rounded-[9px] text-[12.5px] font-medium border transition-all",
                   adjustType === value
@@ -138,10 +145,14 @@ export function InventoryForm({ initialData, onSave }: InventoryFormProps) {
 
         {/* Quantity input */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="adjust-quantity"
+            className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+          >
             {adjustType === "set" ? "New Stock Level" : "Quantity"} <span className="text-[#C8924A]">*</span>
           </label>
           <input
+            id="adjust-quantity"
             type="number"
             min={0}
             value={adjustValue}
@@ -159,10 +170,14 @@ export function InventoryForm({ initialData, onSave }: InventoryFormProps) {
 
         {/* Min threshold */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="min-threshold"
+            className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+          >
             Low Stock Threshold
           </label>
           <input
+            id="min-threshold"
             type="number"
             min={0}
             value={minThreshold}
@@ -174,10 +189,14 @@ export function InventoryForm({ initialData, onSave }: InventoryFormProps) {
 
         {/* Reason */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="reason-notes"
+            className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+          >
             Reason / Notes
           </label>
           <textarea
+            id="reason-notes"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={2}

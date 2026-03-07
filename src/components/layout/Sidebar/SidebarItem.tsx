@@ -124,7 +124,6 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
         ) : (
           <Link
             href={item.href}
-            onClick={hasChildren ? handleClick : undefined}
             className={cn(
               "flex items-center gap-2 px-1.5 py-1 rounded-[10px] transition-all duration-150",
               "relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40",

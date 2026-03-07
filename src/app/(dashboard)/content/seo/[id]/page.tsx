@@ -19,3 +19,4 @@ export default function SeoDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

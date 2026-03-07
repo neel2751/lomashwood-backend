@@ -63,7 +63,6 @@ export function CustomerDetail() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Top bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <Link href="/customers"
@@ -105,7 +104,6 @@ export function CustomerDetail() {
         </div>
       </div>
 
-      {/* KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { icon: TrendingUp,    label: "Total Spend",    value: `£${c.totalSpend.toLocaleString()}`,  sub: `Avg £${c.avgOrderValue.toLocaleString()} / order` },
@@ -125,9 +123,7 @@ export function CustomerDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left: orders + appointments + timeline */}
         <div className="lg:col-span-2 flex flex-col gap-5">
-          {/* Recent Orders */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#2E231A]">
               <h3 className="text-[14px] font-semibold text-[#E8D5B7]">Orders</h3>
@@ -159,7 +155,6 @@ export function CustomerDetail() {
             </table>
           </div>
 
-          {/* Recent Appointments */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#2E231A]">
               <h3 className="text-[14px] font-semibold text-[#E8D5B7]">Appointments</h3>
@@ -183,13 +178,10 @@ export function CustomerDetail() {
             </div>
           </div>
 
-          {/* Timeline */}
           <CustomerTimeline />
         </div>
 
-        {/* Right sidebar */}
         <div className="flex flex-col gap-5">
-          {/* Contact */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[14px] font-semibold text-[#E8D5B7] mb-4">Contact</h3>
             {[
@@ -207,7 +199,6 @@ export function CustomerDetail() {
             ))}
           </div>
 
-          {/* Tags */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[14px] font-semibold text-[#E8D5B7] mb-3">Tags</h3>
             <div className="flex flex-wrap gap-2">
@@ -219,7 +210,6 @@ export function CustomerDetail() {
             </div>
           </div>
 
-          {/* Notes */}
           <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
             <h3 className="text-[14px] font-semibold text-[#E8D5B7] mb-3 flex items-center gap-2">
               <MessageSquare size={14} className="text-[#C8924A]" /> Internal Notes

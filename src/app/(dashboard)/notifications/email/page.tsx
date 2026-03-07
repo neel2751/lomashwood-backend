@@ -15,3 +15,4 @@ export default function EmailNotificationsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

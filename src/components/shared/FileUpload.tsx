@@ -1,7 +1,20 @@
 "use client"
 
 import * as React from "react"
-import { Upload, X, File, Image, FileText, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
+
+import NextImage from "next/image"
+
+import {
+  AlertCircle,
+  CheckCircle2,
+  File,
+  FileText,
+  Image,
+  Loader2,
+  Upload,
+  X,
+} from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
@@ -17,7 +30,7 @@ function formatBytes(bytes: number): string {
 }
 
 function FileIcon({ type, className }: { type: string; className?: string }) {
-  if (IMAGE_TYPES.includes(type)) return <Image className={cn("h-5 w-5 text-blue-500", className)} />
+  if (IMAGE_TYPES.includes(type)) return <Image aria-hidden className={cn("h-5 w-5 text-blue-500", className)} />
   if (type.includes("pdf")) return <FileText className={cn("h-5 w-5 text-red-500", className)} />
   return <File className={cn("h-5 w-5 text-muted-foreground", className)} />
 }
@@ -136,7 +149,7 @@ export function FileUpload({
     e.preventDefault()
     setIsDragging(false)
     if (disabled) return
-    processFiles(Array.from(e.dataTransfer.files))
+    void processFiles(Array.from(e.dataTransfer.files))
   }
 
   const handleRemove = (id: string) => {
@@ -151,14 +164,18 @@ export function FileUpload({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div
+      {/* Dropzone rendered as a button for full keyboard and screen-reader support */}
+      <button
+        type="button"
+        disabled={disabled}
         onDragEnter={(e) => { e.preventDefault(); if (!disabled) setIsDragging(true) }}
         onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        onClick={() => !disabled && inputRef.current?.click()}
+        onClick={() => inputRef.current?.click()}
+        aria-label="Upload files — click or drag and drop"
         className={cn(
-          "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors",
+          "relative flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors",
           isCompact ? "gap-1.5 px-4 py-4" : "gap-3 px-6 py-10",
           isDragging
             ? "border-primary bg-primary/5"
@@ -185,10 +202,10 @@ export function FileUpload({
           multiple={multiple}
           className="sr-only"
           disabled={disabled}
-          onChange={(e) => processFiles(Array.from(e.target.files ?? []))}
+          onChange={(e) => { void processFiles(Array.from(e.target.files ?? [])) }}
           onClick={(e) => (e.currentTarget.value = "")}
         />
-      </div>
+      </button>
 
       {files.length > 0 && (
         <ul className="space-y-2">
@@ -202,11 +219,15 @@ export function FileUpload({
               )}
             >
               {entry.preview ? (
-                <img
-                  src={entry.preview}
-                  alt={entry.file.name}
-                  className="h-8 w-8 rounded object-cover flex-shrink-0"
-                />
+                <div className="relative h-8 w-8 flex-shrink-0 rounded overflow-hidden">
+                  <NextImage
+                    src={entry.preview}
+                    alt={entry.file.name}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
               ) : (
                 <FileIcon type={entry.file.type} />
               )}

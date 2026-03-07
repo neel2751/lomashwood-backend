@@ -18,6 +18,17 @@ const PRODUCT_OPTIONS = [
 
 const SIZE_OPTIONS = ["Standard", "Large", "Compact", "Single", "Double", "Triple"];
 
+interface PricingFormData {
+  productId: string;
+  size: string;
+  type: PriceType;
+  basePrice: string;
+  salePrice: string;
+  validFrom: string;
+  validTo: string;
+  isActive: boolean;
+}
+
 interface PricingFormProps {
   initialData?: {
     productId?: string;
@@ -29,7 +40,7 @@ interface PricingFormProps {
     validTo?: string;
     isActive?: boolean;
   };
-  onSave?: (data: any) => void;
+  onSave?: (data: PricingFormData) => void;
   isEdit?: boolean;
 }
 
@@ -90,11 +101,19 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
         {/* Product + Size */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+            <label
+              htmlFor="pricing-product"
+              className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+            >
               Product <span className="text-[#C8924A]">*</span>
             </label>
             <div className="relative">
-              <select value={productId} onChange={(e) => setProductId(e.target.value)} className={selectCls}>
+              <select
+                id="pricing-product"
+                value={productId}
+                onChange={(e) => setProductId(e.target.value)}
+                className={selectCls}
+              >
                 <option value="">Select product…</option>
                 {PRODUCT_OPTIONS.map((p) => (
                   <option key={p.id} value={p.id} className="bg-[#1C1611]">
@@ -106,9 +125,19 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">Size</label>
+            <label
+              htmlFor="pricing-size"
+              className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+            >
+              Size
+            </label>
             <div className="relative">
-              <select value={size} onChange={(e) => setSize(e.target.value)} className={selectCls}>
+              <select
+                id="pricing-size"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+                className={selectCls}
+              >
                 <option value="">All sizes</option>
                 {SIZE_OPTIONS.map((s) => <option key={s} value={s} className="bg-[#1C1611]">{s}</option>)}
               </select>
@@ -119,10 +148,10 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
 
         {/* Type */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
             Price Type
-          </label>
-          <div className="flex gap-2">
+          </p>
+          <div className="flex gap-2" role="group" aria-label="Price Type">
             {([
               { value: "standard", label: "Standard" },
               { value: "sale",     label: "Sale",    icon: Tag },
@@ -131,6 +160,7 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
               <button
                 key={value}
                 onClick={() => setType(value)}
+                aria-pressed={type === value}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1.5 h-10 rounded-[9px] text-[12.5px] font-medium border transition-all",
                   type === value
@@ -148,17 +178,29 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
         {/* Prices */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+            <label
+              htmlFor="pricing-base-price"
+              className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+            >
               Base Price <span className="text-[#C8924A]">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232] text-[13px]">£</span>
-              <input type="number" value={basePrice} onChange={(e) => setBasePrice(e.target.value)}
-                placeholder="0" className="w-full h-10 pl-7 pr-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[13px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors" />
+              <input
+                id="pricing-base-price"
+                type="number"
+                value={basePrice}
+                onChange={(e) => setBasePrice(e.target.value)}
+                placeholder="0"
+                className="w-full h-10 pl-7 pr-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[13px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors"
+              />
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+            <label
+              htmlFor="pricing-sale-price"
+              className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+            >
               Sale Price
               {discount !== null && discount > 0 && (
                 <span className="ml-2 text-emerald-400 normal-case font-normal">({discount}% off)</span>
@@ -166,9 +208,15 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232] text-[13px]">£</span>
-              <input type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)}
-                placeholder="0" disabled={type === "standard"}
-                className="w-full h-10 pl-7 pr-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[13px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors disabled:opacity-40 disabled:pointer-events-none" />
+              <input
+                id="pricing-sale-price"
+                type="number"
+                value={salePrice}
+                onChange={(e) => setSalePrice(e.target.value)}
+                placeholder="0"
+                disabled={type === "standard"}
+                className="w-full h-10 pl-7 pr-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[13px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+              />
             </div>
           </div>
         </div>
@@ -177,16 +225,34 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
         {type !== "standard" && (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+              <label
+                htmlFor="pricing-valid-from"
+                className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+              >
                 Valid From
               </label>
-              <input type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} className={inputCls} />
+              <input
+                id="pricing-valid-from"
+                type="date"
+                value={validFrom}
+                onChange={(e) => setValidFrom(e.target.value)}
+                className={inputCls}
+              />
             </div>
             <div>
-              <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+              <label
+                htmlFor="pricing-valid-to"
+                className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+              >
                 Valid To
               </label>
-              <input type="date" value={validTo} onChange={(e) => setValidTo(e.target.value)} className={inputCls} />
+              <input
+                id="pricing-valid-to"
+                type="date"
+                value={validTo}
+                onChange={(e) => setValidTo(e.target.value)}
+                className={inputCls}
+              />
             </div>
           </div>
         )}
@@ -198,6 +264,9 @@ export function PricingForm({ initialData, onSave, isEdit = false }: PricingForm
             <p className="text-[11px] text-[#3D2E1E]">Show this price on the customer-facing site</p>
           </div>
           <button
+            role="switch"
+            aria-checked={isActive}
+            aria-label="Active"
             onClick={() => setIsActive((v) => !v)}
             className={cn(
               "w-10 h-6 rounded-full border relative transition-all",

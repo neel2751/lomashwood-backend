@@ -1,14 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Table } from "@tanstack/react-table"
+
 import { format } from "date-fns"
 import { Calendar as CalendarIcon, Search, SlidersHorizontal, X } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
   DropdownMenu,
@@ -18,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
@@ -30,20 +29,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
+
+import type { Table } from "@tanstack/react-table"
 
 export type FilterOption = {
   label: string
   value: string
-  
   icon?: React.ReactNode
-  
   color?: string
 }
 
 export type FilterConfig =
   | {
       type: "search"
-     
       columnId: string
       placeholder?: string
       className?: string
@@ -53,20 +52,17 @@ export type FilterConfig =
       columnId: string
       label: string
       options: FilterOption[]
-   
       multi?: boolean
       className?: string
     }
   | {
       type: "daterange"
-     
       columnId: string
       label?: string
       className?: string
     }
   | {
       type: "custom"
-    
       render: () => React.ReactNode
       className?: string
     }
@@ -80,7 +76,7 @@ function SearchFilter<TData>({
   config: Extract<FilterConfig, { type: "search" }>
 }) {
   const column = config.columnId === "global" ? null : table.getColumn(config.columnId)
-  const value  = (column?.getFilterValue() as string) ?? ""
+  const value  = (column?.getFilterValue() as string | undefined) ?? ""
 
   return (
     <div className={cn("relative flex-1 min-w-[180px] max-w-xs", config.className)}>
@@ -114,7 +110,6 @@ function SelectFilter<TData>({
   const filterValue  = column?.getFilterValue()
 
   if (config.multi) {
-    
     const selectedValues = new Set(
       Array.isArray(filterValue) ? filterValue as string[] : []
     )
@@ -152,6 +147,8 @@ function SelectFilter<TData>({
         <PopoverContent className="w-48 p-1" align="start">
           {config.options.map((opt) => {
             const isSelected = selectedValues.has(opt.value)
+            // getFacetedUniqueValues returns a plain Map — no optional chain needed
+            const count = column?.getFacetedUniqueValues().get(opt.value)
             return (
               <button
                 key={opt.value}
@@ -178,13 +175,9 @@ function SelectFilter<TData>({
                 </div>
                 {opt.icon && <span className="h-4 w-4 flex items-center">{opt.icon}</span>}
                 <span className="flex-1 text-left">{opt.label}</span>
-                {/* Facet count */}
-                {(() => {
-                  const count = column?.getFacetedUniqueValues?.()?.get(opt.value)
-                  return count ? (
-                    <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
-                  ) : null
-                })()}
+                {count !== undefined && (
+                  <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
+                )}
               </button>
             )
           })}
@@ -204,7 +197,6 @@ function SelectFilter<TData>({
     )
   }
 
- 
   return (
     <Select
       value={(filterValue as string) ?? ""}
@@ -249,7 +241,7 @@ function DateRangeFilter<TData>({
 
   const apply = () => {
     column?.setFilterValue(
-      range.from || range.to ? [range.from ?? null, range.to ?? null] : undefined
+      range.from ?? range.to ? [range.from ?? null, range.to ?? null] : undefined
     )
     setOpen(false)
   }
@@ -267,7 +259,7 @@ function DateRangeFilter<TData>({
       : from
       ? `From ${format(from, "dd MMM")}`
       : `Until ${format(to!, "dd MMM")}`
-    : (config.label ?? "Date range")
+    : config.label ?? "Date range"
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -284,13 +276,15 @@ function DateRangeFilter<TData>({
           <CalendarIcon className="h-3.5 w-3.5" />
           <span>{label}</span>
           {hasValue && (
-            <span
-              role="button"
+            <button
+              type="button"
+              aria-label="Clear date range"
               className="ml-0.5 hover:text-destructive transition-colors"
               onClick={(e) => { e.stopPropagation(); clear() }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); clear() } }}
             >
               <X className="h-3 w-3" />
-            </span>
+            </button>
           )}
         </Button>
       </PopoverTrigger>
@@ -430,28 +424,19 @@ export function DataTableFilters<TData>({
 
   return (
     <div className={cn("flex flex-col gap-2 flex-1", className)}>
-      
       <div className="flex flex-wrap items-center gap-2">
         {filters.map((config, i) => {
           if (config.type === "search") {
-            return (
-              <SearchFilter key={i} table={table} config={config} />
-            )
+            return <SearchFilter key={i} table={table} config={config} />
           }
           if (config.type === "select") {
-            return (
-              <SelectFilter key={i} table={table} config={config} />
-            )
+            return <SelectFilter key={i} table={table} config={config} />
           }
           if (config.type === "daterange") {
-            return (
-              <DateRangeFilter key={i} table={table} config={config} />
-            )
+            return <DateRangeFilter key={i} table={table} config={config} />
           }
           if (config.type === "custom") {
-            return (
-              <React.Fragment key={i}>{config.render()}</React.Fragment>
-            )
+            return <React.Fragment key={i}>{config.render()}</React.Fragment>
           }
           return null
         })}
@@ -471,7 +456,6 @@ export function DataTableFilters<TData>({
         {showViewOptions && <ViewOptionsToggle table={table} />}
       </div>
 
-      
       <ActiveFilterPills table={table} filters={filters} />
     </div>
   )

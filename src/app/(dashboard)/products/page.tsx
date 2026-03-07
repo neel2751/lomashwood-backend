@@ -341,3 +341,5 @@ export default function ProductsListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

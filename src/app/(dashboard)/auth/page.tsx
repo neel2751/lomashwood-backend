@@ -12,3 +12,4 @@ export default function AuthPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

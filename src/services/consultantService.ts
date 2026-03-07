@@ -1,12 +1,14 @@
+
 import { apiClient } from "@/lib/api-client";
-import type { PaginatedResponse } from "@/lib/api-client";
 import axios from "@/lib/axios";
+
+import type { PaginatedResponse } from "@/lib/api-client";
 
 type Consultant = {
   id: string;
   name: string;
   email?: string;
-  speciality?: string;
+  specialty?: string;
   active?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -33,10 +35,10 @@ export const consultantService = {
       .get<PaginatedResponse<Consultant>>("/consultants/active")
       .then((r) => r.data),
 
-  getBySpeciality: (speciality: string): Promise<PaginatedResponse<Consultant>> =>
+  getBySpecialty: (specialty: string): Promise<PaginatedResponse<Consultant>> =>
     axios
-      .get<PaginatedResponse<Consultant>>("/consultants/by-speciality", {
-        params: { speciality },
+      .get<PaginatedResponse<Consultant>>("/consultants/by-specialty", {
+        params: { specialty },
       })
       .then((r) => r.data),
 };

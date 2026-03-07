@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { refundService } from "@/services/refundService";
+
 import type { CreateRefundPayload } from "@/types/order.types";
 
 export function useRefunds(filters?: Record<string, unknown>) {
@@ -23,9 +25,9 @@ export function useCreateRefund() {
   return useMutation({
     mutationFn: (payload: CreateRefundPayload) => refundService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["refunds"] });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      void queryClient.invalidateQueries({ queryKey: ["refunds"] });
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["payments"] });
     },
   });
 }

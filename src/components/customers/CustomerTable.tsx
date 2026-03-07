@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 type CustomerStatus = "active" | "inactive" | "vip" | "blocked";
 type CustomerInterest = "Kitchen" | "Bedroom" | "Both";
+type StatusFilterValue = "All" | CustomerStatus;
 
 export interface Customer {
   id: string;
@@ -66,7 +67,7 @@ function Avatar({ name, status }: { name: string; status: CustomerStatus }) {
 
 export function CustomerTable() {
   const [search, setSearch]         = useState("");
-  const [statusFilter, setStatus]   = useState<"All" | CustomerStatus>("All");
+  const [statusFilter, setStatus]   = useState<StatusFilterValue>("All");
   const [interestFilter, setInterest] = useState<"All" | CustomerInterest>("All");
   const [openMenu, setOpenMenu]     = useState<string | null>(null);
   const [selected, setSelected]     = useState<string[]>([]);
@@ -91,7 +92,6 @@ export function CustomerTable() {
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
-      {/* Toolbar */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2E231A] flex-wrap">
         <div className="relative">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
@@ -102,7 +102,7 @@ export function CustomerTable() {
 
         <div className="relative">
           <Filter size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
-          <select value={statusFilter} onChange={(e) => setStatus(e.target.value as any)}
+          <select value={statusFilter} onChange={(e) => setStatus(e.target.value as StatusFilterValue)}
             className="appearance-none h-9 pl-8 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40">
             <option value="All">All Status</option>
             {(Object.keys(STATUS_CONFIG) as CustomerStatus[]).map((s) => (
@@ -134,7 +134,6 @@ export function CustomerTable() {
         </Link>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <thead>
@@ -161,7 +160,6 @@ export function CustomerTable() {
                       className="w-4 h-4 rounded accent-[#C8924A] cursor-pointer" />
                   </td>
 
-                  {/* Customer */}
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-3">
                       <Avatar name={c.name} status={c.status} />
@@ -175,7 +173,6 @@ export function CustomerTable() {
                     </div>
                   </td>
 
-                  {/* Interest */}
                   <td className="px-3 py-3.5">
                     <span className={cn("text-[10.5px] px-2 py-0.5 rounded-full font-medium",
                       c.interest === "Kitchen" ? "bg-[#C8924A]/15 text-[#C8924A]"
@@ -185,24 +182,20 @@ export function CustomerTable() {
                     </span>
                   </td>
 
-                  {/* Spend */}
                   <td className="px-3 py-3.5">
                     <span className="text-[13px] font-semibold text-[#E8D5B7]">
                       £{c.totalSpend.toLocaleString()}
                     </span>
                   </td>
 
-                  {/* Orders */}
                   <td className="px-3 py-3.5">
                     <span className="text-[12.5px] text-[#7A6045]">{c.ordersCount}</span>
                   </td>
 
-                  {/* Appointments */}
                   <td className="px-3 py-3.5">
                     <span className="text-[12.5px] text-[#7A6045]">{c.appointmentsCount}</span>
                   </td>
 
-                  {/* Loyalty */}
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-1.5">
                       <Star size={11} className="text-[#C8924A]" />
@@ -210,7 +203,6 @@ export function CustomerTable() {
                     </div>
                   </td>
 
-                  {/* Status */}
                   <td className="px-3 py-3.5">
                     <span className={cn("inline-flex items-center gap-1.5 text-[10.5px] px-2 py-0.5 rounded-full font-medium", st.bg, st.text)}>
                       <span className={cn("w-1.5 h-1.5 rounded-full", st.dot)} />
@@ -218,12 +210,10 @@ export function CustomerTable() {
                     </span>
                   </td>
 
-                  {/* Last active */}
                   <td className="px-3 py-3.5">
                     <span className="text-[11px] text-[#5A4232]">{c.lastActivity}</span>
                   </td>
 
-                  {/* Actions */}
                   <td className="px-3 py-3.5 relative">
                     <button onClick={() => setOpenMenu(openMenu === c.id ? null : c.id)}
                       className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#3D2E1E] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all opacity-0 group-hover:opacity-100">

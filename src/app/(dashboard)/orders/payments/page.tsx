@@ -1,3 +1,4 @@
+"use client"
 
 export default function PaymentsPage() {
   return (
@@ -7,3 +8,5 @@ export default function PaymentsPage() {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic'

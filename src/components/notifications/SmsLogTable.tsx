@@ -177,14 +177,14 @@ export function SmsLogTable() {
                     onClick={() => router.push(`/notifications/sms/${msg.id}`)}
                   >
                     <TableCell>
-                      <p className="font-medium text-sm">{msg.recipient ?? "—"}</p>
+                      <p className="font-medium text-sm">{msg.recipient}</p>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm font-mono">{msg.recipient}</span>
                     </TableCell>
                     <TableCell>
                       <p className="text-sm truncate max-w-[240px] text-muted-foreground">
-                        {msg.body ?? "—"}
+                        {msg.body || "—"}
                       </p>
                     </TableCell>
                     <TableCell>

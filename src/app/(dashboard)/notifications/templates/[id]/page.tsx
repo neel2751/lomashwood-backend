@@ -19,3 +19,4 @@ export default function NotificationTemplateDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

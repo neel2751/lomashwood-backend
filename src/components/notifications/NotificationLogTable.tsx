@@ -194,14 +194,14 @@ export function NotificationLogTable() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-sm leading-tight">{n.recipient ?? "—"}</p>
+                      <p className="font-medium text-sm leading-tight">{n.recipient}</p>
                       <p className="text-xs text-muted-foreground truncate max-w-[180px]">
                         {n.recipient}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <p className="text-sm truncate max-w-[220px]">{n.subject ?? n.body ?? "—"}</p>
+                    <p className="text-sm truncate max-w-[220px]">{n.subject || n.body || "—"}</p>
                   </TableCell>
                   <TableCell>
                     <span className="text-xs text-muted-foreground">{n.templateId ?? "—"}</span>

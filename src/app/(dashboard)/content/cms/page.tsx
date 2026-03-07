@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { CmsPageTable } from "@/components/content/CmsPageTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 
@@ -21,3 +22,4 @@ export default function CmsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

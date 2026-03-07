@@ -1,5 +1,6 @@
-import { PERMISSIONS, ROLES } from "@/lib/constants";
-import type { PermissionKey, RoleName } from "@/lib/constants";
+import { PERMISSIONS, ROLES } from "@/lib/constants"
+
+import type { PermissionKey, RoleName } from "@/lib/constants"
 
 export type UserWithRole = {
   id: string;
@@ -72,7 +73,7 @@ const ROLE_PERMISSION_MAP: Record<RoleName, PermissionKey[]> = {
 };
 
 export function getRolePermissions(role: RoleName): PermissionKey[] {
-  return ROLE_PERMISSION_MAP[role] ?? [];
+  return ROLE_PERMISSION_MAP[role];
 }
 
 export function hasPermission(

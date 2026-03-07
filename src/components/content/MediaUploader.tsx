@@ -2,9 +2,11 @@
 
 import { useState, useRef, useCallback } from "react";
 
+import Image from "next/image";
+
 import {
   Upload, X, CheckCircle, AlertTriangle,
-  Image, Film, FileText, ChevronDown, FolderOpen,
+  Image as ImageIcon, Film, FileText, ChevronDown, FolderOpen,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -35,7 +37,7 @@ function formatBytes(bytes: number) {
 }
 
 function fileIcon(type: string) {
-  if (type.startsWith("image"))  return Image;
+  if (type.startsWith("image"))  return ImageIcon;
   if (type.startsWith("video"))  return Film;
   return FileText;
 }
@@ -114,6 +116,13 @@ export function MediaUploader({ defaultFolder = "products", onUploadComplete }: 
 
   const selectCls = "appearance-none h-8 px-2.5 pr-6 rounded-[7px] bg-[#1C1611] border border-[#3D2E1E] text-[11.5px] text-[#E8D5B7] focus:outline-none focus:border-[#C8924A]/50 transition-colors";
 
+  const handleDropZoneKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      inputRef.current?.click();
+    }
+  };
+
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
       {/* Header */}
@@ -139,11 +148,12 @@ export function MediaUploader({ defaultFolder = "products", onUploadComplete }: 
 
       <div className="p-5 flex flex-col gap-4">
         {/* Drop zone */}
-        <div
+        <button
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
+          onKeyDown={handleDropZoneKeyDown}
           className={cn(
             "border-2 border-dashed rounded-[12px] py-10 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all",
             dragging ? "border-[#C8924A] bg-[#C8924A]/10" : "border-[#3D2E1E] hover:border-[#C8924A]/40 hover:bg-[#221A12]"
@@ -167,7 +177,7 @@ export function MediaUploader({ defaultFolder = "products", onUploadComplete }: 
             className="hidden"
             onChange={(e) => addFiles(e.target.files)}
           />
-        </div>
+        </button>
 
         {/* File queue */}
         {files.length > 0 && (
@@ -194,7 +204,7 @@ export function MediaUploader({ defaultFolder = "products", onUploadComplete }: 
                   {/* Thumbnail / icon */}
                   <div className="w-12 h-12 rounded-[8px] bg-[#1C1611] border border-[#3D2E1E] flex items-center justify-center shrink-0 overflow-hidden">
                     {item.preview
-                      ? <img src={item.preview} alt="" className="w-full h-full object-cover" />
+                      ? <Image src={item.preview} alt={item.file.name} width={48} height={48} className="w-full h-full object-cover" />
                       : <Icon size={20} className={color} />
                     }
                   </div>

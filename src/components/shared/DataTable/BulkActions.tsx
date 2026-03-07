@@ -1,12 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { Table } from "@tanstack/react-table"
-import { Loader2, X } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import {
+  CheckCircle2,
+  Download,
+  Loader2,
+  Mail,
+  Tag,
+  Trash2,
+  X,
+  XCircle,
+} from "lucide-react"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,35 +23,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+
+import type { Table } from "@tanstack/react-table"
 
 
 export interface BulkAction<TData> {
-
   label: string
-  
   icon?: React.ReactNode
-  
   onClick: (rows: TData[]) => Promise<void> | void
- 
   destructive?: boolean
-  
   confirm?: {
     title: string
     description?: string
     confirmLabel?: string
   }
- 
   disabled?: (rows: TData[]) => boolean
-
   hidden?: (rows: TData[]) => boolean
-  
   tooltip?: string
-  
   variant?: "outline" | "secondary" | "ghost" | "destructive"
 }
 
@@ -125,7 +127,6 @@ export function DataTableBulkActions<TData>({
         role="toolbar"
         aria-label="Bulk actions"
       >
-        
         <div className="flex items-center gap-2 mr-1">
           <span className="text-sm font-semibold tabular-nums text-primary">
             {selectedCount}
@@ -144,7 +145,6 @@ export function DataTableBulkActions<TData>({
 
         <Separator orientation="vertical" className="h-5" />
 
-        
         <div className="flex items-center gap-1.5 flex-wrap">
           {visibleActions.map((action, idx) => {
             const isLoading  = loadingId === idx
@@ -196,7 +196,6 @@ export function DataTableBulkActions<TData>({
           })}
         </div>
 
-      
         {table.getIsAllPageRowsSelected() &&
           !table.getIsAllRowsSelected() &&
           table.getFilteredRowModel().rows.length > selectedCount && (
@@ -214,7 +213,6 @@ export function DataTableBulkActions<TData>({
           )}
       </div>
 
-      
       <AlertDialog open={open} onOpenChange={(v) => !v && handleCancel()}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -243,15 +241,6 @@ export function DataTableBulkActions<TData>({
   )
 }
 
-
-import {
-  Trash2,
-  Download,
-  CheckCircle2,
-  XCircle,
-  Mail,
-  Tag,
-} from "lucide-react"
 
 export function bulkDeleteAction<TData>(
   onDelete: (rows: TData[]) => Promise<void> | void,

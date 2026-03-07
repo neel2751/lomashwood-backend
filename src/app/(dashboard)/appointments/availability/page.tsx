@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState } from 'react'
@@ -308,3 +309,5 @@ export default function AvailabilityPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

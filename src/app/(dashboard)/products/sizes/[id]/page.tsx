@@ -173,3 +173,4 @@ export default function SizeDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

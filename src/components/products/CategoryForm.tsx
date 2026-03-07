@@ -8,9 +8,14 @@ import { cn } from "@/lib/utils";
 
 type CategoryName = "Kitchen" | "Bedroom";
 
+interface CategorySaveData {
+  name: CategoryName;
+  description: string;
+}
+
 interface CategoryFormProps {
   initialData?: { name?: CategoryName; description?: string };
-  onSave?: (data: any) => void;
+  onSave?: (data: CategorySaveData) => void;
   isEdit?: boolean;
 }
 
@@ -28,8 +33,6 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
     onSave?.({ name, description });
     setTimeout(() => setSaved(false), 2000);
   };
-
-  
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden max-w-lg">
@@ -57,9 +60,9 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
       <div className="p-6 flex flex-col gap-5">
         {/* Category name toggle */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
             Category <span className="text-[#C8924A]">*</span>
-          </label>
+          </p>
           <div className="flex gap-2">
             {(["Kitchen", "Bedroom"] as CategoryName[]).map((cat) => (
               <button
@@ -82,9 +85,9 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
 
         {/* Slug preview */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             URL Slug (auto-generated)
-          </label>
+          </p>
           <div className="flex items-center h-10 px-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E]">
             <span className="text-[#5A4232] text-[13px]">/products/</span>
             <span className="text-[#C8924A] text-[13px] font-mono">{name.toLowerCase()}</span>
@@ -93,10 +96,11 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
 
         {/* Description */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label htmlFor="category-description" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
             Description
           </label>
           <textarea
+            id="category-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}

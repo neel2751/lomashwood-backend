@@ -15,3 +15,4 @@ export default function NewConsultantPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

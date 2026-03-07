@@ -1,20 +1,22 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+
 import {
-  Package,
-  Users,
-  ShoppingBag,
-  Calendar,
-  Bell,
-  FileText,
   BarChart2,
-  Search,
-  Plus,
-  RefreshCw,
+  Bell,
+  Calendar,
+  FileText,
   Filter,
   Inbox,
+  Package,
+  Plus,
+  RefreshCw,
+  Search,
+  ShoppingBag,
+  Users,
 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 const PRESET_ICONS = {
   products:     Package,

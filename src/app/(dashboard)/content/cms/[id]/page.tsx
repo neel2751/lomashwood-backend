@@ -19,3 +19,4 @@ export default function CmsDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

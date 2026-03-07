@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { analyticsService } from "@/services/analyticsService";
+
 import type { DateRangeParams, GroupByPeriod, AnalyticsFilterParams } from "@/types/analytics.types";
 
 type StatsFilterParams = DateRangeParams & { groupBy?: GroupByPeriod };

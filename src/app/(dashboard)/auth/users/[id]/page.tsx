@@ -19,3 +19,4 @@ export default function UserDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

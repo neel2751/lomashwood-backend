@@ -180,3 +180,4 @@ export default function InventoryDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

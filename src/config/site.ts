@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 
 export const siteConfig = {
   name: "Lomash Wood Admin",
   shortName: "LW Admin",
   description:
     "Administration console for Lomash Wood — kitchen & bedroom design, sales, and consultation services.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://admin.lomashwood.com",
+  url: (process.env.NEXT_PUBLIC_SITE_URL as string | undefined) ?? "https://admin.lomashwood.com",
   company: {
     name: "Lomash Wood",
     website: "https://lomashwood.com",
@@ -29,12 +29,12 @@ export const siteConfig = {
     email: "support@lomashwood.com",
     docsUrl: "/docs",
   },
-  version: process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0",
-  environment: (process.env.NODE_ENV ?? "development") as
+  version: (process.env.NEXT_PUBLIC_APP_VERSION as string | undefined) ?? "1.0.0",
+  environment: ((process.env.NODE_ENV as string | undefined) ?? "development") as
     | "development"
     | "staging"
     | "production",
-} as const;
+} as const
 
 export const defaultMetadata: Metadata = {
   title: {
@@ -49,12 +49,12 @@ export const defaultMetadata: Metadata = {
     index: false,
     follow: false,
   },
-};
+}
 
 export function isProduction(): boolean {
-  return siteConfig.environment === "production";
+  return siteConfig.environment === "production"
 }
 
 export function isDevelopment(): boolean {
-  return siteConfig.environment === "development";
+  return siteConfig.environment === "development"
 }

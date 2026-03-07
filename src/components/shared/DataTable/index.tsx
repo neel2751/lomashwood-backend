@@ -1,14 +1,8 @@
 "use client"
 
 import * as React from "react"
+
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  Row,
-  RowSelectionState,
-  SortingState,
-  Table as TanstackTable,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -19,7 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 
-import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -28,11 +22,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
-import { DataTableFilters, type FilterConfig } from "./Filters"
-import { DataTablePagination }                 from "./Pagination"
 import { DataTableBulkActions, type BulkAction } from "./BulkActions"
+import { DataTableFilters, type FilterConfig }    from "./Filters"
+import { DataTablePagination }                    from "./Pagination"
+
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  Row,
+  RowSelectionState,
+  SortingState,
+  Table as TanstackTable,
+  VisibilityState,
+} from "@tanstack/react-table"
 
 
 
@@ -45,7 +49,6 @@ export type DataTableContextValue<TData> = {
   table: TanstackTable<TData>
 }
 
-
 const DataTableContext = React.createContext<DataTableContextValue<any> | null>(null)
 
 export function useDataTable<TData>() {
@@ -57,59 +60,35 @@ export function useDataTable<TData>() {
 
 
 export interface DataTableProps<TData, TValue = unknown> {
-
   columns: ColumnDef<TData, TValue>[]
-
   data: TData[]
-
-  
   isLoading?: boolean
   skeletonRows?: number
   emptyState?: React.ReactNode
   filters?: FilterConfig[]
- 
   showViewOptions?: boolean
- 
   toolbarRight?: React.ReactNode
-
-  
-  
   enableSorting?: boolean
- 
   sorting?: SortingState
   onSortingChange?: (sorting: SortingState) => void
-
   showPagination?: boolean
-  
   total?: number
- 
   page?: number
   onPageChange?: (page: number) => void
-  
   pageSizeOptions?: number[]
   defaultPageSize?: number
   pageSize?: number
   onPageSizeChange?: (size: number) => void
- 
   manualPagination?: boolean
   manualSorting?: boolean
   manualFiltering?: boolean
-
-  
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean)
   rowSelection?: RowSelectionState
   onRowSelectionChange?: (selection: RowSelectionState, rows: TData[]) => void
- 
   bulkActions?: BulkAction<TData>[]
-
-  
   onRowClick?: (row: TData, e: React.MouseEvent) => void
- 
   rowClassName?: (row: TData) => string
-
-  
   defaultColumnVisibility?: VisibilityState
-
   className?: string
 }
 
@@ -155,16 +134,16 @@ export function DataTable<TData, TValue = unknown>({
 
   className,
 }: DataTableProps<TData, TValue>) {
-  
-  const [internalSorting, setInternalSorting]         = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters]              = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility]        = React.useState<VisibilityState>(
+
+  const [internalSorting, setInternalSorting]           = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters]                = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility]          = React.useState<VisibilityState>(
     defaultColumnVisibility ?? {}
   )
-  const [internalRowSelection, setInternalRowSelection] = React.useState<RowSelectionState>({})
+  const [internalRowSelection, setInternalRowSelection]  = React.useState<RowSelectionState>({})
 
-  const activeSorting        = sortingProp        ?? internalSorting
-  const activeRowSelection   = rowSelectionProp   ?? internalRowSelection
+  const activeSorting      = sortingProp      ?? internalSorting
+  const activeRowSelection = rowSelectionProp ?? internalRowSelection
 
   const handleSortingChange = (updater: React.SetStateAction<SortingState>) => {
     const next = typeof updater === "function" ? updater(activeSorting) : updater
@@ -183,7 +162,6 @@ export function DataTable<TData, TValue = unknown>({
     }
   }
 
-  
   const pageCount = manualPagination && total !== undefined && pageSizeProp
     ? Math.ceil(total / pageSizeProp)
     : undefined
@@ -193,10 +171,10 @@ export function DataTable<TData, TValue = unknown>({
     columns,
     pageCount,
     state: {
-      sorting:activeSorting,
+      sorting: activeSorting,
       columnFilters,
       columnVisibility,
-      rowSelection:     activeRowSelection,
+      rowSelection: activeRowSelection,
       ...(manualPagination && page !== undefined && pageSizeProp !== undefined
         ? { pagination: { pageIndex: page - 1, pageSize: pageSizeProp } }
         : {}),
@@ -206,10 +184,10 @@ export function DataTable<TData, TValue = unknown>({
     manualPagination,
     manualSorting,
     manualFiltering,
-    onSortingChange:  handleSortingChange,
-    onColumnFiltersChange:   setColumnFilters,
+    onSortingChange:          handleSortingChange,
+    onColumnFiltersChange:    setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange:  handleRowSelectionChange,
+    onRowSelectionChange:     handleRowSelectionChange,
     onPaginationChange: manualPagination && onPageChange && onPageSizeChange
       ? (updater) => {
           const prev = {
@@ -217,23 +195,24 @@ export function DataTable<TData, TValue = unknown>({
             pageSize:  pageSizeProp ?? defaultPageSize,
           }
           const next = typeof updater === "function" ? updater(prev) : updater
-          if (next.pageIndex !== prev.pageIndex)onPageChange(next.pageIndex + 1)
-          if (next.pageSize  !== prev.pageSize)onPageSizeChange(next.pageSize)
+          if (next.pageIndex !== prev.pageIndex) onPageChange(next.pageIndex + 1)
+          if (next.pageSize  !== prev.pageSize)  onPageSizeChange(next.pageSize)
         }
       : undefined,
-    getCoreRowModel:  getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel:  getFacetedRowModel(),
-    getFacetedUniqueValues:getFacetedUniqueValues(),
+    getCoreRowModel:        getCoreRowModel(),
+    getFilteredRowModel:    getFilteredRowModel(),
+    getPaginationRowModel:  getPaginationRowModel(),
+    getSortedRowModel:      getSortedRowModel(),
+    getFacetedRowModel:     getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     initialState: {
       pagination: { pageSize: defaultPageSize },
     },
   })
 
   const selectedCount = table.getFilteredSelectedRowModel().rows.length
-  const hasSelection  = selectedCount > 0 && !!enableRowSelection && !!bulkActions?.length
+  const rowSelectionEnabled = typeof enableRowSelection === "function" || enableRowSelection
+  const hasSelection  = selectedCount > 0 && rowSelectionEnabled && !!bulkActions?.length
 
   const showToolbar = !!(filters?.length || showViewOptions || toolbarRight || hasSelection)
 
@@ -241,10 +220,8 @@ export function DataTable<TData, TValue = unknown>({
     <DataTableContext.Provider value={{ table }}>
       <div className={cn("flex flex-col gap-4", className)}>
 
-      
         {showToolbar && (
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            
             {filters?.length ? (
               <DataTableFilters
                 table={table}
@@ -254,15 +231,12 @@ export function DataTable<TData, TValue = unknown>({
             ) : (
               <div />
             )}
-
-          
             {toolbarRight && (
               <div className="flex items-center gap-2 shrink-0">{toolbarRight}</div>
             )}
           </div>
         )}
 
-        
         {hasSelection && bulkActions && (
           <DataTableBulkActions
             table={table}
@@ -271,7 +245,6 @@ export function DataTable<TData, TValue = unknown>({
           />
         )}
 
-       
         <div className="rounded-md border bg-white overflow-hidden">
           <Table>
             <TableHeader>
@@ -294,7 +267,6 @@ export function DataTable<TData, TValue = unknown>({
 
             <TableBody>
               {isLoading ? (
-                
                 Array.from({ length: skeletonRows }).map((_, i) => (
                   <TableRow key={`skeleton-${i}`}>
                     {columns.map((_, j) => (
@@ -329,14 +301,9 @@ export function DataTable<TData, TValue = unknown>({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-36 text-center"
-                  >
+                  <TableCell colSpan={columns.length} className="h-36 text-center">
                     {emptyState ?? (
-                      <p className="text-sm text-muted-foreground">
-                        No results found.
-                      </p>
+                      <p className="text-sm text-muted-foreground">No results found.</p>
                     )}
                   </TableCell>
                 </TableRow>
@@ -345,7 +312,6 @@ export function DataTable<TData, TValue = unknown>({
           </Table>
         </div>
 
-        
         {showPagination && (
           <DataTablePagination
             table={table}

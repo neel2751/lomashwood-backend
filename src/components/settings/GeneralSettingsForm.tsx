@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import Image from "next/image";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Save,
@@ -164,9 +166,12 @@ export function GeneralSettingsForm() {
     },
   });
 
+  // Destructure reset so the effect only re-runs when settings data changes,
+  // not on every render where `form` itself is a new reference.
+  const { reset } = form;
   useEffect(() => {
-    if (settings) form.reset(settings);
-  }, [settings]);
+    if (settings) reset(settings);
+  }, [settings, reset]);
 
   const onSubmit = async (data: GeneralSettingsData) => {
     await updateSettings("general", data);
@@ -518,7 +523,15 @@ export function GeneralSettingsForm() {
                     <div className="flex gap-2 items-center">
                       <Input placeholder="https://..." {...field} />
                       {field.value && (
-                        <img src={field.value} alt="Logo preview" className="h-9 w-9 object-contain border rounded flex-shrink-0" />
+                        <div className="relative h-9 w-9 flex-shrink-0 border rounded overflow-hidden">
+                          <Image
+                            src={field.value}
+                            alt="Logo preview"
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        </div>
                       )}
                     </div>
                   </FormControl>
@@ -536,7 +549,15 @@ export function GeneralSettingsForm() {
                     <div className="flex gap-2 items-center">
                       <Input placeholder="https://..." {...field} />
                       {field.value && (
-                        <img src={field.value} alt="Favicon preview" className="h-9 w-9 object-contain border rounded flex-shrink-0" />
+                        <div className="relative h-9 w-9 flex-shrink-0 border rounded overflow-hidden">
+                          <Image
+                            src={field.value}
+                            alt="Favicon preview"
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        </div>
                       )}
                     </div>
                   </FormControl>

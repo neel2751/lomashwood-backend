@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { RoleTable } from "@/components/auth/RoleTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 
@@ -21,3 +22,4 @@ export default function RolesPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

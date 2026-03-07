@@ -1,7 +1,8 @@
+
 import { apiClient } from "@/lib/api-client";
-import type { Reminder } from "@/lib/api-client";
 import axios from "@/lib/axios";
-import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
+
+import type { ApiResponse, PaginatedResponse, Reminder } from "@/lib/api-client";
 
 export const reminderService = {
   getAll: (params?: Record<string, unknown>) =>

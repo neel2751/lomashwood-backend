@@ -34,16 +34,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSettings } from "@/hooks/useSettings";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useSettings } from "@/hooks/useSettings";
 
 
 
 const securitySettingsSchema = z.object({
-  
+
   minPasswordLength: z.number().int().min(8).max(32),
   requireUppercase: z.boolean(),
   requireLowercase: z.boolean(),
@@ -52,26 +52,26 @@ const securitySettingsSchema = z.object({
   passwordExpiryDays: z.number().int().min(0).max(365),
   preventPasswordReuse: z.number().int().min(0).max(24),
 
-  
+
   sessionTimeoutMinutes: z.number().int().min(5).max(1440),
   maxConcurrentSessions: z.number().int().min(1).max(20),
   rememberMeDays: z.number().int().min(1).max(90),
   forceLogoutOnPasswordChange: z.boolean(),
 
-  
+
   twoFactorRequired: z.boolean(),
   twoFactorMethods: z.array(z.string()),
 
-  
+
   maxLoginAttempts: z.number().int().min(3).max(20),
   lockoutDurationMinutes: z.number().int().min(1).max(1440),
   loginRateLimitEnabled: z.boolean(),
 
-  
+
   ipAllowlistEnabled: z.boolean(),
   ipAllowlist: z.string(),
 
-  
+
   auditLogRetentionDays: z.number().int().min(30).max(3650),
   sensitiveActionNotifications: z.boolean(),
   notifyOnNewAdminLogin: z.boolean(),
@@ -160,9 +160,10 @@ export function SecuritySettingsForm() {
     },
   });
 
+  const { reset } = form;
   useEffect(() => {
-    if (settings) form.reset(settings);
-  }, [settings]);
+    if (settings) reset(settings);
+  }, [settings, reset]);
 
   const onSubmit = async (data: SecuritySettingsData) => {
     await updateSettings("security", data);
@@ -187,7 +188,6 @@ export function SecuritySettingsForm() {
     form.setValue("ipAllowlist", ipList.filter((i) => i !== ip).join("\n"));
   };
 
- 
   const watchSettings = form.watch();
   const testPasswordStrength = (pw: string) => {
     const checks = [
@@ -201,7 +201,6 @@ export function SecuritySettingsForm() {
   };
 
   const passwordChecks = testPasswordStrength(testPassword);
-   
 
   if (isLoading) {
     return (

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { orderService } from "@/services/orderService";
+
 import type { UpdateOrderStatusPayload } from "@/types/order.types";
 
 export function useOrders(filters?: Record<string, unknown>) {
@@ -24,9 +26,9 @@ export function useUpdateOrder() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateOrderStatusPayload }) =>
       orderService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: UpdateOrderStatusPayload }) => {
-  queryClient.invalidateQueries({ queryKey: ["orders"] });
-  queryClient.invalidateQueries({ queryKey: ["orders", id] });
-},
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["orders", id] });
+    },
   });
 }
 
@@ -36,7 +38,7 @@ export function useDeleteOrder() {
   return useMutation({
     mutationFn: (id: string) => orderService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
   });
 }

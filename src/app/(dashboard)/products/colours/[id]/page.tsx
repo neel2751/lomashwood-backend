@@ -227,3 +227,4 @@ export default function ColourDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

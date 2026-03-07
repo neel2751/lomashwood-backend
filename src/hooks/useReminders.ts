@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { reminderService } from "@/services/reminderService";
 
 export function useReminders(appointmentId?: string) {
@@ -23,8 +24,8 @@ export function useUpdateReminder() {
     mutationFn: ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       reminderService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["reminders"] });
-      queryClient.invalidateQueries({ queryKey: ["reminders", id] });
+      void queryClient.invalidateQueries({ queryKey: ["reminders"] });
+      void queryClient.invalidateQueries({ queryKey: ["reminders", id] });
     },
   });
 }

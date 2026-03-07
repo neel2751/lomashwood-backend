@@ -1,5 +1,5 @@
-
 import { z } from "zod";
+
 import {
   PRODUCT_CATEGORIES,
   APPOINTMENT_TYPES,
@@ -19,7 +19,6 @@ import { isValidHex } from "./utils";
 export const zRequiredString = (label = "This field") =>
   z.string().trim().min(1, `${label} is required`);
 
-
 export const zOptionalString = z.string().trim().optional().or(z.literal("")).transform(
   (v) => (v === "" ? undefined : v),
 );
@@ -29,14 +28,11 @@ export const zUrl = z
   .url("Please enter a valid URL")
   .or(z.literal(""));
 
-
 export const zPhone = z
   .string()
   .regex(/^[+\d\s().-]{7,20}$/, "Please enter a valid phone number");
 
-
 export const zEmail = z.string().email("Please enter a valid email address");
-
 
 export const zPostcode = z
   .string()
@@ -45,33 +41,25 @@ export const zPostcode = z
     "Please enter a valid UK postcode",
   );
 
-export const zHexColour = z
+export const zHexColor = z
   .string()
-  .refine(isValidHex, { message: "Please enter a valid hex colour (e.g. #FF5733)" });
-
+  .refine(isValidHex, { message: "Please enter a valid hex color (e.g. #FF5733)" });
 
 export const zPositiveInt = z.number().int().positive();
 
-
 export const zNonNegativeInt = z.number().int().min(0);
-
 
 export const zPrice = z.number().positive("Price must be greater than 0");
 
-
 export const zIsoDate = z.string().datetime({ message: "Please enter a valid date" });
-
 
 export const zDateString = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format");
 
-
 export const zTimeString = z
   .string()
   .regex(/^\d{2}:\d{2}$/, "Time must be in HH:MM format");
-
-
 
 export const zProductCategory = z.enum(PRODUCT_CATEGORIES);
 export const zAppointmentType = z.enum(APPOINTMENT_TYPES);
@@ -102,10 +90,9 @@ export const zImageFileList = z
   .array(zImageFile)
   .max(MAX_PRODUCT_IMAGES, `You can upload a maximum of ${MAX_PRODUCT_IMAGES} images`);
 
-
-export const zColourBase = z.object({
-  name: zRequiredString("Colour name").max(50),
-  hexCode: zHexColour,
+export const zColorBase = z.object({
+  name: zRequiredString("Color name").max(50),
+  hexCode: zHexColor,
 });
 
 export const zSizeBase = z.object({
@@ -126,7 +113,7 @@ export const zProductBase = z.object({
   category: zProductCategory,
   rangeName: zRequiredString("Range name").max(100),
   price: zPrice.optional(),
-  colourIds: z.array(z.string().uuid()).min(1, "Select at least one colour"),
+  colorIds: z.array(z.string().uuid()).min(1, "Select at least one color"),
   sizeIds: z.array(z.string().uuid()).optional(),
 });
 
@@ -206,7 +193,6 @@ export const zCmsPageBase = z.object({
   content: zRequiredString("Content"),
 });
 
-
 export const zSeoBase = z.object({
   pageSlug: zRequiredString("Page slug"),
   title: zRequiredString("SEO title").max(70),
@@ -238,13 +224,10 @@ export const zFinanceBase = z.object({
   content: zRequiredString("Content"),
 });
 
-
 export const zReviewBase = z.object({
   name: zRequiredString("Customer name").max(150),
   description: zRequiredString("Review content").max(2000),
 });
-
-
 
 export const zPaginationParams = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -255,7 +238,7 @@ export const zPaginationParams = z.object({
 
 export const zProductFilterParams = zPaginationParams.extend({
   category: zProductCategory.optional(),
-  colourId: z.string().uuid().optional(),
+  colorId: z.string().uuid().optional(),
   style: zStyle.optional(),
   finish: zFinish.optional(),
   rangeId: z.string().uuid().optional(),
@@ -269,7 +252,6 @@ export const zAppointmentFilterParams = zPaginationParams.extend({
   dateFrom: zDateString.optional(),
   dateTo: zDateString.optional(),
 });
-
 
 export function safeValidate<T>(
   schema: z.ZodSchema<T>,

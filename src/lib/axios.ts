@@ -1,14 +1,12 @@
-
 import axios, {
   type AxiosError,
   type AxiosInstance,
   type AxiosRequestConfig,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
-} from "axios";
-import { API_BASE_URL, API_TIMEOUT_MS } from "./constants";
+} from "axios"
 
-
+import { API_BASE_URL, API_TIMEOUT_MS } from "./constants"
 
 export class ApiError extends Error {
   public readonly status: number;
@@ -36,7 +34,6 @@ function onRefreshSuccess(token: string) {
   refreshSubscribers = [];
 }
 
-
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT_MS,
@@ -44,13 +41,11 @@ export const axiosInstance: AxiosInstance = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  withCredentials: true, 
+  withCredentials: true,
 });
-
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-  
     const { getAccessToken } = getAuthStoreLazy();
     const token = getAccessToken();
 
@@ -63,17 +58,14 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
 
   async (error: AxiosError<{ message?: string; code?: string; details?: unknown }>) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-    
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        
         return new Promise<AxiosResponse>((resolve) => {
           subscribeToTokenRefresh((newToken) => {
             if (originalRequest.headers) {
@@ -103,7 +95,6 @@ axiosInstance.interceptors.response.use(
         isRefreshing = false;
         refreshSubscribers = [];
 
-        
         const { logout } = getAuthStoreLazy();
         logout();
 
@@ -119,9 +110,10 @@ function buildApiError(
   error: AxiosError<{ message?: string; code?: string; details?: unknown }>,
 ): ApiError {
   const status = error.response?.status ?? 0;
-  const serverMessage = error.response?.data?.message;
-  const code = error.response?.data?.code;
-  const details = error.response?.data?.details;
+  const data = error.response?.data;
+  const serverMessage = data?.message;
+  const code = data?.code;
+  const details = data?.details;
 
   const message =
     serverMessage ??
@@ -145,23 +137,30 @@ const HTTP_STATUS_MESSAGES: Record<number, string> = {
   503: "Service unavailable. Maintenance may be in progress.",
 };
 
-
 type AuthStoreLazyApi = {
   getAccessToken: () => string | null;
   refreshAccessToken: () => Promise<string>;
   logout: () => void;
 };
 
+let authStoreModule: AuthStoreLazyApi | null = null;
+
 function getAuthStoreLazy(): AuthStoreLazyApi {
+  if (authStoreModule) return authStoreModule;
 
   
-  const { useAuthStore } = require("@/stores/useAuthStore");
+  const { useAuthStore } = require("@/stores/useAuthStore") as {
+    useAuthStore: { getState: () => AuthStoreLazyApi };
+  };
   const state = useAuthStore.getState();
-  return {
-    getAccessToken: () => state.accessToken,
+
+  authStoreModule = {
+    getAccessToken: state.getAccessToken,
     refreshAccessToken: state.refreshAccessToken,
     logout: state.logout,
   };
+
+  return authStoreModule;
 }
 
 export default axiosInstance;

@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: lomashwood_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ../services/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ../services/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  # Product Service
+  product-service:
+    build:
+      context: ../services/product-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+    depends_on:
+      - postgres
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ../services/analytics-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+    depends_on:
+      - postgres
+
+  # Upload Service
+  upload-service:
+    build:
+      context: ../services/upload-service
+      dockerfile: Dockerfile
+    ports:
+      - "3009:3009"
+    environment:
+      NODE_ENV: development
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: us-east-1
+
+volumes:
+  postgres_data:
+  redis_data:

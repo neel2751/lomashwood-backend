@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+
 import type { NextRequest } from "next/server";
+
 
 const PUBLIC_PATHS = [
   "/login",
   "/forgot-password",
   "/reset-password",
+  "/", 
 ];
 
 const API_PUBLIC_PATHS = [
@@ -73,7 +76,7 @@ function buildLoginRedirect(request: NextRequest): NextResponse {
 
 function buildUnauthorizedApiResponse(): NextResponse {
   return NextResponse.json(
-    { message: "Authentication required.", code: "UNAUTHORISED" },
+    { message: "Authentication required.", code: "UNAUTHORIZED" },
     { status: 401 },
   );
 }
@@ -134,7 +137,7 @@ const ADMIN_AND_ABOVE_PATHS = [
   "/settings",
 ];
 
-function isAuthorisedForPath(pathname: string, role: string | null): boolean {
+function isAuthorizedForPath(pathname: string, role: string | null): boolean {
   if (!role) return false;
 
   if (
@@ -210,7 +213,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
 
     const role = getUserRole(token);
-    if (!isAuthorisedForPath(pathname, role)) {
+    if (!isAuthorizedForPath(pathname, role)) {
       return buildForbiddenApiResponse();
     }
 
@@ -276,7 +279,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   const role = getUserRole(token);
 
-  if (!isAuthorisedForPath(pathname, role)) {
+  if (!isAuthorizedForPath(pathname, role)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

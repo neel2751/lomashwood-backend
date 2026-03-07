@@ -20,14 +20,16 @@ type RoleFilters = {
 };
 
 const roleService = {
-  getAll: async (_filters?: RoleFilters): Promise<RolesResponse> => ({
-    data: [],
-    meta: { total: 0 },
-  }),
-  getById: async (_id: string): Promise<Role | null> => null,
-  create: async (_payload: Record<string, unknown>): Promise<Role | null> => null,
-  update: async (_id: string, _payload: Record<string, unknown>): Promise<Role | null> => null,
-  remove: async (_id: string): Promise<void> => {},
+  getAll: (_filters?: RoleFilters): Promise<RolesResponse> =>
+    Promise.resolve({ data: [], meta: { total: 0 } }),
+  getById: (_id: string): Promise<Role | null> =>
+    Promise.resolve(null),
+  create: (_payload: Record<string, unknown>): Promise<Role | null> =>
+    Promise.resolve(null),
+  update: (_id: string, _payload: Record<string, unknown>): Promise<Role | null> =>
+    Promise.resolve(null),
+  remove: (_id: string): Promise<void> =>
+    Promise.resolve(),
 };
 
 export function useRoles(filters?: RoleFilters) {
@@ -49,7 +51,7 @@ export function useCreateRole() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: Record<string, unknown>) => roleService.create(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["roles"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["roles"] }),
   });
 }
 
@@ -59,8 +61,8 @@ export function useUpdateRole() {
     mutationFn: ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       roleService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-      queryClient.invalidateQueries({ queryKey: ["roles", id] });
+      void queryClient.invalidateQueries({ queryKey: ["roles"] });
+      void queryClient.invalidateQueries({ queryKey: ["roles", id] });
     },
   });
 }
@@ -69,6 +71,6 @@ export function useDeleteRole() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => roleService.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["roles"] }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["roles"] }),
   });
 }

@@ -1,7 +1,8 @@
+
 import { appointmentClient, apiClient } from "@/lib/api-client";
-import type { Appointment, TimeSlot } from "@/lib/api-client";
 import axios from "@/lib/axios";
-import type { ApiResponse } from "@/lib/api-client";
+
+import type { ApiResponse, Appointment, TimeSlot } from "@/lib/api-client";
 
 export const appointmentService = {
   getAll: (params?: Record<string, unknown>) =>
@@ -15,10 +16,8 @@ export const appointmentService = {
   update: (id: string, payload: Partial<Appointment>) =>
     appointmentClient.update(id, payload),
 
-  // `makeService` exposes `delete`, not `remove`
   remove: (id: string) => appointmentClient.delete(id),
 
-  // `getSlots` is not on appointmentClient — use the availability service instead
   getSlots: (params: { date: string; consultantId?: string }): Promise<TimeSlot[]> =>
     apiClient.availability.getAll(params),
 

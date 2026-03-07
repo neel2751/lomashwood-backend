@@ -1,11 +1,11 @@
 export const apiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.lomashwood.com/v1",
+  baseUrl: (process.env.NEXT_PUBLIC_API_BASE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
   timeoutMs: 15_000,
   version: "v1",
 
   services: {
     auth: {
-      baseUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_AUTH_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         login: "/auth/login",
         logout: "/auth/logout",
@@ -17,7 +17,7 @@ export const apiConfig = {
       },
     },
     product: {
-      baseUrl: process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         products: "/products",
         categories: "/products/categories",
@@ -28,7 +28,7 @@ export const apiConfig = {
       },
     },
     order: {
-      baseUrl: process.env.NEXT_PUBLIC_ORDER_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_ORDER_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         orders: "/orders",
         payments: "/orders/payments",
@@ -37,7 +37,7 @@ export const apiConfig = {
       },
     },
     appointment: {
-      baseUrl: process.env.NEXT_PUBLIC_APPOINTMENT_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_APPOINTMENT_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         appointments: "/appointments",
         availability: "/appointments/availability",
@@ -47,7 +47,7 @@ export const apiConfig = {
       },
     },
     customer: {
-      baseUrl: process.env.NEXT_PUBLIC_CUSTOMER_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_CUSTOMER_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         customers: "/customers",
         reviews: "/customers/reviews",
@@ -56,7 +56,7 @@ export const apiConfig = {
       },
     },
     content: {
-      baseUrl: process.env.NEXT_PUBLIC_CONTENT_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_CONTENT_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         blogs: "/content/blogs",
         mediaWall: "/content/media-wall",
@@ -66,7 +66,7 @@ export const apiConfig = {
       },
     },
     notification: {
-      baseUrl: process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         notifications: "/notifications",
         email: "/notifications/email",
@@ -77,7 +77,7 @@ export const apiConfig = {
       },
     },
     analytics: {
-      baseUrl: process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_URL ?? "https://api.lomashwood.com/v1",
+      baseUrl: (process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
       paths: {
         overview: "/analytics",
         tracking: "/analytics/tracking",
@@ -152,7 +152,7 @@ export const apiConfig = {
   },
 
   webhooks: {
-    secret: process.env.WEBHOOK_SECRET ?? "",
+    secret: (process.env.WEBHOOK_SECRET as string | undefined) ?? "",
     events: {
       orderCreated: "order.created",
       orderUpdated: "order.updated",
@@ -165,14 +165,14 @@ export const apiConfig = {
 
   integrations: {
     gtm: {
-      id: process.env.NEXT_PUBLIC_GTM_ID ?? "",
+      id: (process.env.NEXT_PUBLIC_GTM_ID as string | undefined) ?? "",
       enabled: Boolean(process.env.NEXT_PUBLIC_GTM_ID),
     },
     googleSearchConsole: {
-      verificationId: process.env.NEXT_PUBLIC_GSC_VERIFICATION ?? "",
+      verificationId: (process.env.NEXT_PUBLIC_GSC_VERIFICATION as string | undefined) ?? "",
     },
     googleAnalytics: {
-      measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "",
+      measurementId: (process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID as string | undefined) ?? "",
       enabled: Boolean(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID),
     },
   },

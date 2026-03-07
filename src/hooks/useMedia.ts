@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { mediaService } from "@/services/mediaService";
 
 export function useMedia() {
@@ -23,7 +24,7 @@ export function useUploadMedia() {
     mutationFn: ({ files }: { files: File[]; meta?: Record<string, string> }) =>
       mediaService.upload(files),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["media"] });
+      void queryClient.invalidateQueries({ queryKey: ["media"] });
     },
   });
 }
@@ -35,8 +36,8 @@ export function useUpdateMedia() {
     mutationFn: ({ id, payload }: { id: string; payload: Record<string, string> }) =>
       mediaService.update(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["media"] });
-      queryClient.invalidateQueries({ queryKey: ["media", id] });
+      void queryClient.invalidateQueries({ queryKey: ["media"] });
+      void queryClient.invalidateQueries({ queryKey: ["media", id] });
     },
   });
 }
@@ -47,7 +48,7 @@ export function useDeleteMedia() {
   return useMutation({
     mutationFn: (id: string) => mediaService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["media"] });
+      void queryClient.invalidateQueries({ queryKey: ["media"] });
     },
   });
 }

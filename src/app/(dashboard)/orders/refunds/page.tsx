@@ -1,3 +1,4 @@
+"use client"
 
 
 export default function RefundsPage() {
@@ -8,3 +9,5 @@ export default function RefundsPage() {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic'

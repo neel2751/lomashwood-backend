@@ -72,10 +72,10 @@ export function SessionDetail({ sessionId }: SessionDetailProps) {
   const [showRevoke, setShowRevoke] = useState(false);
 
   const { data: rawData, isLoading, isError } = useSessions({ id: sessionId });
-  const data = rawData as unknown as { data?: Session[]; } | Session[] | null;
+  const data = rawData as unknown as { data?: Session[] } | Session[] | null;
   const session: Session | null = Array.isArray(data)
     ? (data as Session[])[0] ?? null
-    : (data as { data?: Session[] })?.data?.[0] ?? null;
+    : (data as { data?: Session[] }).data?.[0] ?? null;
 
   const { mutateAsync: revokeSession } = useRevokeSession();
 

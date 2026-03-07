@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState } from 'react'
@@ -202,3 +203,4 @@ export function ConsultantForm({ consultantId: _consultantId, defaultValues }: C
     </form>
   )
 }
+export const dynamic = 'force-dynamic'

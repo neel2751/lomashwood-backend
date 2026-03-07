@@ -1,3 +1,4 @@
+"use client"
 'use client'
 
 import { useState, useTransition } from 'react'
@@ -257,3 +258,5 @@ export default function NewPricingRulePage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

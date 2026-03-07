@@ -1,5 +1,6 @@
-import axios from "@/lib/axios"
-import type { AxiosResponse } from "axios"
+import axios from "@/lib/axios";
+
+import type { AxiosResponse } from "axios";
 
 export interface Settings {
   id: string

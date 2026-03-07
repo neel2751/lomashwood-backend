@@ -15,3 +15,4 @@ export default function SupportPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

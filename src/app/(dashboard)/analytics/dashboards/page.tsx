@@ -392,3 +392,5 @@ export default function DashboardsListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

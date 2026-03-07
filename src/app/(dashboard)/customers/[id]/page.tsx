@@ -21,3 +21,4 @@ export default function CustomerDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

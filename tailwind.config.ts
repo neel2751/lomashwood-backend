@@ -247,22 +247,6 @@ const config: Config = {
   				to: {
   					transform: 'rotate(360deg)'
   				}
-  			},
-  			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
-  			},
-  			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
   			}
   		},
   		animation: {
@@ -277,9 +261,7 @@ const config: Config = {
   			'collapsible-down': 'collapsible-down 0.2s ease-out',
   			'collapsible-up': 'collapsible-up 0.2s ease-out',
   			shimmer: 'shimmer 2s linear infinite',
-  			'spin-slow': 'spin 3s linear infinite',
-  			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'spin-slow': 'spin 3s linear infinite'
   		},
   		transitionTimingFunction: {
   			'in-expo': 'cubic-bezier(0.95, 0.05, 0.795, 0.035)',
@@ -294,7 +276,29 @@ const config: Config = {
   		screens: {
   			xs: '480px'
   		},
-  		typography: '() => ({\r\n        DEFAULT: {\r\n          css: {\r\n            "--tw-prose-body": "hsl(var(--foreground))",\r\n            "--tw-prose-headings": "hsl(var(--foreground))",\r\n            "--tw-prose-lead": "hsl(var(--muted-foreground))",\r\n            "--tw-prose-links": "hsl(var(--primary))",\r\n            "--tw-prose-bold": "hsl(var(--foreground))",\r\n            "--tw-prose-counters": "hsl(var(--muted-foreground))",\r\n            "--tw-prose-bullets": "hsl(var(--muted-foreground))",\r\n            "--tw-prose-hr": "hsl(var(--border))",\r\n            "--tw-prose-quotes": "hsl(var(--foreground))",\r\n            "--tw-prose-quote-borders": "hsl(var(--border))",\r\n            "--tw-prose-captions": "hsl(var(--muted-foreground))",\r\n            "--tw-prose-code": "hsl(var(--foreground))",\r\n            "--tw-prose-pre-code": "hsl(var(--foreground))",\r\n            "--tw-prose-pre-bg": "hsl(var(--muted))",\r\n            "--tw-prose-th-borders": "hsl(var(--border))",\r\n            "--tw-prose-td-borders": "hsl(var(--border))",\r\n            maxWidth: "none",\r\n          },\r\n        },\r\n      })'
+  		typography: {
+  			DEFAULT: {
+  				css: {
+  					'--tw-prose-body': 'hsl(var(--foreground))',
+  					'--tw-prose-headings': 'hsl(var(--foreground))',
+  					'--tw-prose-lead': 'hsl(var(--muted-foreground))',
+  					'--tw-prose-links': 'hsl(var(--primary))',
+  					'--tw-prose-bold': 'hsl(var(--foreground))',
+  					'--tw-prose-counters': 'hsl(var(--muted-foreground))',
+  					'--tw-prose-bullets': 'hsl(var(--muted-foreground))',
+  					'--tw-prose-hr': 'hsl(var(--border))',
+  					'--tw-prose-quotes': 'hsl(var(--foreground))',
+  					'--tw-prose-quote-borders': 'hsl(var(--border))',
+  					'--tw-prose-captions': 'hsl(var(--muted-foreground))',
+  					'--tw-prose-code': 'hsl(var(--foreground))',
+  					'--tw-prose-pre-code': 'hsl(var(--foreground))',
+  					'--tw-prose-pre-bg': 'hsl(var(--muted))',
+  					'--tw-prose-th-borders': 'hsl(var(--border))',
+  					'--tw-prose-td-borders': 'hsl(var(--border))',
+  					maxWidth: 'none'
+  				}
+  			}
+  		}
   	}
   },
 

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { productService } from "@/services/productService";
+
 import type { CreateProductPayload, UpdateProductPayload } from "@/types/product.types";
 
 export function useProducts(filters?: Record<string, unknown>) {
@@ -23,7 +25,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (payload: CreateProductPayload) => productService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateProduct() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateProductPayload }) =>
       productService.update(id, payload),
     onSuccess: (_data: unknown, { id }: { id: string; payload: Record<string, unknown> }) => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      queryClient.invalidateQueries({ queryKey: ["products", id] });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+      void queryClient.invalidateQueries({ queryKey: ["products", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteProduct() {
   return useMutation({
     mutationFn: (id: string) => productService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }

@@ -1,5 +1,7 @@
 import * as React from "react"
+
 import { cva } from "class-variance-authority"
+
 import { cn } from "@/lib/utils"
 
 const statusBadgeVariants = cva(
@@ -96,17 +98,12 @@ export function StatusBadge({
   showDot = true,
   className,
 }: StatusBadgeProps) {
-  const badgeClass = statusBadgeVariants({ status });
-  const dotClass = DOT_VARIANTS[status] ?? "bg-muted-foreground/40";
-  const displayLabel = label ?? STATUS_LABELS[status] ?? status.replace(/_/g, " ");
+  const badgeClass = statusBadgeVariants({ status })
+  const dotClass = DOT_VARIANTS[status] ?? "bg-muted-foreground/40"
+  const displayLabel = label ?? STATUS_LABELS[status] ?? status.replace(/_/g, " ")
 
   return (
-    <span
-      className={cn(
-        badgeClass ?? "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium bg-muted text-muted-foreground",
-        className
-      )}
-    >
+    <span className={cn(badgeClass, className)}>
       {showDot && (
         <span className={cn("h-1.5 w-1.5 rounded-full flex-shrink-0", dotClass)} />
       )}

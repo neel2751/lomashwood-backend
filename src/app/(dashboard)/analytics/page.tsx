@@ -251,3 +251,5 @@ export default function AnalyticsPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

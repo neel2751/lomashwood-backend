@@ -27,7 +27,7 @@ export function useSettings(section: string) {
   const mutation = useMutation({
     mutationFn: (data: unknown) => saveSettings(section, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["settings", section] });
+      void queryClient.invalidateQueries({ queryKey: ["settings", section] });
     },
   });
 

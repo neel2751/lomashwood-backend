@@ -25,9 +25,11 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRole, useCreateRole, useUpdateRole } from "@/hooks/useRoles";
 import { roleSchema } from "@/schemas/role.schema";
-import type { Role } from "@/types/auth.types";
 
 import { PermissionsMatrix } from "./PermissionsMatrix";
+
+import type { Role } from "@/types/auth.types";
+
 
 type RoleFormData = z.infer<typeof roleSchema>;
 

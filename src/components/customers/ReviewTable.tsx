@@ -45,6 +45,8 @@ const STATUS_CONFIG: Record<ReviewStatus, { label: string; bg: string; text: str
   flagged:  { label: "Flagged",  bg: "bg-red-400/10",      text: "text-red-400"    },
 };
 
+type RatingFilter = "All" | "5" | "4" | "3" | "2" | "1";
+
 function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -59,7 +61,7 @@ function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
 export function ReviewTable() {
   const [search, setSearch]         = useState("");
   const [statusFilter, setStatus]   = useState<"All" | ReviewStatus>("All");
-  const [ratingFilter, setRating]   = useState<"All" | "5" | "4" | "3" | "2" | "1">("All");
+  const [ratingFilter, setRating]   = useState<RatingFilter>("All");
   const [statuses, setStatuses]     = useState<Record<string, ReviewStatus>>(
     Object.fromEntries(MOCK_REVIEWS.map((r) => [r.id, r.status]))
   );
@@ -108,7 +110,9 @@ export function ReviewTable() {
         {/* Status filter */}
         <div className="relative">
           <Filter size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
-          <select value={statusFilter} onChange={(e) => setStatus(e.target.value as any)}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatus(e.target.value as "All" | ReviewStatus)}
             className="appearance-none h-9 pl-8 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40">
             <option value="All">All Status</option>
             {(Object.keys(STATUS_CONFIG) as ReviewStatus[]).map((s) => (
@@ -120,7 +124,9 @@ export function ReviewTable() {
 
         {/* Rating filter */}
         <div className="relative">
-          <select value={ratingFilter} onChange={(e) => setRating(e.target.value as any)}
+          <select
+            value={ratingFilter}
+            onChange={(e) => setRating(e.target.value as RatingFilter)}
             className="appearance-none h-9 px-3 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40">
             <option value="All">All Ratings</option>
             {["5","4","3","2","1"].map((r) => (

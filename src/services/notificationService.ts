@@ -1,7 +1,9 @@
 import { apiClient } from "@/lib/api-client";
-import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
 import axios from "@/lib/axios";
+
+import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
 import type { NotificationChannel } from "@/lib/constants";
+
 
 type Notification = {
   id: string;

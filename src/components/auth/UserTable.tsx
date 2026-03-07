@@ -104,9 +104,9 @@ export function UserTable() {
   });
 
   const users: User[] = data?.data ?? []; // ✅ Typed as User[]
-  const total = data?.meta?.total ?? 0;
+  const total = data?.meta.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const roles = data?.meta?.roles ?? [];
+  const roles = data?.meta.roles ?? [];
 
   const handleDelete = async () => {
     if (!deleteId) return;

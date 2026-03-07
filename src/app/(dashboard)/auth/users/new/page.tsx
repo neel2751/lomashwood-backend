@@ -17,3 +17,4 @@ export default function NewUserPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

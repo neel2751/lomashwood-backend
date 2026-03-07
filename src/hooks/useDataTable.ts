@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
-import {
+import { useCallback, useState } from "react";
+
+import type {
   ColumnFiltersState,
   PaginationState,
   RowSelectionState,

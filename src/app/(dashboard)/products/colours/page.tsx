@@ -430,3 +430,5 @@ export default function ColoursListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

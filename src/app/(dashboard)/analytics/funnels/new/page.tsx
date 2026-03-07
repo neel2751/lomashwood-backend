@@ -121,3 +121,5 @@ export default function NewFunnelPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

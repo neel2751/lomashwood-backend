@@ -175,3 +175,4 @@ export default function PricingDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

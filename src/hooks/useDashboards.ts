@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { dashboardService } from "@/services/dashboardService";
+
 import type { CreateDashboardPayload } from "@/types/analytics.types";
 
 export function useDashboards() {
@@ -23,7 +25,7 @@ export function useCreateDashboard() {
   return useMutation({
     mutationFn: (payload: CreateDashboardPayload) => dashboardService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dashboards"] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboards"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateDashboard() {
     mutationFn: ({ id, payload }: { id: string; payload: CreateDashboardPayload }) =>
       dashboardService.update(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["dashboards"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboards", id] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboards"] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboards", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteDashboard() {
   return useMutation({
     mutationFn: (id: string) => dashboardService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dashboards"] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboards"] });
     },
   });
 }

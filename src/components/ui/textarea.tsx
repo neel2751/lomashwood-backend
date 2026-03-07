@@ -1,9 +1,8 @@
 import * as React from "react"
+
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-
-// ── Variants ──────────────────────────────────────────────────────────────────
 
 const textareaVariants = cva(
   [
@@ -60,7 +59,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref
   ) => {
-    // Track value internally only when showCount is on and the component is uncontrolled
     const [internalValue, setInternalValue] = React.useState(
       (defaultValue as string) ?? ""
     )
@@ -123,8 +121,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   }
 )
 Textarea.displayName = "Textarea"
-
-// ── Labelled textarea (convenience wrapper) ───────────────────────────────────
 
 export interface LabelledTextareaProps extends TextareaProps {
   label?: string

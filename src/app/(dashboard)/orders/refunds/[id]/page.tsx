@@ -1,3 +1,4 @@
+"use client"
 
 export default function RefundDetailPage({ params }: { params: { id: string } }) {
   return (
@@ -7,3 +8,4 @@ export default function RefundDetailPage({ params }: { params: { id: string } })
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

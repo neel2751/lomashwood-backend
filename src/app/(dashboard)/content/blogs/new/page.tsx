@@ -15,3 +15,4 @@ export default function NewBlogPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

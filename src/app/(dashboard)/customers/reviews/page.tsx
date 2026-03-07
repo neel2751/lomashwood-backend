@@ -15,3 +15,4 @@ export default function ReviewsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

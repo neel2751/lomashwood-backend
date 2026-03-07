@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_ROUTES = ["/login", "/forgot-password", "/reset-password"];
-const AUTH_COOKIE = "lomash_access_token";
+const AUTH_COOKIE = "lomash_access_token"; 
 
 export function authMiddleware(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;

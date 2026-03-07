@@ -15,3 +15,4 @@ export default function MediaWallPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

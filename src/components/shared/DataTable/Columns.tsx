@@ -1,14 +1,22 @@
 "use client"
 
 import * as React from "react"
+
 import {
-  ColumnDef,
-  Column,
-  
-} from "@tanstack/react-table"
-import { Checkbox } from "@/components/ui/checkbox"
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Copy,
+  ExternalLink,
+  Eye,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,17 +31,8 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { formatters } from "@/utils/formatters"
-import {
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  MoreHorizontal,
-  Eye,
-  Pencil,
-  Trash2,
-  Copy,
-  ExternalLink,
-} from "lucide-react"
+
+import type { ColumnDef, Column } from "@tanstack/react-table"
 
 
 
@@ -115,13 +114,9 @@ export function createSelectionColumn<TData>(): ColumnDef<TData> {
 export interface RowAction<TData> {
   label: string
   icon?: React.ReactNode
-  
   onClick: (row: TData) => void
- 
   destructive?: boolean
- 
   separator?: boolean
-  
   hidden?: (row: TData) => boolean
   disabled?: (row: TData) => boolean
 }
@@ -219,7 +214,7 @@ export function copyAction<TData>(
   return {
     label: "Copy ID",
     icon: <Copy className="h-4 w-4" />,
-    onClick: (row) => navigator.clipboard.writeText(getValue(row)),
+    onClick: (row) => { void navigator.clipboard.writeText(getValue(row)) },
     ...overrides,
   }
 }
@@ -302,11 +297,10 @@ export function DateCell({
 }) {
   if (!value) return <span className="text-xs text-muted-foreground">—</span>
 
-  // Option A — cast formatters to include relative (quick fix):
-const display =
-  format === "datetime" ? formatters.dateTime(value as string)
-  : format === "relative" ? (formatters as typeof formatters & { relative?: (v: string) => string }).relative?.(value as string) ?? formatters.date(value as string)
-  : formatters.date(value as string)
+  const display =
+    format === "datetime" ? formatters.dateTime(value as string)
+    : format === "relative" ? (formatters as typeof formatters & { relative?: (v: string) => string }).relative?.(value as string) ?? formatters.date(value as string)
+    : formatters.date(value as string)
 
   return (
     <Tooltip>
@@ -450,7 +444,6 @@ export function AvatarCell({
 
 
 type ColumnHelper<TData> = {
-  
   text: (
     id: keyof TData & string,
     title: string,
@@ -463,13 +456,11 @@ type ColumnHelper<TData> = {
     }
   ) => ColumnDef<TData>
 
- 
   date: (
     id: keyof TData & string,
     title: string,
     options?: { format?: "date" | "datetime" | "relative"; size?: number }
   ) => ColumnDef<TData>
-
 
   badge: (
     id: keyof TData & string,
@@ -478,24 +469,20 @@ type ColumnHelper<TData> = {
     options?: { size?: number }
   ) => ColumnDef<TData>
 
- 
   currency: (
     id: keyof TData & string,
     title: string,
     options?: { currency?: string; size?: number }
   ) => ColumnDef<TData>
 
- 
   boolean: (
     id: keyof TData & string,
     title: string,
     options?: { trueLabel?: string; falseLabel?: string; size?: number }
   ) => ColumnDef<TData>
 
-  
   selection: () => ColumnDef<TData>
 
-  
   actions: (actions: RowAction<TData>[], options?: { size?: number }) => ColumnDef<TData>
 }
 

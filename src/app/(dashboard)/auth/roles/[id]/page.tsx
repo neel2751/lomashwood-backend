@@ -1,7 +1,9 @@
+"use client"
 'use client'
 
-import { useParams } from 'next/navigation'
 import { useState } from 'react'
+
+import { useParams } from 'next/navigation'
 
 import { PermissionsMatrix } from '@/components/auth/PermissionsMatrix'
 import { RoleForm } from '@/components/auth/RoleForm'
@@ -28,3 +30,4 @@ export default function RoleDetailPage() {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

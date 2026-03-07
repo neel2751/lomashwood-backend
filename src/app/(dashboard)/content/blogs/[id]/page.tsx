@@ -19,3 +19,4 @@ export default function BlogDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

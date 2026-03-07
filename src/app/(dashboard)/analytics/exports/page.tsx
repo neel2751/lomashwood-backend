@@ -390,3 +390,5 @@ export default function ExportsPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

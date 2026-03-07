@@ -2,24 +2,37 @@
 
 import { useState } from "react";
 
+import Image from "next/image";
+
 import { Save, Loader2, Upload } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 interface SizeFormDefaultValues {
-  name: string;
-  category: string;
-  width: number;
-  height: number;
-  depth: number;
+  name?: string;
+  category?: string;
+  width?: number;
+  height?: number;
+  depth?: number;
+  description?: string;
+}
+
+interface SizeFormData {
+  sizeId: string | undefined;
+  title: string;
   description: string;
+  imageUrl: string;
+  category: "Kitchen" | "Bedroom";
+  width: number | undefined;
+  height: number | undefined;
+  depth: number | undefined;
 }
 
 interface SizeFormProps {
   sizeId?: string;
   defaultValues?: SizeFormDefaultValues;
   initialData?: { title?: string; description?: string; imageUrl?: string; category?: "Kitchen" | "Bedroom" };
-  onSave?: (data: any) => void;
+  onSave?: (data: SizeFormData) => void;
   isEdit?: boolean;
 }
 
@@ -77,16 +90,17 @@ export function SizeForm({ sizeId, defaultValues, initialData, onSave, isEdit = 
       </div>
 
       <div className="p-6 flex flex-col gap-5">
-        {/* Category */}
+        {/* Category — button group, not a labellable control */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
             Category <span className="text-[#C8924A]">*</span>
-          </label>
-          <div className="flex gap-2">
+          </p>
+          <div className="flex gap-2" role="group" aria-label="Category">
             {(["Kitchen", "Bedroom"] as const).map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
+                aria-pressed={category === cat}
                 className={cn(
                   "flex-1 h-10 rounded-[9px] text-[13px] font-medium border transition-all",
                   category === cat
@@ -104,26 +118,38 @@ export function SizeForm({ sizeId, defaultValues, initialData, onSave, isEdit = 
 
         {/* Title */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="size-title"
+            className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+          >
             Title <span className="text-[#C8924A]">*</span>
           </label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Standard, Large, Double…" className={inputCls} />
+          <input
+            id="size-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Standard, Large, Double…"
+            className={inputCls}
+          />
         </div>
 
         {/* Dimensions (read-only display if provided via defaultValues) */}
         {defaultValues && (
           <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: "Width (mm)", value: defaultValues.width },
-              { label: "Height (mm)", value: defaultValues.height },
-              { label: "Depth (mm)", value: defaultValues.depth },
-            ].map(({ label, value }) => (
+            {([
+              { label: "Width (mm)",  id: "size-width",  value: defaultValues.width  },
+              { label: "Height (mm)", id: "size-height", value: defaultValues.height },
+              { label: "Depth (mm)",  id: "size-depth",  value: defaultValues.depth  },
+            ] as const).map(({ label, id, value }) => (
               <div key={label}>
-                <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+                <label
+                  htmlFor={id}
+                  className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+                >
                   {label}
                 </label>
                 <input
+                  id={id}
                   type="number"
                   defaultValue={value}
                   className={inputCls}
@@ -135,10 +161,14 @@ export function SizeForm({ sizeId, defaultValues, initialData, onSave, isEdit = 
 
         {/* Description */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="size-description"
+            className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+          >
             Description
           </label>
           <textarea
+            id="size-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
@@ -149,11 +179,15 @@ export function SizeForm({ sizeId, defaultValues, initialData, onSave, isEdit = 
 
         {/* Image URL */}
         <div>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="size-image-url"
+            className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5"
+          >
             Image URL
           </label>
           <div className="flex gap-2">
             <input
+              id="size-image-url"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://cdn.lomashwood.co.uk/sizes/…"
@@ -166,8 +200,14 @@ export function SizeForm({ sizeId, defaultValues, initialData, onSave, isEdit = 
 
           {/* Preview */}
           {imageUrl && (
-            <div className="mt-2 h-24 w-32 rounded-[8px] border border-[#3D2E1E] overflow-hidden bg-[#2E231A]">
-              <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
+            <div className="mt-2 h-24 w-32 rounded-[8px] border border-[#3D2E1E] overflow-hidden bg-[#2E231A] relative">
+              <Image
+                src={imageUrl}
+                alt="Size preview"
+                fill
+                className="object-cover"
+                unoptimized
+              />
             </div>
           )}
         </div>

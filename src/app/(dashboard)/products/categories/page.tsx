@@ -295,3 +295,5 @@ export default function CategoriesListPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

@@ -1,3 +1,4 @@
+"use client"
 
 export default function InvoicesPage() {
   return (
@@ -7,3 +8,5 @@ export default function InvoicesPage() {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic'

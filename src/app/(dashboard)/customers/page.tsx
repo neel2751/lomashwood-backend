@@ -14,3 +14,4 @@ export default function CustomersPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

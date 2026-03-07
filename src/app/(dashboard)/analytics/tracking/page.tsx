@@ -149,3 +149,5 @@ export default function AnalyticsTrackingPage() {
     </div>
   )
 }
+
+export const dynamic = 'force-dynamic'

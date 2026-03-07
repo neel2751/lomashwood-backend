@@ -1,5 +1,7 @@
+
 import { apiClient } from "@/lib/api-client";
 import axios from "@/lib/axios";
+
 import type { ApiResponse, PaginatedResponse } from "@/lib/api-client";
 
 export type Refund = {
@@ -26,7 +28,7 @@ export const refundService = {
     apiClient.refunds.update(id, payload),
 
   patch: (id: string, payload: Partial<Refund>) =>
-    apiClient.refunds.update(id, payload), // `patch` maps to update (PATCH)
+    apiClient.refunds.update(id, payload),
 
   remove: (id: string) => apiClient.refunds.delete(id),
 

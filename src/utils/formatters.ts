@@ -1,5 +1,6 @@
-import { format, formatDistanceToNow, parseISO, isValid } from "date-fns";
-import { DATE_FORMAT, DATETIME_FORMAT, TIME_FORMAT } from "@/lib/constants";
+import { format, formatDistanceToNow, parseISO, isValid } from "date-fns"
+
+import { DATE_FORMAT, DATETIME_FORMAT, TIME_FORMAT } from "@/lib/constants"
 
 export function formatDate(value: string | Date | null | undefined): string {
   if (!value) return "—";
@@ -141,6 +142,7 @@ export function formatSlug(slug: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
 export const formatters = {
   date: formatDate,
   dateTime: formatDateTime,

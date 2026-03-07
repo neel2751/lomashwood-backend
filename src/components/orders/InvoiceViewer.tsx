@@ -167,7 +167,7 @@ export function InvoiceViewer() {
               {[
                 { label: "Subtotal", value: `£${inv.subtotal.toLocaleString()}`, bold: false },
                 { label: "VAT (20%)", value: `£${inv.vat.toLocaleString()}`, bold: false },
-              ].map(({ label, value, bold }) => (
+              ].map(({ label, value}) => (
                 <div key={label} className="flex justify-between">
                   <span className="text-[12px] text-[#5A4232]">{label}</span>
                   <span className="text-[12px] text-[#7A6045]">{value}</span>

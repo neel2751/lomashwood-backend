@@ -69,8 +69,8 @@ function SectionCard({ section, onUpdate, onDelete, onToggle }: {
 
   const field = (key: string, placeholder: string) => (
     <div key={key}>
-      <label className="block text-[10px] font-semibold tracking-wider text-[#3D2E1E] mb-1 uppercase">{key.replace(/([A-Z]|\d)/g, " $1").trim()}</label>
-      <input value={section.settings[key] ?? ""} onChange={(e) => onUpdate(section.id, { ...section.settings, [key]: e.target.value })}
+      <label htmlFor={`${section.id}-${key}`} className="block text-[10px] font-semibold tracking-wider text-[#3D2E1E] mb-1 uppercase">{key.replace(/([A-Z]|\d)/g, " $1").trim()}</label>
+      <input id={`${section.id}-${key}`} value={section.settings[key] ?? ""} onChange={(e) => onUpdate(section.id, { ...section.settings, [key]: e.target.value })}
         placeholder={placeholder} className={inputCls} />
     </div>
   );
@@ -303,15 +303,15 @@ export function LandingPageEditor({ isEdit = false }: LandingPageEditorProps) {
               {activeTab === "settings" && (
                 <div className="flex flex-col gap-4">
                   <div>
-                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Campaign Name</label>
-                    <input value={campaign} onChange={(e) => setCampaign(e.target.value)}
+                    <label htmlFor="campaign-name" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Campaign Name</label>
+                    <input id="campaign-name" value={campaign} onChange={(e) => setCampaign(e.target.value)}
                       placeholder="e.g. Spring Sale 2026" className={inputCls} />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Expiry Date</label>
+                    <label htmlFor="expiry-date" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Expiry Date</label>
                     <div className="relative">
                       <Calendar size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
-                      <input type="date" value={expiresAt} onChange={(e) => setExpires(e.target.value)}
+                      <input id="expiry-date" type="date" value={expiresAt} onChange={(e) => setExpires(e.target.value)}
                         className="w-full h-9 pl-8 pr-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#E8D5B7] focus:outline-none focus:border-[#C8924A]/50 transition-colors" />
                     </div>
                     <p className="text-[11px] text-[#3D2E1E] mt-1">Page will auto-archive after this date</p>
@@ -327,9 +327,9 @@ export function LandingPageEditor({ isEdit = false }: LandingPageEditorProps) {
             <h3 className="text-[13px] font-semibold text-[#E8D5B7] mb-4">Publish</h3>
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
+                <label htmlFor="landing-status" className="block text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E] mb-1">Status</label>
                 <div className="relative">
-                  <select value={status} onChange={(e) => setStatus(e.target.value as LandingStatus)} className={selectCls}>
+                  <select id="landing-status" value={status} onChange={(e) => setStatus(e.target.value as LandingStatus)} className={selectCls}>
                     <option value="draft"    className="bg-[#1C1611]">Draft</option>
                     <option value="live"     className="bg-[#1C1611]">Live</option>
                     <option value="paused"   className="bg-[#1C1611]">Paused</option>

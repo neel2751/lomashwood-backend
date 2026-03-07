@@ -399,3 +399,4 @@ export default function CategoryDetailPage({ params }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

@@ -26,12 +26,24 @@ const STATUS_COLORS: Record<string, string> = {
   refunded: "#7A4232",
 };
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipPayloadEntry {
+  dataKey: string;
+  fill: string;
+  value: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadEntry[];
+  label?: string;
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-[#1C1611] border border-[#3D2E1E] rounded-[10px] px-3 py-2.5 shadow-xl">
       <p className="text-[11px] text-[#5A4232] mb-1.5 font-medium">{label}</p>
-      {payload.map((entry: any) => (
+      {payload.map((entry) => (
         <div key={entry.dataKey} className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ background: entry.fill }} />
           <span className="text-[12px] text-[#9A7A5A] capitalize">{entry.dataKey}:</span>

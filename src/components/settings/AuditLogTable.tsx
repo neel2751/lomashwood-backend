@@ -1,34 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
+import { useQuery } from "@tanstack/react-query";
 import {
-  Search,
-  RefreshCw,
+  AlertTriangle,
+  BarChart2,
+  Bell,
+  Calendar,
   ChevronLeft,
   ChevronRight,
   Download,
   Eye,
-  Filter,
-  Shield,
-  User,
-  Settings,
-  ShoppingBag,
-  Calendar,
-  Users,
   FileText,
-  Bell,
-  BarChart2,
-  Trash2,
-  Plus,
-  Pencil,
+  Filter,
+  Globe,
+  Key,
   Lock,
   LogIn,
   LogOut,
-  Key,
-  AlertTriangle,
-  Globe,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  Settings,
+  Shield,
+  ShoppingBag,
+  Trash2,
+  User,
+  Users,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -59,8 +59,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatters } from "@/utils/formatters";
 import { axiosInstance } from "@/lib/axios";
+import { formatters } from "@/utils/formatters";
 
 
 
@@ -294,14 +294,12 @@ function AuditLogDetail({ log, open, onClose }: { log: AuditLog | null; open: bo
 
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            {actionCfg && (
-              <Badge variant="outline" className={`flex items-center gap-1.5 ${actionCfg.style}`}>
-                {actionCfg.icon}
-                {actionCfg.label}
-              </Badge>
-            )}
+            <Badge variant="outline" className={`flex items-center gap-1.5 ${actionCfg.style}`}>
+              {actionCfg.icon}
+              {actionCfg.label}
+            </Badge>
             <Badge variant="secondary" className="capitalize">
-              {log.resource?.replace("_", " ")}
+              {log.resource.replace("_", " ")}
             </Badge>
           </div>
 
@@ -344,7 +342,7 @@ function AuditLogDetail({ log, open, onClose }: { log: AuditLog | null; open: bo
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Target</p>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Resource</span>
-                <span className="capitalize">{log.resource?.replace("_", " ")}</span>
+                <span className="capitalize">{log.resource.replace("_", " ")}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
@@ -439,7 +437,7 @@ export function AuditLogTable() {
   });
 
   const logs = data?.data ?? [];
-  const total = data?.meta?.total ?? 0;
+  const total = data?.meta.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
@@ -583,23 +581,19 @@ export function AuditLogTable() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {actionCfg ? (
-                          <Badge
-                            variant="outline"
-                            className={`text-xs flex items-center gap-1 w-fit whitespace-nowrap ${actionCfg.style}`}
-                          >
-                            {actionCfg.icon}
-                            {actionCfg.label}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs capitalize">{log.action}</span>
-                        )}
+                        <Badge
+                          variant="outline"
+                          className={`text-xs flex items-center gap-1 w-fit whitespace-nowrap ${actionCfg.style}`}
+                        >
+                          {actionCfg.icon}
+                          {actionCfg.label}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5 text-sm">
                           <span className="text-muted-foreground">{resourceIcon}</span>
                           <span className="capitalize text-xs">
-                            {log.resource?.replace("_", " ")}
+                            {log.resource.replace("_", " ")}
                           </span>
                         </div>
                       </TableCell>

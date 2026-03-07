@@ -177,14 +177,14 @@ export function PushLogTable() {
                   >
                     <TableCell>
                       <div>
-                        <p className="font-medium text-sm">{push.recipient ?? "—"}</p>
+                        <p className="font-medium text-sm">{push.recipient}</p>
                         <p className="text-xs text-muted-foreground truncate max-w-[120px]">
                           {push.recipient}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="text-sm font-medium truncate max-w-[160px]">{push.subject ?? "—"}</p>
+                      <p className="text-sm font-medium truncate max-w-[160px]">{push.subject || "—"}</p>
                     </TableCell>
                     <TableCell>
                       <p className="text-sm truncate max-w-[200px] text-muted-foreground">

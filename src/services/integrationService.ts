@@ -1,5 +1,7 @@
-import { axiosInstance } from "@/lib/axios"
-import type { AxiosResponse } from "axios"
+import { axiosInstance } from "@/lib/axios";
+
+import type { AxiosResponse } from "axios";
+
 
 export type Integration = {
   id: string;
@@ -11,36 +13,36 @@ export type Integration = {
 };
 
 export interface IntegrationResponse {
-  data: Integration[]
-  total: number
+  data: Integration[];
+  total: number;
 }
 
 export const integrationService = {
   getAll: async (): Promise<IntegrationResponse> => {
     const response: AxiosResponse<IntegrationResponse> =
-      await axiosInstance.get("/integrations")
+      await axiosInstance.get("/integrations");
 
-    return response.data
+    return response.data;
   },
 
   getById: async (id: string): Promise<Integration> => {
     const response: AxiosResponse<Integration> =
-      await axiosInstance.get(`/integrations/${id}`)
+      await axiosInstance.get(`/integrations/${id}`);
 
-    return response.data
+    return response.data;
   },
 
   update: async (
     id: string,
-    payload: Partial<Integration>
+    payload: Partial<Integration>,
   ): Promise<Integration> => {
     const response: AxiosResponse<Integration> =
-      await axiosInstance.put(`/integrations/${id}`, payload)
+      await axiosInstance.put(`/integrations/${id}`, payload);
 
-    return response.data
+    return response.data;
   },
 
   remove: async (id: string): Promise<void> => {
-    await axiosInstance.delete(`/integrations/${id}`)
+    await axiosInstance.delete(`/integrations/${id}`);
   },
-} as const
+} as const;

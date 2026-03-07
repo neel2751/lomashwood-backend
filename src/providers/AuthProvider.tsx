@@ -4,9 +4,10 @@ import { useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useAuth } from "@/hooks/useAuth";
 import { PageLoader } from "@/components/shared/PageLoader";
+import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/stores/useAuthStore";
+
 import type { AdminUser } from "@/stores/useAuthStore";
 
 interface AuthProviderProps {

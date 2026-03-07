@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { notificationService } from "@/services/notificationService";
+
 import type { NotificationFilterParams } from "@/types/notification.types";
 
 export function useNotifications(filters?: NotificationFilterParams) {

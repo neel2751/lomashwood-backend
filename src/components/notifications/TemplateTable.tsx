@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   FileText,
   Search,
@@ -225,7 +225,7 @@ export function TemplateTable() {
                       </p>
                     </TableCell>
                     <TableCell>
-                      {tpl.variables && tpl.variables.length > 0 ? (
+                      {tpl.variables.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {tpl.variables.slice(0, 3).map((v: string) => (
                             <Badge key={v} variant="secondary" className="text-xs font-mono">

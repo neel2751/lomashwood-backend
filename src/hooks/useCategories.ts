@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { categoryService } from "@/services/categoryService";
+
 import type { CreateCategoryPayload } from "@/types/product.types";
 
 export function useCategories() {
@@ -23,7 +25,7 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: (payload: CreateCategoryPayload) => categoryService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      void queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateCategory() {
     mutationFn: ({ id, payload }: { id: string; payload: CreateCategoryPayload }) =>
       categoryService.update(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      queryClient.invalidateQueries({ queryKey: ["categories", id] });
+      void queryClient.invalidateQueries({ queryKey: ["categories"] });
+      void queryClient.invalidateQueries({ queryKey: ["categories", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: (id: string) => categoryService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      void queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
   });
 }

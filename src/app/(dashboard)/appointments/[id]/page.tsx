@@ -1,3 +1,4 @@
+"use client"
 
 
 type TimelineEvent = {
@@ -183,3 +184,4 @@ export function AppointmentTimeline({ appointmentId }: Props) {
     </div>
   )
 }
+export const dynamic = 'force-dynamic'

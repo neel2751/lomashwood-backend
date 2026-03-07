@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { cmsPageService } from "@/services/cmsPageService";
+
 import type { CreateCmsPagePayload } from "@/types/content.types";
 
 export function useCmsPages() {
@@ -23,7 +25,7 @@ export function useCreateCmsPage() {
   return useMutation({
     mutationFn: (payload: CreateCmsPagePayload) => cmsPageService.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
+      void queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
     },
   });
 }
@@ -35,8 +37,8 @@ export function useUpdateCmsPage() {
     mutationFn: ({ id, payload }: { id: string; payload: CreateCmsPagePayload }) =>
       cmsPageService.update(id, payload),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
-      queryClient.invalidateQueries({ queryKey: ["cms-pages", id] });
+      void queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
+      void queryClient.invalidateQueries({ queryKey: ["cms-pages", id] });
     },
   });
 }
@@ -47,7 +49,7 @@ export function useDeleteCmsPage() {
   return useMutation({
     mutationFn: (id: string) => cmsPageService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
+      void queryClient.invalidateQueries({ queryKey: ["cms-pages"] });
     },
   });
 }

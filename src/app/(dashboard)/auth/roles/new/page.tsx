@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { PermissionsMatrix } from "@/components/auth/PermissionsMatrix";
 import { RoleForm } from "@/components/auth/RoleForm";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -20,3 +21,4 @@ export default function NewRolePage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

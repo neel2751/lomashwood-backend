@@ -23,3 +23,4 @@ export default function RoleDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

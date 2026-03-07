@@ -19,3 +19,4 @@ export default function LandingPageDetailPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

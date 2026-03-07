@@ -15,3 +15,4 @@ export default function PushNotificationsPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

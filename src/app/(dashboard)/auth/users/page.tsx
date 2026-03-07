@@ -3,6 +3,7 @@
 
 
 import Link from "next/link";
+
 import { UserTable } from "@/components/auth/UserTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 
@@ -23,3 +24,4 @@ export default function UsersPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'

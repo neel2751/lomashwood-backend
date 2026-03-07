@@ -1,3 +1,4 @@
+"use client"
 
 
 export default function OrdersPage() {
@@ -8,3 +9,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic'

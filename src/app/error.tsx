@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 
 interface ErrorProps {
@@ -20,7 +21,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
         An unexpected error occurred. Please try again or contact support if the
         issue persists.
       </p>
-      {error?.digest && (
+      {error.digest && (
         <p className="text-xs text-muted-foreground">Error ID: {error.digest}</p>
       )}
       <Button onClick={reset}>Try Again</Button>

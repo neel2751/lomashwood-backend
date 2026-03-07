@@ -1,6 +1,8 @@
+
 import { apiClient } from "@/lib/api-client";
-import type { PaginatedResponse } from "@/lib/api-client";
 import axios from "@/lib/axios";
+
+import type { PaginatedResponse } from "@/lib/api-client";
 
 type Invoice = {
   id: string;

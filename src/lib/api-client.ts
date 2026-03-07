@@ -52,9 +52,11 @@ export type TimeSlot = {
   available: boolean;
 };
 
+type QueryParams = Record<string, unknown>;
+
 function makeService(basePath: string) {
   return {
-    getAll: (params?: Record<string, any>) =>
+    getAll: (params?: QueryParams) =>
       axios.get(basePath, { params }).then((r) => r.data),
 
     getById: (id: string) =>
@@ -71,7 +73,7 @@ function makeService(basePath: string) {
   };
 }
 
-export function createLomashApiClient() {
+export function createApiClient() {
   return {
     auth: {
       login: (payload: unknown) =>
@@ -84,7 +86,7 @@ export function createLomashApiClient() {
 
     products: makeService("/products"),
     categories: makeService("/categories"),
-    colours: makeService("/colours"),
+    colors: makeService("/colors"),
     sizes: makeService("/sizes"),
     inventory: makeService("/inventory"),
     pricing: makeService("/pricing"),
@@ -121,31 +123,31 @@ export function createLomashApiClient() {
 
     notifications: {
       ...makeService("/notifications"),
-      getByChannel: (channel: string, params?: Record<string, any>) =>
+      getByChannel: (channel: string, params?: QueryParams) =>
         axios.get(`/notifications/${channel}`, { params }).then((r) => r.data),
     },
     templates: makeService("/templates"),
 
     analytics: {
-      get: (params?: Record<string, any>) =>
+      get: (params?: QueryParams) =>
         axios.get("/analytics", { params }).then((r) => r.data),
-      getOverview: (params?: Record<string, any>): Promise<ApiResponse<AnalyticsOverview>> =>
+      getOverview: (params?: QueryParams): Promise<ApiResponse<AnalyticsOverview>> =>
         axios.get("/analytics/overview", { params }).then((r) => r.data),
-      getTracking: (params?: Record<string, any>): Promise<PaginatedResponse<TrackingEvent>> =>
+      getTracking: (params?: QueryParams): Promise<PaginatedResponse<TrackingEvent>> =>
         axios.get("/analytics/tracking", { params }).then((r) => r.data),
-      getRevenue: (params?: Record<string, any>) =>
+      getRevenue: (params?: QueryParams) =>
         axios.get("/analytics/revenue", { params }).then((r) => r.data),
-      getOrders: (params?: Record<string, any>) =>
+      getOrders: (params?: QueryParams) =>
         axios.get("/analytics/orders", { params }).then((r) => r.data),
-      getAppointments: (params?: Record<string, any>) =>
+      getAppointments: (params?: QueryParams) =>
         axios.get("/analytics/appointments", { params }).then((r) => r.data),
-      getCustomers: (params?: Record<string, any>) =>
+      getCustomers: (params?: QueryParams) =>
         axios.get("/analytics/customers", { params }).then((r) => r.data),
     },
     funnels: makeService("/funnels"),
     dashboards: makeService("/dashboards"),
     exports: {
-      getAll: (params?: Record<string, any>) =>
+      getAll: (params?: QueryParams) =>
         axios.get("/exports", { params }).then((r) => r.data),
       create: (payload: unknown) =>
         axios.post("/exports", payload).then((r) => r.data),
@@ -163,9 +165,9 @@ export function createLomashApiClient() {
   };
 }
 
-export type LomashApiClient = ReturnType<typeof createLomashApiClient>;
+export type ApiClient = ReturnType<typeof createApiClient>;
 
-export const apiClient = createLomashApiClient();
+export const apiClient = createApiClient();
 
 export const analyticsClient = apiClient.analytics;
 export const appointmentClient = apiClient.appointments;

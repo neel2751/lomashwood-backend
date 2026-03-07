@@ -15,3 +15,4 @@ export default function LoyaltyPage() {
     </div>
   );
 }
+export const dynamic = 'force-dynamic'
