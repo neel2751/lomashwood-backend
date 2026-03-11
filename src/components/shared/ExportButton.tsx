@@ -5,7 +5,6 @@ interface ExportButtonProps {
 export function ExportButton({ label = 'Export' }: ExportButtonProps) {
   return (
     <button
-      onClick={() => {}}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

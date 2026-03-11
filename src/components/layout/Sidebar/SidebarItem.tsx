@@ -50,8 +50,8 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
           className={cn(
             "shrink-0 flex items-center justify-center w-[34px] h-[34px] rounded-[8px] transition-all duration-200",
             (isActive || isChildActive)
-              ? "bg-[#C8924A]/15 text-[#C8924A]"
-              : "text-[#7A6045] group-hover/item:text-[#C8924A] group-hover/item:bg-[#2E231A]"
+              ? "bg-[var(--color-sidebar-active-bg)] text-[var(--color-sidebar-accent)]"
+              : "text-[var(--color-sidebar-muted)] group-hover/item:bg-[var(--color-sidebar-hover)] group-hover/item:text-[var(--color-sidebar-accent)]"
           )}
         >
           <Icon size={17} strokeWidth={1.8} />
@@ -64,7 +64,9 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
           <span
             className={cn(
               "text-[13px] font-medium truncate transition-colors duration-200",
-              (isActive || isChildActive) ? "text-[#E8D5B7]" : "text-[#9A7A5A] group-hover/item:text-[#C8924A]"
+              (isActive || isChildActive)
+                ? "text-[var(--color-sidebar-active)]"
+                : "text-[var(--color-sidebar-text)] group-hover/item:text-[var(--color-sidebar-active)]"
             )}
           >
             {item.label}
@@ -82,7 +84,7 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
               <ChevronRight
                 size={13}
                 className={cn(
-                  "text-[#5A4232] transition-transform duration-200",
+                  "text-[var(--color-sidebar-muted)] transition-transform duration-200",
                   open && "rotate-90"
                 )}
               />
@@ -106,19 +108,19 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
         onMouseLeave={() => setShowTooltip(false)}
       >
        
-        {hasChildren || !item.href ? (
+        {(hasChildren && !collapsed) || !item.href ? (
           <button
             onClick={handleClick}
             className={cn(
               "w-full flex items-center gap-2 px-1.5 py-1 rounded-[10px] transition-all duration-150",
-              "relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40",
-              (isActive || isChildActive) ? "bg-[#2E231A]" : "hover:bg-[#221A12]"
+              "relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-sidebar-accent)]/30",
+              (isActive || isChildActive) ? "bg-[var(--color-sidebar-active-bg)]" : "hover:bg-[var(--color-sidebar-hover)]"
             )}
           >
             {itemContent}
            
             {(isActive || isChildActive) && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#C8924A]" />
+              <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--color-sidebar-accent)]" />
             )}
           </button>
         ) : (
@@ -126,14 +128,14 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
             href={item.href}
             className={cn(
               "flex items-center gap-2 px-1.5 py-1 rounded-[10px] transition-all duration-150",
-              "relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40",
+              "relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-sidebar-accent)]/30",
               collapsed ? "justify-center px-0 w-full" : "",
-              isActive ? "bg-[#2E231A]" : "hover:bg-[#221A12]"
+              isActive || isChildActive ? "bg-[var(--color-sidebar-active-bg)]" : "hover:bg-[var(--color-sidebar-hover)]"
             )}
           >
             {itemContent}
             {isActive && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#C8924A]" />
+              <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--color-sidebar-accent)]" />
             )}
           </Link>
         )}
@@ -143,15 +145,15 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
             ref={tooltipRef}
             className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 z-50 pointer-events-none"
           >
-            <div className="bg-[#2E231A] border border-[#3D2E1E] text-[#E8D5B7] text-[12px] font-medium px-3 py-1.5 rounded-[8px] whitespace-nowrap shadow-xl">
+            <div className="rounded-[8px] border border-[var(--color-sidebar-border)] bg-[var(--color-sidebar-subtle)] px-3 py-1.5 text-[12px] font-medium whitespace-nowrap text-[var(--color-sidebar-text)] shadow-xl">
               {item.label}
               {item.badge && (
-                <span className="ml-2 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full bg-[#C8924A] text-[9px] font-bold text-white">
+                <span className="ml-2 inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[var(--color-sidebar-accent)] px-1 text-[9px] font-bold text-white">
                   {item.badge}
                 </span>
               )}
               
-              <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#3D2E1E]" />
+              <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[var(--color-sidebar-border)]" />
             </div>
           </div>
         )}
@@ -165,24 +167,24 @@ export function SidebarItem({ item, collapsed }: SidebarItemProps) {
             open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           )}
         >
-          <div className="mt-0.5 ml-4 pl-3 border-l border-[#2E231A] flex flex-col gap-0.5 py-0.5">
+          <div className="mt-0.5 ml-4 flex flex-col gap-0.5 border-l py-0.5 pl-3 border-[var(--color-sidebar-border)]">
             {item.children!.map((child) => (
               <Link
                 key={child.href}
                 href={child.href}
                 className={cn(
                   "flex items-center gap-2 px-3 py-[7px] rounded-[8px] text-[12.5px] transition-all duration-150",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-sidebar-accent)]/30",
                   pathname === child.href
-                    ? "bg-[#C8924A]/10 text-[#E8D5B7] font-medium"
-                    : "text-[#7A6045] hover:text-[#C8924A] hover:bg-[#221A12]"
+                    ? "bg-[var(--color-sidebar-active-bg)] text-[var(--color-sidebar-active)] font-medium"
+                    : "text-[var(--color-sidebar-muted)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-sidebar-accent)]"
                 )}
               >
               
                 <span
                   className={cn(
                     "w-1 h-1 rounded-full shrink-0 transition-colors",
-                    pathname === child.href ? "bg-[#C8924A]" : "bg-[#3D2E1E]"
+                    pathname === child.href ? "bg-[var(--color-sidebar-accent)]" : "bg-[var(--color-sidebar-border)]"
                   )}
                 />
                 {child.label}

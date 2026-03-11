@@ -19,7 +19,7 @@ export function SidebarGroup({ group, collapsed }: SidebarGroupProps) {
         <p
           className={cn(
             "px-3 pt-4 pb-1.5 text-[10px] font-semibold tracking-[0.14em] uppercase",
-            "text-[#5A4232] select-none"
+            "select-none text-[var(--color-sidebar-muted)]"
           )}
         >
           {group.title}
@@ -27,7 +27,7 @@ export function SidebarGroup({ group, collapsed }: SidebarGroupProps) {
       )}
 
       {collapsed && (
-        <div className="my-2 mx-3 h-px bg-[#2E231A]" />
+        <div className="my-2 mx-3 h-px bg-[var(--color-sidebar-border)]" />
       )}
 
       {/* Items */}

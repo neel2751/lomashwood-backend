@@ -3,8 +3,8 @@
 import {
   LayoutDashboard,
   ShoppingBag,
-  ClipboardList,
   CalendarCheck,
+  Store,
   Users,
   FileText,
   Bell,
@@ -51,18 +51,6 @@ const NAV_GROUPS: NavSection[] = [
     title: "Sales",
     items: [
       {
-        label: "Orders",
-        href: "/orders",
-        icon: ClipboardList,
-        badge: "12",
-        children: [
-          { label: "All Orders", href: "/orders" },
-          { label: "Payments", href: "/orders/payments" },
-          { label: "Invoices", href: "/orders/invoices" },
-          { label: "Refunds", href: "/orders/refunds" },
-        ],
-      },
-      {
         label: "Appointments",
         href: "/appointments",
         icon: CalendarCheck,
@@ -72,6 +60,15 @@ const NAV_GROUPS: NavSection[] = [
           { label: "Availability", href: "/appointments/availability" },
           { label: "Consultants", href: "/appointments/consultants" },
           { label: "Reminders", href: "/appointments/reminders" },
+        ],
+      },
+      {
+        label: "Showrooms",
+        href: "/showrooms",
+        icon: Store,
+        children: [
+          { label: "All Showrooms", href: "/showrooms" },
+          { label: "Add New", href: "/showrooms/new" },
         ],
       },
     ],

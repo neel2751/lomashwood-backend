@@ -20,10 +20,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !user) {
       router.replace("/login");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, user, router]);
 
   useEffect(() => {
     if (user) {
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return <PageLoader />;
   }
 
-  if (!isAuthenticated) {
+  if (!user && !isAuthenticated) {
     return null;
   }
 

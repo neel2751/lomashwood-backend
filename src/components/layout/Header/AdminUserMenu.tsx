@@ -47,10 +47,14 @@ export function AdminUserMenu() {
         .slice(0, 2)
     : "LW";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setOpen(false);
-    clearUser();
-    router.push("/login");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      clearUser();
+      router.push("/login");
+    }
   };
 
   // Close on outside click
@@ -71,27 +75,27 @@ export function AdminUserMenu() {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex items-center gap-2.5 h-9 pl-1 pr-2.5 rounded-[10px] transition-all",
-          "hover:bg-[#2E231A]",
-          open && "bg-[#2E231A]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40"
+          "hover:bg-[var(--color-header-hover)]",
+          open && "bg-[var(--color-header-hover)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-sidebar-accent)]/30"
         )}
         aria-label="User menu"
         aria-expanded={open}
       >
         {/* Avatar */}
         <div className="relative">
-          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-[#C8924A] to-[#8B5E2A] text-white text-[11px] font-semibold shadow-md shadow-[#C8924A]/20">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-sidebar-accent)] to-[#7A551C] text-[11px] font-semibold text-white shadow-md shadow-[rgba(167,121,43,0.2)]">
             {initials}
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-[#1C1611]" />
+          <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-[var(--color-header-bg)] bg-emerald-500" />
         </div>
 
         {/* Name */}
         <div className="hidden sm:flex flex-col items-start leading-none">
-          <span className="text-[12.5px] font-medium text-[#E8D5B7] leading-none">
+          <span className="text-[12.5px] font-medium leading-none text-[var(--color-header-text)]">
             {user?.name ?? "Admin"}
           </span>
-          <span className="text-[10px] text-[#5A4232] leading-none mt-0.5 capitalize">
+          <span className="mt-0.5 text-[10px] capitalize leading-none text-[var(--color-header-muted)]">
             {user?.roleName ?? "administrator"}
           </span>
         </div>
@@ -99,7 +103,7 @@ export function AdminUserMenu() {
         <ChevronDown
           size={13}
           className={cn(
-            "text-[#5A4232] transition-transform duration-200 hidden sm:block",
+            "hidden text-[var(--color-header-muted)] transition-transform duration-200 sm:block",
             open && "rotate-180"
           )}
         />
@@ -107,21 +111,21 @@ export function AdminUserMenu() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-[calc(100%+8px)] w-[220px] bg-[#1C1611] border border-[#2E231A] rounded-[14px] shadow-2xl shadow-black/50 overflow-hidden z-50">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[220px] overflow-hidden rounded-[14px] border border-[var(--color-header-border)] bg-[var(--color-header-panel)] shadow-2xl shadow-[rgba(92,72,41,0.18)]">
           {/* User info header */}
-          <div className="px-4 py-3 border-b border-[#2E231A]">
-            <p className="text-[13px] font-semibold text-[#E8D5B7] truncate">
+          <div className="border-b border-[var(--color-header-border)] px-4 py-3">
+            <p className="truncate text-[13px] font-semibold text-[var(--color-header-text)]">
               {user?.name ?? "Admin User"}
             </p>
-            <p className="text-[11px] text-[#5A4232] truncate mt-0.5">
+            <p className="mt-0.5 truncate text-[11px] text-[var(--color-header-muted)]">
               {user?.email ?? "admin@lomashwood.co.uk"}
             </p>
           </div>
 
           {/* Menu groups */}
           {MENU_ITEMS.map((group) => (
-            <div key={group.group} className="py-1 border-b border-[#2E231A]">
-              <p className="px-4 pt-2 pb-1 text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E]">
+            <div key={group.group} className="border-b border-[var(--color-header-border)] py-1">
+              <p className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#9A8B7C]">
                 {group.group}
               </p>
               {group.items.map((item) => {
@@ -131,7 +135,7 @@ export function AdminUserMenu() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2 text-[12.5px] text-[#7A6045] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all"
+                    className="flex items-center gap-3 px-4 py-2 text-[12.5px] text-[var(--color-header-muted)] transition-all hover:bg-[var(--color-header-hover)] hover:text-[var(--color-sidebar-accent)]"
                   >
                     <Icon size={14} />
                     {item.label}
@@ -145,7 +149,7 @@ export function AdminUserMenu() {
           <div className="py-1">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2 text-[12.5px] text-[#7A6045] hover:text-red-400 hover:bg-red-500/10 transition-all"
+              className="flex w-full items-center gap-3 px-4 py-2 text-[12.5px] text-[var(--color-header-muted)] transition-all hover:bg-red-50 hover:text-red-600"
             >
               <LogOut size={14} />
               Sign Out

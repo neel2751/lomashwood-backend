@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { auditService } from "@/services/auditService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 export const useAuditLogs = (params?: {
   page?: number;
@@ -9,6 +9,6 @@ export const useAuditLogs = (params?: {
 }) => {
   return useQuery({
     queryKey: ["audit-logs", params],
-    queryFn: () => auditService.getLogs(params),
+    queryFn: () => fetchWithAuth(`/api/audit-logs${buildQueryString(params || {})}`),
   });
 };

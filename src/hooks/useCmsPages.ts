@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { cmsPageService } from "@/services/cmsPageService";
+import { fetchWithAuth } from "@/lib/fetch-client";
 
 import type { CreateCmsPagePayload } from "@/types/content.types";
 
 export function useCmsPages() {
   return useQuery({
     queryKey: ["cms-pages"],
-    queryFn: () => cmsPageService.getAll(),
+    queryFn: () => fetchWithAuth('/api/cms-pages'),
   });
 }
 
 export function useCmsPage(id: string) {
   return useQuery({
     queryKey: ["cms-pages", id],
-    queryFn: () => cmsPageService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/cms-pages/${id}`),
     enabled: !!id,
   });
 }

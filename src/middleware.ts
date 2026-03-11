@@ -5,13 +5,25 @@ import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = [
   "/login",
+  "/register",
   "/forgot-password",
   "/reset-password",
-  "/", 
 ];
 
 const API_PUBLIC_PATHS = [
   "/api/auth/login",
+  "/api/auth/register",
+  "/api/showrooms",
+  "/api/v1/products",
+  "/api/v1/showrooms",
+  "/api/v1/appointments",
+];
+
+const DEFAULT_CORS_ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://lomashwood.co.uk",
+  "https://www.lomashwood.co.uk",
 ];
 
 const STATIC_EXTENSIONS = /\.(ico|svg|png|jpg|jpeg|webp|gif|woff|woff2|ttf|otf|css|js|map)$/;
@@ -34,6 +46,38 @@ function isStaticAsset(pathname: string): boolean {
 
 function isApiRoute(pathname: string): boolean {
   return pathname.startsWith("/api/");
+}
+
+function getAllowedCorsOrigins(): Set<string> {
+  const configured = (process.env.CORS_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const fallback = process.env.NEXT_PUBLIC_URL?.trim();
+  const all = [
+    ...DEFAULT_CORS_ALLOWED_ORIGINS,
+    ...(fallback ? [fallback] : []),
+    ...configured,
+  ];
+
+  return new Set(all);
+}
+
+function addApiCorsHeaders(request: NextRequest, response: NextResponse): NextResponse {
+  const origin = request.headers.get("origin");
+  const allowedOrigins = getAllowedCorsOrigins();
+
+  response.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  response.headers.set("Vary", "Origin");
+
+  if (origin && allowedOrigins.has(origin)) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+  }
+
+  return response;
 }
 
 function getAccessToken(request: NextRequest): string | null {
@@ -89,6 +133,16 @@ function buildForbiddenApiResponse(): NextResponse {
 }
 
 function addSecurityHeaders(response: NextResponse): NextResponse {
+  const connectSources = [
+    "'self'",
+    "https://api.lomashwood.com",
+    "https://api.lomashwood.co.uk",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://*.amazonaws.com",
+    "https://*.r2.cloudflarestorage.com",
+  ];
+
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -104,7 +158,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://api.lomashwood.com",
+      `connect-src ${connectSources.join(" ")}`,
       "frame-ancestors 'none'",
     ].join("; "),
   );
@@ -167,20 +221,24 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   if (isApiRoute(pathname)) {
+    if (request.method === "OPTIONS") {
+      return addApiCorsHeaders(request, new NextResponse(null, { status: 204 }));
+    }
+
     if (isApiPublicPath(pathname)) {
-      return NextResponse.next();
+      return addApiCorsHeaders(request, NextResponse.next());
     }
 
     const token = getAccessToken(request);
 
     if (!token) {
-      return buildUnauthorizedApiResponse();
+      return addApiCorsHeaders(request, buildUnauthorizedApiResponse());
     }
 
     if (isTokenExpired(token)) {
       const refreshToken = getRefreshToken(request);
       if (!refreshToken) {
-        return buildUnauthorizedApiResponse();
+        return addApiCorsHeaders(request, buildUnauthorizedApiResponse());
       }
 
       try {
@@ -194,7 +252,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         );
 
         if (!refreshRes.ok) {
-          return buildUnauthorizedApiResponse();
+          return addApiCorsHeaders(request, buildUnauthorizedApiResponse());
         }
 
         const { data } = await refreshRes.json();
@@ -206,18 +264,18 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
           path: "/",
           maxAge: 15 * 60,
         });
-        return addSecurityHeaders(response);
+        return addApiCorsHeaders(request, addSecurityHeaders(response));
       } catch {
-        return buildUnauthorizedApiResponse();
+        return addApiCorsHeaders(request, buildUnauthorizedApiResponse());
       }
     }
 
     const role = getUserRole(token);
     if (!isAuthorizedForPath(pathname, role)) {
-      return buildForbiddenApiResponse();
+      return addApiCorsHeaders(request, buildForbiddenApiResponse());
     }
 
-    return addSecurityHeaders(NextResponse.next());
+    return addApiCorsHeaders(request, addSecurityHeaders(NextResponse.next()));
   }
 
   if (isPublicPath(pathname)) {

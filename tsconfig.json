@@ -27,6 +27,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@servers/*": ["./servers/*"],
+      "@generated/*": ["./generated/*"],
       "@/components/*": ["./src/components/*"],
       "@/app/*": ["./src/app/*"],
       "@/lib/*": ["./src/lib/*"],

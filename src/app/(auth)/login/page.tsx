@@ -1,12 +1,14 @@
-"use client"
-'use client'
+"use client";
 import { useState, useTransition } from 'react'
 
 import Link from 'next/link'
+import { useAuthStore } from '@/stores/useAuthStore'
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const { setAccessToken, setUser } = useAuthStore()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -27,6 +29,17 @@ export default function LoginPage() {
           setError(data.message ?? 'Invalid credentials. Please try again.')
           return
         }
+        
+        const data = await res.json()
+        
+        // Save token and user to auth store
+        if (data.token) {
+          setAccessToken(data.token)
+        }
+        if (data.user) {
+          setUser(data.user)
+        }
+        
         window.location.href = '/'
       } catch {
         setError('Something went wrong. Please try again.')
@@ -113,6 +126,10 @@ export default function LoginPage() {
           {isPending ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
+
+      <p className="register-link-text">
+        Need an admin account? <Link href="/register">Register</Link>
+      </p>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -298,6 +315,20 @@ export default function LoginPage() {
 
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        .register-link-text {
+          margin-top: 14px;
+          text-align: center;
+          font-size: 0.875rem;
+          color: #6B6B68;
+        }
+
+        .register-link-text a {
+          color: #1A1A18;
+          font-weight: 600;
+          text-decoration: underline;
+          text-underline-offset: 2px;
         }
       `}</style>
     </>

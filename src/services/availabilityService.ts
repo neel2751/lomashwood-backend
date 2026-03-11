@@ -5,11 +5,21 @@ import type { ApiResponse } from "@/lib/api-client";
 
 type Availability = {
   id: string;
-  consultantId: string;
+  consultantId?: string;
   date: string;
-  startTime: string;
-  endTime: string;
-  available?: boolean;
+  slots: string[];
+  isBlocked?: boolean;
+};
+
+type WeeklyPatternPayload = {
+  consultantId?: string;
+  patterns: Array<{
+    weekday: number;
+    isEnabled: boolean;
+    startTime: string;
+    endTime: string;
+    slotDuration: number;
+  }>;
 };
 
 export const availabilityService = {
@@ -27,6 +37,15 @@ export const availabilityService = {
 
   remove: (id: string) =>
     apiClient.availability.delete(id),
+
+  getSlots: (params: { date: string; consultantId?: string }) =>
+    axios.get("/availability/slots", { params }).then((r) => r.data),
+
+  getWeeklyPattern: (params?: { consultantId?: string }) =>
+    axios.get("/availability/weekly", { params }).then((r) => r.data),
+
+  saveWeeklyPattern: (payload: WeeklyPatternPayload) =>
+    axios.post("/availability/weekly", payload).then((r) => r.data),
 
   getByConsultant: (consultantId: string, params?: Record<string, unknown>) =>
     axios

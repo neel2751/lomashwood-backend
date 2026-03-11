@@ -76,7 +76,7 @@ export function Breadcrumb() {
       {/* Home */}
       <Link
         href="/"
-        className="shrink-0 flex items-center justify-center w-7 h-7 rounded-[7px] text-[#5A4232] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-[var(--color-header-muted)] transition-all hover:bg-[var(--color-header-hover)] hover:text-[var(--color-sidebar-accent)]"
         aria-label="Dashboard"
       >
         <Home size={14} />
@@ -84,13 +84,13 @@ export function Breadcrumb() {
 
       {crumbs.map((crumb) => (
         <div key={crumb.href} className="flex items-center gap-1 min-w-0">
-          <ChevronRight size={13} className="shrink-0 text-[#3D2E1E]" />
+          <ChevronRight size={13} className="shrink-0 text-[var(--color-header-muted)]" />
 
           {crumb.isLast ? (
             <span
               className={cn(
                 "text-[13px] font-medium truncate",
-                crumb.isDynamic ? "text-[#7A6045] italic" : "text-[#E8D5B7]"
+                crumb.isDynamic ? "italic text-[var(--color-header-muted)]" : "text-[var(--color-header-text)]"
               )}
             >
               {crumb.isDynamic ? "Detail" : crumb.label}
@@ -98,7 +98,7 @@ export function Breadcrumb() {
           ) : (
             <Link
               href={crumb.href}
-              className="text-[13px] text-[#7A6045] hover:text-[#C8924A] transition-colors truncate"
+              className="truncate text-[13px] text-[var(--color-header-muted)] transition-colors hover:text-[var(--color-sidebar-accent)]"
             >
               {crumb.label}
             </Link>

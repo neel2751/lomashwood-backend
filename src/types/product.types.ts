@@ -17,6 +17,26 @@ export type ProductStyle =
   | "classic"
   | "rustic";
 
+export type ProductStyleOption = {
+  id: string;
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ProductFinishOption = {
+  id: string;
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Colour = {
   id: string;
   name: string;
@@ -50,8 +70,13 @@ export type Product = {
   rangeName: string;
   images: string[];
   price?: number;
-  finish?: ProductFinish;
-  style?: ProductStyle;
+  packageId?: string | null;
+  finishId?: string | null;
+  styleId?: string | null;
+  package?: Package | null;
+  packageTitle?: string | null;
+  finish?: string | null;
+  style?: string | null;
   colours: Colour[];
   sizes: Size[];
   category_ref?: Category;
@@ -106,6 +131,10 @@ export type Package = {
   image?: string;
   category: ProductCategory;
   price?: number;
+  features: string[];
+  isActive: boolean;
+  productsCount?: number;
+  products?: Pick<Product, "id" | "title" | "category" | "price" | "isPublished">[];
   createdAt: string;
   updatedAt: string;
 };
@@ -141,7 +170,11 @@ export type CreateProductPayload = {
   description: string;
   category: ProductCategory;
   rangeName: string;
+  images?: string[];
   price?: number;
+  packageId?: string;
+  finishId?: string;
+  styleId?: string;
   finish?: ProductFinish;
   style?: ProductStyle;
   colourIds: string[];
@@ -150,6 +183,18 @@ export type CreateProductPayload = {
 };
 
 export type UpdateProductPayload = Partial<CreateProductPayload>;
+
+export type CreatePackagePayload = {
+  title: string;
+  description?: string;
+  image?: string;
+  category: ProductCategory;
+  price?: number;
+  features?: string[];
+  isActive?: boolean;
+};
+
+export type UpdatePackagePayload = Partial<CreatePackagePayload>;
 
 export type CreateColourPayload = {
   name: string;
@@ -193,8 +238,10 @@ export type ProductFilterParams = PaginationParams & {
   search?: string;
   category?: ProductCategory;
   colourId?: string;
-  style?: ProductStyle;
-  finish?: ProductFinish;
+  style?: string;
+  finish?: string;
+  styleId?: string;
+  finishId?: string;
   rangeId?: string;
   isPublished?: boolean;
 };

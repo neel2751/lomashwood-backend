@@ -1,20 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { createApiClient } from "@/lib/api-client";
+import { deleteProduct, getProductById, updateProduct } from "@servers/products.actions";
+import { parseZodError } from "@servers/_shared";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createApiClient();
-    const data = await client.products.getById(params.id);
+    const data = await getProductById(params.id);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to fetch product" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to fetch product" },
+      { status }
     );
   }
 }
@@ -25,14 +26,14 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const client = createApiClient();
-    const data = await client.products.update(params.id, body);
+    const data = await updateProduct(params.id, body);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to update product" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to update product" },
+      { status }
     );
   }
 }
@@ -42,14 +43,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createApiClient();
-    await client.products.delete(params.id);
+    await deleteProduct(params.id);
 
     return NextResponse.json({ message: "Product deleted" }, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to delete product" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to delete product" },
+      { status }
     );
   }
 }

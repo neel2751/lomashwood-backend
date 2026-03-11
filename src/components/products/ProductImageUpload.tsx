@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 import Image from "next/image";
 
@@ -8,9 +8,11 @@ import { Upload, X, GripVertical, Star, ImageOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-interface UploadedImage {
+export interface UploadedImage {
   id: string;
   url: string;
+  key?: string;
+  mediaId?: string;
   name: string;
   size: number;
   isPrimary: boolean;
@@ -20,6 +22,7 @@ interface ProductImageUploadProps {
   value?: UploadedImage[];
   onChange?: (images: UploadedImage[]) => void;
   maxImages?: number;
+  uploadFolder?: string;
 }
 
 function uid() { return Math.random().toString(36).slice(2, 8); }
@@ -34,10 +37,19 @@ export function ProductImageUpload({
   value,
   onChange,
   maxImages = 10,
+  uploadFolder = "products",
 }: ProductImageUploadProps) {
   const [images, setImages] = useState<UploadedImage[]>(value ?? []);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (value) {
+      setImages(value);
+    }
+  }, [value]);
 
   const emit = useCallback((imgs: UploadedImage[]) => {
     setImages(imgs);
@@ -45,22 +57,86 @@ export function ProductImageUpload({
   }, [onChange]);
 
   const processFiles = useCallback(
-    (files: FileList | null) => {
-      if (!files) return;
+    async (files: FileList | null) => {
+      if (!files || isUploading) return;
+
       const remaining = maxImages - images.length;
-      const toAdd = Array.from(files).slice(0, remaining);
+      if (remaining <= 0) {
+        return;
+      }
 
-      const newImages: UploadedImage[] = toAdd.map((file, i) => ({
-        id: uid(),
-        url: URL.createObjectURL(file),
-        name: file.name,
-        size: file.size,
-        isPrimary: images.length === 0 && i === 0,
-      }));
+      const toAdd = Array.from(files)
+        .filter((file) => file.type.startsWith("image/"))
+        .filter((file) => file.size <= 5 * 1024 * 1024)
+        .slice(0, remaining);
 
-      emit([...images, ...newImages]);
+      if (toAdd.length === 0) {
+        setUploadError("Only image files up to 5MB are allowed.");
+        return;
+      }
+
+      setIsUploading(true);
+      setUploadError(null);
+
+      const uploaded: UploadedImage[] = [];
+
+      try {
+        for (const [index, file] of toAdd.entries()) {
+          const presignResponse = await fetch("/api/uploads/presign", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              contentType: file.type || "application/octet-stream",
+              folder: uploadFolder,
+              source: "product-image-upload",
+            }),
+          });
+
+          if (!presignResponse.ok) {
+            throw new Error("Failed to prepare image upload");
+          }
+
+          const { uploadUrl, fileUrl, key, mediaId } = (await presignResponse.json()) as {
+            uploadUrl: string;
+            fileUrl: string;
+            key: string;
+            mediaId: string;
+          };
+
+          const uploadResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+            body: file,
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error("Failed to upload image");
+          }
+
+          uploaded.push({
+            id: uid(),
+            url: fileUrl,
+            key,
+            mediaId,
+            name: file.name,
+            size: file.size,
+            isPrimary: images.length === 0 && index === 0,
+          });
+        }
+
+        emit([...images, ...uploaded]);
+      } catch (error) {
+        setUploadError(error instanceof Error ? error.message : "Image upload failed");
+      } finally {
+        setIsUploading(false);
+      }
     },
-    [images, maxImages, emit]
+    [emit, images, isUploading, maxImages, uploadFolder]
   );
 
   const onDrop = useCallback(
@@ -99,6 +175,7 @@ export function ProductImageUpload({
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+          disabled={isUploading}
           aria-label="Upload images — click or drag and drop"
           className={cn(
             "flex flex-col items-center justify-center gap-3 h-36 rounded-[12px] border-2 border-dashed transition-all cursor-pointer w-full",
@@ -115,7 +192,7 @@ export function ProductImageUpload({
           </div>
           <div className="text-center">
             <p className="text-[13px] font-medium text-[#9A7A5A]">
-              {isDragging ? "Drop images here" : "Drag & drop or click to upload"}
+              {isUploading ? "Uploading images..." : isDragging ? "Drop images here" : "Drag & drop or click to upload"}
             </p>
             <p className="text-[11px] text-[#3D2E1E] mt-0.5">
               JPG, PNG, WebP · Max 5MB · {images.length}/{maxImages} uploaded
@@ -130,6 +207,10 @@ export function ProductImageUpload({
             onChange={(e) => processFiles(e.target.files)}
           />
         </button>
+      )}
+
+      {uploadError && (
+        <p className="text-[12px] text-red-400">{uploadError}</p>
       )}
 
       {/* Image grid */}
@@ -199,6 +280,7 @@ export function ProductImageUpload({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
               className="aspect-square rounded-[10px] border-2 border-dashed border-[#3D2E1E] bg-[#2E231A] flex flex-col items-center justify-center gap-1.5 text-[#3D2E1E] hover:border-[#C8924A]/40 hover:text-[#C8924A] hover:bg-[#221A12] transition-all"
             >
               <Upload size={16} />

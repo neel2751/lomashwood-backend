@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useLandingPages } from "@/hooks/useLandingPages";
 
 type LandingStatus = "live" | "draft" | "paused" | "archived";
 
@@ -26,16 +27,6 @@ interface LandingPage {
   expiresAt?: string;
   lastEdited: string;
 }
-
-const MOCK_PAGES: LandingPage[] = [
-  { id: "1", title: "Spring Kitchen Sale 2026",       slug: "/kitchen-spring-sale",       campaign: "Spring Sale",    status: "live",     visits: 3421, conversions: 184, createdAt: "01 Feb 2026", expiresAt: "31 Mar 2026", lastEdited: "10 Feb 2026" },
-  { id: "2", title: "Book a Free Home Consultation",  slug: "/free-consultation",         campaign: "Lead Gen",       status: "live",     visits: 1892, conversions: 97,  createdAt: "15 Jan 2026", lastEdited: "20 Jan 2026" },
-  { id: "3", title: "Trade Programme Sign Up",        slug: "/trade-programme",           campaign: "Trade",          status: "draft",    visits: 0,    conversions: 0,   createdAt: "20 Feb 2026", lastEdited: "27 Feb 2026" },
-  { id: "4", title: "Bedroom Range Launch",           slug: "/bedroom-launch-2026",       campaign: "Bedroom Launch", status: "live",     visits: 2109, conversions: 131, createdAt: "01 Feb 2026", expiresAt: "28 Feb 2026", lastEdited: "01 Feb 2026" },
-  { id: "5", title: "Christmas Kitchens 2025",        slug: "/christmas-kitchens-2025",   campaign: "Christmas 2025", status: "archived", visits: 4872, conversions: 289, createdAt: "01 Nov 2025", expiresAt: "31 Dec 2025", lastEdited: "01 Nov 2025" },
-  { id: "6", title: "Manchester Showroom Open Day",   slug: "/showroom-open-day",         campaign: "Events",         status: "paused",   visits: 742,  conversions: 58,  createdAt: "05 Feb 2026", expiresAt: "15 Feb 2026", lastEdited: "05 Feb 2026" },
-  { id: "7", title: "Sustainability Promise Page",    slug: "/sustainability-promise",    campaign: "Brand",          status: "draft",    visits: 0,    conversions: 0,   createdAt: "25 Feb 2026", lastEdited: "25 Feb 2026" },
-];
 
 const STATUS_CONFIG: Record<LandingStatus, { label: string; bg: string; text: string; dot: string }> = {
   live:     { label: "Live",     bg: "bg-emerald-400/10",  text: "text-emerald-400", dot: "bg-emerald-400" },
@@ -59,11 +50,15 @@ function ConversionRate({ visits, conversions }: { visits: number; conversions: 
 export function LandingPageTable() {
   const [search, setSearch]       = useState("");
   const [statusFilter, setStatus] = useState<"All" | LandingStatus>("All");
+
+  const { data, isLoading, isError } = useLandingPages();
+
+  const landingPages = ((data as { data?: LandingPage[] } | undefined)?.data ?? []) as LandingPage[];
   const [statuses, setStatuses]   = useState<Record<string, LandingStatus>>(
-    Object.fromEntries(MOCK_PAGES.map((p) => [p.id, p.status]))
+    Object.fromEntries(landingPages.map((p) => [p.id, p.status]))
   );
 
-  const filtered = MOCK_PAGES.filter((p) => {
+  const filtered = landingPages.filter((p) => {
     const q = search.toLowerCase();
     const matchSearch = p.title.toLowerCase().includes(q) ||
       p.slug.toLowerCase().includes(q) ||
@@ -76,8 +71,24 @@ export function LandingPageTable() {
     if (next !== current) setStatuses((p) => ({ ...p, [id]: next }));
   };
 
-  const totalVisits      = MOCK_PAGES.reduce((s, p) => s + p.visits, 0);
-  const totalConversions = MOCK_PAGES.reduce((s, p) => s + p.conversions, 0);
+  const totalVisits      = landingPages.reduce((s, p) => s + p.visits, 0);
+  const totalConversions = landingPages.reduce((s, p) => s + p.conversions, 0);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading landing pages...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load landing pages.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
@@ -244,8 +255,8 @@ export function LandingPageTable() {
       <div className="px-5 py-3 border-t border-[#2E231A] flex items-center justify-between">
         <span className="text-[12px] text-[#5A4232]">{filtered.length} pages</span>
         <span className="text-[12px] text-[#3D2E1E]">
-          {MOCK_PAGES.filter((p) => p.status === "live").length} live ·{" "}
-          {MOCK_PAGES.filter((p) => p.status === "draft").length} draft
+          {landingPages.filter((p) => p.status === "live").length} live ·{" "}
+          {landingPages.filter((p) => p.status === "draft").length} draft
         </span>
       </div>
     </div>

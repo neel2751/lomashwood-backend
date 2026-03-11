@@ -1,20 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { createApiClient } from "@/lib/api-client";
+import { deleteAppointment, getAppointmentById, updateAppointment } from "@servers/appointments.actions";
+import { parseZodError } from "@servers/_shared";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createApiClient();
-    const data = await client.appointments.getById(params.id);
+    const data = await getAppointmentById(params.id);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to fetch appointment" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to fetch appointment" },
+      { status }
     );
   }
 }
@@ -25,14 +26,14 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const client = createApiClient();
-    const data = await client.appointments.update(params.id, body);
+    const data = await updateAppointment(params.id, body);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to update appointment" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to update appointment" },
+      { status }
     );
   }
 }
@@ -42,14 +43,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createApiClient();
-    await client.appointments.delete(params.id);
+    await deleteAppointment(params.id);
 
     return NextResponse.json({ message: "Appointment deleted" }, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to delete appointment" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to delete appointment" },
+      { status }
     );
   }
 }

@@ -8,11 +8,16 @@
     },
     "scripts": {
         "dev": "next dev",
-        "build": "next build",
+        "build": "prisma generate && next build",
         "start": "next start",
         "lint": "next lint",
         "lint:fix": "next lint --fix",
         "type-check": "tsc --noEmit",
+        "prisma:generate": "prisma generate",
+        "prisma:validate": "prisma validate",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:migrate:deploy": "prisma migrate deploy",
+        "prisma:seed": "prisma db seed",
         "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
         "format:check": "prettier --check \"src/**/*.{ts,tsx,css,md}\"",
         "test": "jest --passWithNoTests",
@@ -27,11 +32,15 @@
         "clean:full": "rimraf .next node_modules pnpm-lock.yaml",
         "reinstall": "pnpm run clean:full && pnpm install",
         "prepare": "husky install || true",
-        "postinstall": "git submodule update --init --recursive"
+        "postinstall": "git submodule update --init --recursive && prisma generate",
+        "vercel-build": "prisma migrate deploy && prisma generate && next build"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.1005.0",
+        "@aws-sdk/s3-request-presigner": "^3.1005.0",
         "@hookform/resolvers": "^3.9.0",
-        "@prisma/client": "^5.17.0",
+        "@prisma/adapter-pg": "^7.4.2",
+        "@prisma/client": "^7.4.2",
         "@radix-ui/react-accordion": "^1.2.12",
         "@radix-ui/react-alert-dialog": "^1.1.15",
         "@radix-ui/react-avatar": "^1.1.11",
@@ -63,16 +72,20 @@
         "@tiptap/react": "^2.5.9",
         "@tiptap/starter-kit": "^2.5.9",
         "axios": "^1.7.3",
+        "bcrypt": "^6.0.0",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "cmdk": "^1.0.0",
         "date-fns": "^3.6.0",
+        "dotenv": "^17.3.1",
         "embla-carousel-react": "^8.1.8",
         "js-cookie": "^3.0.5",
         "lucide-react": "^0.575.0",
         "next": "14.2.5",
         "next-themes": "^0.3.0",
+        "nodemailer": "^8.0.2",
         "nuqs": "^1.19.1",
+        "pg": "^8.20.0",
         "react": "18.3.1",
         "react-day-picker": "^8.10.1",
         "react-dom": "18.3.1",
@@ -84,6 +97,7 @@
         "styled-jsx": "^5.1.7",
         "tailwind-merge": "^2.4.0",
         "tailwindcss-animate": "^1.0.7",
+        "typeorm": "^0.3.28",
         "vaul": "^0.9.1",
         "zod": "^3.23.8",
         "zustand": "^4.5.4"
@@ -97,9 +111,12 @@
         "@testing-library/jest-dom": "^6.4.6",
         "@testing-library/react": "^16.0.0",
         "@testing-library/user-event": "^14.5.2",
+        "@types/bcrypt": "^6.0.0",
         "@types/jest": "^30.0.0",
         "@types/js-cookie": "^3.0.6",
         "@types/node": "^20.14.12",
+        "@types/nodemailer": "^7.0.11",
+        "@types/pg": "^8.18.0",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -123,10 +140,14 @@
         "postcss": "^8.4.40",
         "prettier": "^3.3.3",
         "prettier-plugin-tailwindcss": "^0.6.5",
-        "prisma": "^5.17.0",
+        "prisma": "^7.4.2",
         "tailwindcss": "^3.4.6",
         "ts-jest": "^29.2.3",
+        "tsx": "^4.21.0",
         "typescript": "^5.5.4"
+    },
+    "prisma": {
+        "seed": "tsx prisma/seeds/seed.ts"
     },
     "lint-staged": {
         "src/**/*.{ts,tsx}": [
@@ -145,8 +166,6 @@
         "ignoredBuiltDependencies": [
             "msw",
             "unrs-resolver"
-        ],
-        "shamefullyHoist": true,
-        "strictPeerDependencies": false
+        ]
     }
 }

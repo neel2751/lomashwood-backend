@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useAuthStore } from "@/stores/useAuthStore";
 import type { User } from "@/types/api.types";
 
 async function fetchMe(): Promise<{ user: User }> {
@@ -29,6 +30,7 @@ async function logout(): Promise<void> {
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const { setAccessToken, setUser, clearUser } = useAuthStore();
 
   const meQuery = useQuery({
     queryKey: ["auth", "me"],
@@ -40,6 +42,13 @@ export function useAuth() {
     mutationFn: login,
     onSuccess: (data) => {
       queryClient.setQueryData(["auth", "me"], { user: data.user });
+      // Save token and user to auth store for axios interceptor
+      if (data.token) {
+        setAccessToken(data.token);
+      }
+      if (data.user) {
+        setUser(data.user as any);
+      }
     },
   });
 
@@ -47,6 +56,7 @@ export function useAuth() {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.clear();
+      clearUser();
     },
   });
 

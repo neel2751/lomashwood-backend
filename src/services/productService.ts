@@ -1,18 +1,10 @@
 import { apiClient } from "@/lib/api-client";
-
-export type Product = {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  categoryId?: string;
-  colorId?: string;
-  sizeId?: string;
-  images?: string[];
-  isActive?: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+import type {
+  CreatePackagePayload,
+  CreateProductPayload,
+  UpdatePackagePayload,
+  UpdateProductPayload,
+} from "@/types/product.types";
 
 export const productService = {
   getAll: (params?: Record<string, unknown>) =>
@@ -20,13 +12,13 @@ export const productService = {
 
   getById: (id: string) => apiClient.products.getById(id),
 
-  create: (payload: Partial<Product>) =>
+  create: (payload: CreateProductPayload) =>
     apiClient.products.create(payload),
 
-  update: (id: string, payload: Partial<Product>) =>
+  update: (id: string, payload: UpdateProductPayload) =>
     apiClient.products.update(id, payload),
 
-  patch: (id: string, payload: Partial<Product>) =>
+  patch: (id: string, payload: UpdateProductPayload) =>
     apiClient.products.update(id, payload),
 
   remove: (id: string) => apiClient.products.delete(id),
@@ -36,4 +28,12 @@ export const productService = {
     files.forEach((file) => formData.append("files", file));
     return apiClient.media.upload(formData);
   },
+};
+
+export const packageService = {
+  getAll: (params?: Record<string, unknown>) => apiClient.packages.getAll(params),
+  getById: (id: string) => apiClient.packages.getById(id),
+  create: (payload: CreatePackagePayload) => apiClient.packages.create(payload),
+  update: (id: string, payload: UpdatePackagePayload) => apiClient.packages.update(id, payload),
+  remove: (id: string) => apiClient.packages.delete(id),
 };

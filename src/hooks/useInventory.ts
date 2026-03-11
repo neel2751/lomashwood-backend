@@ -1,18 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { inventoryService } from "@/services/inventoryService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 export function useInventory(productId?: string) {
   return useQuery({
     queryKey: ["inventory", productId],
-    queryFn: () => inventoryService.getAll(productId ? { productId } : undefined),
+    queryFn: () => fetchWithAuth(`/api/inventory${buildQueryString(productId ? { productId } : {})}`),
   });
 }
 
 export function useInventoryItem(id: string) {
   return useQuery({
     queryKey: ["inventory", id],
-    queryFn: () => inventoryService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/inventory/${id}`),
     enabled: !!id,
   });
 }

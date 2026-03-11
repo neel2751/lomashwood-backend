@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { appointmentService } from "@/services/appointmentService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { AppointmentFilterParams, CreateAppointmentPayload, UpdateAppointmentPayload } from "@/types/appointment.types";
 
 export function useAppointments(filters?: AppointmentFilterParams) {
   return useQuery({
     queryKey: ["appointments", filters],
-    queryFn: () => appointmentService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/appointments${buildQueryString(filters || {})}`),
   });
 }
 
 export function useAppointment(id: string) {
   return useQuery({
     queryKey: ["appointments", id],
-    queryFn: () => appointmentService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/appointments/${id}`),
     enabled: !!id,
   });
 }
@@ -51,5 +52,12 @@ export function useDeleteAppointment() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
+  });
+}
+
+export function useSendAppointmentEmail() {
+  return useMutation({
+    mutationFn: ({ id, type }: { id: string; type: "confirmation" | "reminder" | "missed" }) =>
+      appointmentService.sendEmail(id, type),
   });
 }

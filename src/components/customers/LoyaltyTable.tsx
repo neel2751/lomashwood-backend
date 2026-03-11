@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useLoyalty } from "@/hooks/useLoyalty";
 
 type LoyaltyTier = "Bronze" | "Silver" | "Gold" | "Platinum";
 
@@ -25,17 +26,6 @@ interface LoyaltyEntry {
   lastEarned: string;
   joinedAt: string;
 }
-
-const MOCK_LOYALTY: LoyaltyEntry[] = [
-  { id: "1", customer: "Aisha Okoye",     customerId: "6", email: "aisha.o@email.com",  tier: "Platinum", points: 1105, lifetimePoints: 1105, totalSpend: 22100, lastEarned: "28 Feb 2026", joinedAt: "Oct 2024" },
-  { id: "2", customer: "James Thornton",  customerId: "1", email: "james.t@email.com",  tier: "Gold",     points: 920,  lifetimePoints: 920,  totalSpend: 18400, lastEarned: "28 Feb 2025", joinedAt: "Jan 2025" },
-  { id: "3", customer: "Tom Hendricks",   customerId: "7", email: "tom.h@email.com",    tier: "Gold",     points: 860,  lifetimePoints: 860,  totalSpend: 17200, lastEarned: "24 Feb 2026", joinedAt: "Nov 2024" },
-  { id: "4", customer: "Oliver Patel",    customerId: "3", email: "oliver.p@email.com", tier: "Silver",   points: 730,  lifetimePoints: 730,  totalSpend: 14600, lastEarned: "27 Feb 2026", joinedAt: "Apr 2025" },
-  { id: "5", customer: "Priya Sharma",    customerId: "2", email: "priya.s@email.com",  tier: "Silver",   points: 455,  lifetimePoints: 455,  totalSpend: 9100,  lastEarned: "25 Feb 2026", joinedAt: "Mar 2025" },
-  { id: "6", customer: "Emma Lawson",     customerId: "4", email: "emma.l@email.com",   tier: "Bronze",   points: 340,  lifetimePoints: 340,  totalSpend: 6800,  lastEarned: "10 Jan 2026", joinedAt: "Jun 2025" },
-  { id: "7", customer: "Daniel Huang",    customerId: "5", email: "daniel.h@email.com", tier: "Bronze",   points: 145,  lifetimePoints: 145,  totalSpend: 2900,  lastEarned: "26 Feb 2026", joinedAt: "Aug 2025" },
-  { id: "8", customer: "Sarah Mitchell",  customerId: "8", email: "sarah.m@email.com",  tier: "Bronze",   points: 0,    lifetimePoints: 160,  totalSpend: 3200,  lastEarned: "10 Nov 2025", joinedAt: "Dec 2024" },
-];
 
 const TIER_CONFIG: Record<LoyaltyTier, { bg: string; text: string; border: string; icon: string; threshold: string }> = {
   Bronze:   { bg: "bg-[#8B6B4A]/15",   text: "text-[#8B6B4A]",  border: "border-[#8B6B4A]/30", icon: "🥉", threshold: "0–499 pts"      },
@@ -71,13 +61,32 @@ export function LoyaltyTable() {
   const [search, setSearch]       = useState("");
   const [tierFilter, setTier]     = useState<"All" | LoyaltyTier>("All");
 
-  const filtered = MOCK_LOYALTY.filter((e) => {
+  const { data, isLoading, isError } = useLoyalty();
+
+  const loyaltyEntries = ((data as { data?: LoyaltyEntry[] } | undefined)?.data ?? []) as LoyaltyEntry[];
+  const filtered = loyaltyEntries.filter((e) => {
     const q = search.toLowerCase();
     const matchSearch = e.customer.toLowerCase().includes(q) || e.email.toLowerCase().includes(q);
     return matchSearch && (tierFilter === "All" || e.tier === tierFilter);
   });
 
-  const totalPoints = MOCK_LOYALTY.reduce((s, e) => s + e.points, 0);
+  const totalPoints = loyaltyEntries.reduce((s, e) => s + e.points, 0);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading loyalty data...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load loyalty data.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">

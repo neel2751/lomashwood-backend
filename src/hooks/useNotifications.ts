@@ -1,20 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { notificationService } from "@/services/notificationService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { NotificationFilterParams } from "@/types/notification.types";
 
 export function useNotifications(filters?: NotificationFilterParams) {
   return useQuery({
     queryKey: ["notifications", filters],
-    queryFn: () => notificationService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/notifications${buildQueryString(filters || {})}`),
   });
 }
 
 export function useNotification(id: string) {
   return useQuery({
     queryKey: ["notifications", id],
-    queryFn: () => notificationService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/notifications/${id}`),
     enabled: !!id,
   });
 }

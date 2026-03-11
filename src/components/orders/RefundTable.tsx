@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Search, Plus, Eye, ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useRefunds } from "@/hooks/useRefunds";
 
 type RefundStatus = "pending" | "approved" | "processing" | "completed" | "rejected";
 
@@ -23,14 +24,6 @@ interface Refund {
   resolvedAt?: string;
 }
 
-const MOCK_REFUNDS: Refund[] = [
-  { id: "1", refundNo: "REF-0041", orderNo: "#1045", orderId: "4", customer: "Emma Lawson",   reason: "Product damaged on delivery",       amount: 6800, status: "completed",  requestedAt: "26 Feb 2026", resolvedAt: "28 Feb 2026" },
-  { id: "2", refundNo: "REF-0040", orderNo: "#1038", orderId: "8", customer: "Tom Hendricks", reason: "Changed mind before installation",  amount: 4200, status: "pending",    requestedAt: "24 Feb 2026" },
-  { id: "3", refundNo: "REF-0039", orderNo: "#1031", orderId: "3", customer: "Priya Sharma",  reason: "Wrong colour delivered",            amount: 9100, status: "approved",   requestedAt: "20 Feb 2026" },
-  { id: "4", refundNo: "REF-0038", orderNo: "#1028", orderId: "2", customer: "Aisha Okoye",   reason: "Partial defect — bedroom unit",     amount: 2000, status: "processing", requestedAt: "18 Feb 2026" },
-  { id: "5", refundNo: "REF-0037", orderNo: "#1020", orderId: "1", customer: "Daniel Huang",  reason: "Duplicate charge",                  amount: 3200, status: "rejected",   requestedAt: "15 Feb 2026", resolvedAt: "17 Feb 2026" },
-];
-
 const STATUS_STYLES: Record<RefundStatus, string> = {
   pending:    "bg-[#6B8A9A]/15 text-[#6B8A9A]",
   approved:   "bg-blue-400/10 text-blue-400",
@@ -43,18 +36,34 @@ export function RefundTable() {
   const [search, setSearch]       = useState("");
   const [statusFilter, setStatus] = useState<"All" | RefundStatus>("All");
 
-  const filtered = MOCK_REFUNDS.filter((r) => {
-    const matchSearch =
-      r.refundNo.toLowerCase().includes(search.toLowerCase()) ||
-      r.customer.toLowerCase().includes(search.toLowerCase()) ||
-      r.orderNo.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || r.status === statusFilter;
-    return matchSearch && matchStatus;
+  const { data, isLoading, isError } = useRefunds({
+    page: 1,
+    limit: 100,
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
   });
 
-  const pendingTotal = MOCK_REFUNDS
+  const refunds = ((data as { data?: Refund[] } | undefined)?.data ?? []) as Refund[];
+  const filtered = refunds;
+  const pendingTotal = refunds
     .filter((r) => r.status === "pending" || r.status === "approved")
     .reduce((s, r) => s + r.amount, 0);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading refunds...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load refunds.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">

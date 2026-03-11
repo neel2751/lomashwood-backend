@@ -1,20 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { createApiClient } from "@/lib/api-client";
+import { deleteOrder, getOrderById, updateOrder } from "@servers/orders.actions";
+import { parseZodError } from "@servers/_shared";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createApiClient();
-    const data = await client.orders.getById(params.id);
+    const data = await getOrderById(params.id);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to fetch order" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to fetch order" },
+      { status }
     );
   }
 }
@@ -25,14 +26,14 @@ export async function PATCH(
 ) {
   try {
     const body = await req.json();
-    const client = createApiClient();
-    const data = await client.orders.update(params.id, body);
+    const data = await updateOrder(params.id, body);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to update order" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to update order" },
+      { status }
     );
   }
 }
@@ -42,14 +43,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const client = createApiClient();
-    await client.orders.delete(params.id);
+    await deleteOrder(params.id);
 
     return NextResponse.json({ message: "Order deleted" }, { status: 200 });
   } catch (error: any) {
+    const status = error?.status ?? 500;
     return NextResponse.json(
-      { message: error?.message ?? "Failed to delete order" },
-      { status: 500 }
+      { message: parseZodError(error) || "Failed to delete order" },
+      { status }
     );
   }
 }

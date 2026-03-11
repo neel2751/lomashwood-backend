@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { pricingService } from "@/services/pricingService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { PricingRule } from "@/types/product.types";
 
 export function usePricing(productId?: string) {
   return useQuery({
     queryKey: ["pricing", productId],
-    queryFn: () => pricingService.getAll(productId ? { productId } : undefined),
+    queryFn: () => fetchWithAuth(`/api/pricing${buildQueryString(productId ? { productId } : {})}`),
   });
 }
 
 export function usePricingItem(id: string) {
   return useQuery({
     queryKey: ["pricing", id],
-    queryFn: () => pricingService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/pricing/${id}`),
     enabled: !!id,
   });
 }

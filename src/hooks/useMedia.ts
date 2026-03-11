@@ -1,18 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { mediaService } from "@/services/mediaService";
+import { fetchWithAuth } from "@/lib/fetch-client";
 
 export function useMedia() {
   return useQuery({
     queryKey: ["media"],
-    queryFn: () => mediaService.getAll(),
+    queryFn: () => fetchWithAuth('/api/media'),
   });
 }
 
 export function useMediaItem(id: string) {
   return useQuery({
     queryKey: ["media", id],
-    queryFn: () => mediaService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/media/${id}`),
     enabled: !!id,
   });
 }

@@ -17,8 +17,11 @@ const SUB_NAV = [
   { href: '/products/categories', label: 'Categories' },
   { href: '/products/colours',    label: 'Colours' },
   { href: '/products/sizes',      label: 'Sizes' },
-  { href: '/products/inventory',  label: 'Inventory' },
-  { href: '/products/pricing',    label: 'Pricing' },
+  { href: '/products/style',      label: 'Style' },
+  { href: '/products/finish',     label: 'Finish' },
+  { href: '/products/package',    label: 'Packages' },
+  // { href: '/products/inventory',  label: 'Inventory' },
+  // { href: '/products/pricing',    label: 'Pricing' },
 ]
 
 const STATS = [
@@ -67,55 +70,6 @@ export default function ProductsListPage() {
             <span className="stat-tile__value">{s.value}</span>
           </div>
         ))}
-      </div>
-
-      <div className="products-page__filters">
-        <div className="filter-left">
-          <input
-            type="search"
-            className="filter-search"
-            placeholder="Search products…"
-          />
-          <select className="filter-select" defaultValue="">
-            <option value="" disabled>Category</option>
-            <option value="kitchen">Kitchen</option>
-            <option value="bedroom">Bedroom</option>
-          </select>
-          <select className="filter-select" defaultValue="">
-            <option value="" disabled>Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
-          <select className="filter-select" defaultValue="">
-            <option value="" disabled>Sort by</option>
-            <option value="newest">Newest</option>
-            <option value="name-asc">Name A–Z</option>
-            <option value="name-desc">Name Z–A</option>
-            <option value="price-asc">Price ↑</option>
-            <option value="price-desc">Price ↓</option>
-          </select>
-        </div>
-        <div className="filter-right">
-          <button className="view-toggle view-toggle--active" title="Grid view" aria-label="Grid view">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="7" height="7"/>
-              <rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/>
-              <rect x="3" y="14" width="7" height="7"/>
-            </svg>
-          </button>
-          <button className="view-toggle" title="List view" aria-label="List view">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="8" y1="6" x2="21" y2="6"/>
-              <line x1="8" y1="12" x2="21" y2="12"/>
-              <line x1="8" y1="18" x2="21" y2="18"/>
-              <line x1="3" y1="6" x2="3.01" y2="6"/>
-              <line x1="3" y1="12" x2="3.01" y2="12"/>
-              <line x1="3" y1="18" x2="3.01" y2="18"/>
-            </svg>
-          </button>
-        </div>
       </div>
 
       <Suspense fallback={<div className="table-skeleton" />}>

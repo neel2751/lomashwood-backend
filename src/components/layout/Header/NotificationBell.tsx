@@ -76,9 +76,9 @@ const ICON_MAP: Record<NotifType, React.ReactNode> = {
 };
 
 const COLOR_MAP: Record<NotifType, string> = {
-  appointment: "text-[#C8924A] bg-[#C8924A]/15",
-  order: "text-blue-400 bg-blue-400/15",
-  review: "text-amber-400 bg-amber-400/15",
+  appointment: "text-[var(--color-sidebar-accent)] bg-[#F2E5CF]",
+  order: "text-[#2B6EA7] bg-[#EAF3FA]",
+  review: "text-[#A06A10] bg-[#FFF2D9]",
 };
 
 export function NotificationBell() {
@@ -112,9 +112,9 @@ export function NotificationBell() {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "relative flex items-center justify-center w-9 h-9 rounded-[10px] transition-all",
-          "text-[#5A4232] hover:text-[#C8924A] hover:bg-[#2E231A]",
-          open && "bg-[#2E231A] text-[#C8924A]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40"
+          "text-[var(--color-header-muted)] hover:bg-[var(--color-header-hover)] hover:text-[var(--color-sidebar-accent)]",
+          open && "bg-[var(--color-header-hover)] text-[var(--color-sidebar-accent)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-sidebar-accent)]/30"
         )}
         aria-label={`Notifications${unreadCount ? ` (${unreadCount} unread)` : ""}`}
       >
@@ -128,13 +128,13 @@ export function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-[calc(100%+8px)] w-[360px] bg-[#1C1611] border border-[#2E231A] rounded-[14px] shadow-2xl shadow-black/50 overflow-hidden z-50">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[360px] overflow-hidden rounded-[14px] border border-[var(--color-header-border)] bg-[var(--color-header-panel)] shadow-2xl shadow-[rgba(92,72,41,0.18)]">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#2E231A]">
+          <div className="flex items-center justify-between border-b border-[var(--color-header-border)] px-4 py-3">
             <div className="flex items-center gap-2">
-              <h3 className="text-[13px] font-semibold text-[#E8D5B7]">Notifications</h3>
+              <h3 className="text-[13px] font-semibold text-[var(--color-header-text)]">Notifications</h3>
               {unreadCount > 0 && (
-                <span className="text-[10px] font-bold text-[#C8924A] bg-[#C8924A]/15 px-2 py-0.5 rounded-full">
+                <span className="rounded-full bg-[#F2E5CF] px-2 py-0.5 text-[10px] font-bold text-[var(--color-sidebar-accent)]">
                   {unreadCount} new
                 </span>
               )}
@@ -142,7 +142,7 @@ export function NotificationBell() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-[11px] text-[#7A6045] hover:text-[#C8924A] transition-colors"
+                className="text-[11px] text-[var(--color-header-muted)] transition-colors hover:text-[var(--color-sidebar-accent)]"
               >
                 Mark all read
               </button>
@@ -150,9 +150,9 @@ export function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-[#2E231A]">
+          <div className="max-h-[380px] divide-y divide-[var(--color-header-border)] overflow-y-auto">
             {notifications.length === 0 ? (
-              <p className="text-center text-[13px] text-[#5A4232] py-10">
+              <p className="py-10 text-center text-[13px] text-[var(--color-header-muted)]">
                 You're all caught up!
               </p>
             ) : (
@@ -160,8 +160,8 @@ export function NotificationBell() {
                 <div
                   key={notif.id}
                   className={cn(
-                    "flex items-start gap-3 px-4 py-3 group hover:bg-[#221A12] transition-colors",
-                    !notif.read && "bg-[#221A12]"
+                    "group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-header-hover)]",
+                    !notif.read && "bg-[#FFF5E8]"
                   )}
                 >
                   {/* Type icon */}
@@ -180,13 +180,13 @@ export function NotificationBell() {
                     }}
                     className="flex-1 min-w-0"
                   >
-                    <p className={cn("text-[12.5px] font-medium leading-snug", notif.read ? "text-[#7A6045]" : "text-[#E8D5B7]")}>
+                    <p className={cn("text-[12.5px] font-medium leading-snug", notif.read ? "text-[var(--color-header-muted)]" : "text-[var(--color-header-text)]")}>
                       {notif.title}
                     </p>
-                    <p className="text-[11.5px] text-[#5A4232] leading-snug mt-0.5 line-clamp-2">
+                    <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-[var(--color-header-muted)]">
                       {notif.description}
                     </p>
-                    <p className="text-[10.5px] text-[#3D2E1E] mt-1">{notif.time}</p>
+                    <p className="mt-1 text-[10.5px] text-[#9A8B7C]">{notif.time}</p>
                   </Link>
 
                   {/* Unread dot + dismiss */}
@@ -196,7 +196,7 @@ export function NotificationBell() {
                     )}
                     <button
                       onClick={() => dismiss(notif.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-[#3D2E1E] hover:text-[#C8924A]"
+                      className="text-[var(--color-header-muted)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--color-sidebar-accent)]"
                       aria-label="Dismiss"
                     >
                       <X size={12} />
@@ -208,11 +208,11 @@ export function NotificationBell() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2.5 border-t border-[#2E231A]">
+          <div className="border-t border-[var(--color-header-border)] px-4 py-2.5">
             <Link
               href="/notifications"
               onClick={() => setOpen(false)}
-              className="text-[12px] text-[#7A6045] hover:text-[#C8924A] transition-colors"
+              className="text-[12px] text-[var(--color-header-muted)] transition-colors hover:text-[var(--color-sidebar-accent)]"
             >
               View all notifications →
             </Link>

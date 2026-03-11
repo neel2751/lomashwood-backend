@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supportService } from "@/services/supportService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { CreateSupportTicketPayload } from "@/types/customer.types";
 
 export function useSupportTickets(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: ["support-tickets", filters],
-    queryFn: () => supportService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/support-tickets${buildQueryString(filters || {})}`),
   });
 }
 
 export function useSupportTicket(id: string) {
   return useQuery({
     queryKey: ["support-tickets", id],
-    queryFn: () => supportService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/support-tickets/${id}`),
     enabled: !!id,
   });
 }

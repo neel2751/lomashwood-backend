@@ -1,83 +1,48 @@
+'use client';
+
 import { Suspense } from 'react'
 
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ProductTable } from '@/components/products/ProductTable'
-
-import type { Metadata } from 'next'
+import { useCategory } from '@/hooks/useCategories'
 
 type Props = { params: { id: string } }
 
-type Category = {
-  id: string
-  name: string
-  type: 'kitchen' | 'bedroom'
-  description: string
-  slug: string
-  productCount: number
-  createdAt: string
-  updatedAt: string
-}
-
-const MOCK_CATEGORIES: Record<string, Category> = {
-  kitchen: {
-    id: 'kitchen',
-    name: 'Kitchen',
-    type: 'kitchen',
-    description: 'Full kitchen ranges, units, handles, and accessories.',
-    slug: 'kitchen',
-    productCount: 96,
-    createdAt: '1 Jan 2024',
-    updatedAt: '2 days ago',
-  },
-  bedroom: {
-    id: 'bedroom',
-    name: 'Bedroom',
-    type: 'bedroom',
-    description: 'Fitted wardrobes, storage solutions, and bedroom furniture.',
-    slug: 'bedroom',
-    productCount: 88,
-    createdAt: '1 Jan 2024',
-    updatedAt: '5 days ago',
-  },
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = MOCK_CATEGORIES[params.id]
-  return {
-    title: category ? `${category.name} | Categories` : 'Category | Products',
-  }
-}
-
 export default function CategoryDetailPage({ params }: Props) {
-  const category = MOCK_CATEGORIES[params.id]
-  if (!category) notFound()
-
-  const typeLabel = category.type === 'kitchen' ? '🍳 Kitchen' : '🛏 Bedroom'
+  const { data: category, isLoading, isError } = useCategory(params.id);
+  
+  if (isLoading) {
+    return (
+      <div className="cat-detail">
+        <div className="px-5 py-10 text-center text-[#5A4232]">Loading category...</div>
+      </div>
+    );
+  }
+  
+  if (isError || !category) {
+    return (
+      <div className="cat-detail">
+        <div className="px-5 py-10 text-center text-red-400">Category not found</div>
+      </div>
+    );
+  }
+  
+  const typeLabel = category.category === 'kitchen' ? '🍳 Kitchen' : '🛏 Bedroom';
 
   return (
     <div className="cat-detail">
       <div className="cat-detail__topbar">
         <PageHeader
           title={category.name}
-          description={`${typeLabel} · ${category.productCount} products`}
+          description={`${typeLabel} · ${category.productCount || 0} products`}
           backHref="/products/categories"
           backLabel="Categories"
         />
         <div className="cat-detail__actions">
-          <button className="btn-danger-ghost">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14H6L5 6"/>
-              <path d="M10 11v6M14 11v6"/>
-              <path d="M9 6V4h6v2"/>
-            </svg>
-            Delete
-          </button>
-          <Link href={`/products/categories/${params.id}/edit`} className="btn-primary">
-            Edit Category
+          <Link href={`/products?category=${category.type}`} className="btn-primary">
+            View Products
           </Link>
         </div>
       </div>
@@ -142,13 +107,6 @@ export default function CategoryDetailPage({ params }: Props) {
                   <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
                 Add new product
-              </Link>
-              <Link href={`/products/categories/${params.id}/edit`} className="sidebar-action">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-                Edit category details
               </Link>
             </div>
           </div>
@@ -217,18 +175,6 @@ export default function CategoryDetailPage({ params }: Props) {
         }
 
         .btn-sm-primary:hover { background: #2E2E2A; }
-
-        .btn-danger-ghost {
-          display: inline-flex; align-items: center; gap: 6px;
-          height: 38px; padding: 0 12px;
-          background: none; border: none;
-          font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem; font-weight: 500;
-          color: #6B6B68; cursor: pointer;
-          transition: color 0.15s;
-        }
-
-        .btn-danger-ghost:hover { color: #C0392B; }
 
         .cat-detail__layout {
           display: grid;

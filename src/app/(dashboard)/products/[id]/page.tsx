@@ -2,110 +2,91 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { PageHeader } from '@/components/layout/PageHeader'
+import { ProductDeleteButton } from '@/components/products/ProductDeleteButton'
+import { getProductById } from '@servers/products.actions'
 
 import type { Metadata } from 'next'
 
 type Props = { params: { id: string } }
 
-type Product = {
-  id: string
-  title: string
-  category: 'Kitchen' | 'Bedroom'
-  range: string
-  status: 'active' | 'draft' | 'archived'
-  style: string
-  finish: string
-  price: number
-  comparePrice?: number
-  colourCount: number
-  imageCount: number
-  createdAt: string
-  updatedAt: string
+async function fetchProduct(id: string): Promise<Awaited<ReturnType<typeof getProductById>> | null> {
+  try {
+    return await getProductById(id)
+  } catch {
+    return null
+  }
 }
 
-const MOCK_PRODUCTS: Record<string, Product> = {
-  'ashford-shaker-white': {
-    id: 'ashford-shaker-white',
-    title: 'Ashford Shaker — Porcelain White',
-    category: 'Kitchen',
-    range: 'Shaker Collection',
-    status: 'active',
-    style: 'Shaker',
-    finish: 'Matt',
-    price: 8990,
-    comparePrice: 12000,
-    colourCount: 6,
-    imageCount: 8,
-    createdAt: '12 Jan 2024',
-    updatedAt: '2 hours ago',
-  },
-  'oslo-handleless-anthracite': {
-    id: 'oslo-handleless-anthracite',
-    title: 'Oslo Handleless — Anthracite',
-    category: 'Kitchen',
-    range: 'Contemporary',
-    status: 'active',
-    style: 'Handleless',
-    finish: 'Gloss',
-    price: 10500,
-    colourCount: 4,
-    imageCount: 6,
-    createdAt: '5 Mar 2024',
-    updatedAt: 'Yesterday',
-  },
+function formatDate(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+function formatCurrency(value?: number | null) {
+  if (typeof value !== 'number') return 'Not set'
+  return `£${value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+function titleCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function buildSlug(title: string, rangeName: string) {
+  return [title, rangeName]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = MOCK_PRODUCTS[params.id]
+  const product = await fetchProduct(params.id)
   return {
     title: product ? `${product.title} | Products` : 'Product | Products',
   }
 }
 
 const STATUS_CONFIG = {
-  active:   { label: 'Active',   color: '#27AE60', bg: '#EAF7EF' },
-  draft:    { label: 'Draft',    color: '#6B6B68', bg: '#F0EDE8' },
-  archived: { label: 'Archived', color: '#D4820A', bg: '#FFF3DC' },
-}
+  active: { label: 'Active', color: '#1F7A45', bg: '#EAF7EF' },
+  draft: { label: 'Draft', color: '#6B6B68', bg: '#F0EDE8' },
+} as const
 
-export default function ProductDetailPage({ params }: Props) {
-  const product = MOCK_PRODUCTS[params.id]
+export default async function ProductDetailPage({ params }: Props) {
+  const product = await fetchProduct(params.id)
   if (!product) notFound()
 
-  const status = STATUS_CONFIG[product.status]
+  const productStatus = product.isPublished ? 'active' : 'draft'
+  const status = STATUS_CONFIG[productStatus]
+  const categoryLabel = titleCase(product.category)
+  const styleLabel = product.style ?? 'Not set'
+  const finishLabel = product.finish ?? 'Not set'
+  const primaryImage = product.images[0] ?? null
+  const seoSlug = buildSlug(product.title, product.rangeName)
 
   return (
     <div className="product-detail">
       <div className="product-detail__topbar">
         <PageHeader
           title={product.title}
-          description={`${product.category} · ${product.range}`}
+          description={`${categoryLabel} · ${product.rangeName}`}
           backHref="/products"
           backLabel="Products"
         />
         <div className="product-detail__actions">
-          <span
-            className="status-badge"
-            style={{ color: status.color, background: status.bg }}
-          >
+          <span className="status-badge" style={{ color: status.color, background: status.bg }}>
             {status.label}
           </span>
-          <Link href={`/products/${params.id}/duplicate`} className="btn-ghost">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-            </svg>
+          <Link href={`/products/${params.id}/duplicate`} className="btn-outline">
             Duplicate
           </Link>
-          <button className="btn-danger-ghost">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14H6L5 6"/>
-              <path d="M10 11v6M14 11v6"/>
-              <path d="M9 6V4h6v2"/>
-            </svg>
-            Delete
-          </button>
+          <ProductDeleteButton productId={params.id} className="btn-danger" />
           <Link href={`/products/${params.id}/edit`} className="btn-primary">
             Edit Product
           </Link>
@@ -114,28 +95,63 @@ export default function ProductDetailPage({ params }: Props) {
 
       <div className="product-detail__layout">
         <div className="product-detail__main">
+          <div className="detail-card detail-card--hero">
+            <div className="hero-copy">
+              <div className="eyebrow">Catalogue Preview</div>
+              <h2 className="detail-card__heading">Images and front-of-house presentation</h2>
+              <p className="detail-card__description">
+                Review the current gallery, listing cover image, and the customer-facing description for this product.
+              </p>
+            </div>
+
+            {primaryImage ? (
+              <div className="gallery-stack">
+                <div className="gallery-featured">
+                  <img src={primaryImage} alt={product.title} className="gallery-image" />
+                </div>
+                {product.images.length > 1 ? (
+                  <div className="gallery-grid">
+                    {product.images.slice(1).map((image, index) => (
+                      <div key={`${image}-${index}`} className="gallery-thumb">
+                        <img src={image} alt={`${product.title} ${index + 2}`} className="gallery-thumb__image" />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="gallery-empty">No product images uploaded yet.</div>
+            )}
+          </div>
+
+          <div className="detail-card">
+            <h2 className="detail-card__title">Description</h2>
+            <p className="rich-copy">{product.description}</p>
+          </div>
+
           <div className="detail-card">
             <h2 className="detail-card__title">Product Information</h2>
             <dl className="detail-grid">
               {[
-                { label: 'Title',     value: product.title },
-                { label: 'Category',  value: product.category },
-                { label: 'Range',     value: product.range },
-                { label: 'Style',     value: product.style },
-                { label: 'Finish',    value: product.finish },
-                { label: 'Status',    value: product.status, badge: true },
+                { label: 'Title', value: product.title },
+                { label: 'Category', value: categoryLabel },
+                { label: 'Range', value: product.rangeName },
+                { label: 'Style', value: styleLabel },
+                { label: 'Finish', value: finishLabel },
+                { label: 'Status', value: status.label, badge: true },
+                { label: 'Base Price', value: formatCurrency(product.price) },
+                { label: 'SEO Slug Preview', value: `/products/${seoSlug || product.id}` },
               ].map(({ label, value, badge }) => (
                 <div key={label} className="detail-row">
                   <dt className="detail-label">{label}</dt>
                   <dd className="detail-value">
                     {badge ? (
-                      <span
-                        className="status-badge"
-                        style={{ color: STATUS_CONFIG[product.status].color, background: STATUS_CONFIG[product.status].bg }}
-                      >
+                      <span className="status-badge" style={{ color: status.color, background: status.bg }}>
                         {value}
                       </span>
-                    ) : value}
+                    ) : (
+                      value
+                    )}
                   </dd>
                 </div>
               ))}
@@ -143,43 +159,42 @@ export default function ProductDetailPage({ params }: Props) {
           </div>
 
           <div className="detail-card">
-            <h2 className="detail-card__title">Pricing</h2>
-            <dl className="detail-grid">
-              <div className="detail-row">
-                <dt className="detail-label">Base Price</dt>
-                <dd className="detail-value detail-value--price">
-                  £{product.price.toLocaleString()}
-                </dd>
+            <h2 className="detail-card__title">Available Colours</h2>
+            {product.colours.length > 0 ? (
+              <div className="colour-list">
+                {product.colours.map((colour) => (
+                  <div key={colour.id} className="colour-chip">
+                    <span
+                      className="colour-chip__swatch"
+                      style={{
+                        background: colour.hexCode,
+                        border: colour.hexCode === '#FFFFFF' ? '1px solid #D7D3CA' : 'none',
+                      }}
+                    />
+                    <span className="colour-chip__label">{colour.name}</span>
+                    <span className="colour-chip__code">{colour.hexCode}</span>
+                  </div>
+                ))}
               </div>
-              {product.comparePrice && (
-                <div className="detail-row">
-                  <dt className="detail-label">Compare-at Price</dt>
-                  <dd className="detail-value detail-value--compare">
-                    £{product.comparePrice.toLocaleString()}
-                    <span className="saving">
-                      Save £{(product.comparePrice - product.price).toLocaleString()}
-                    </span>
-                  </dd>
-                </div>
-              )}
-            </dl>
+            ) : (
+              <p className="empty-copy">No colours linked to this product yet.</p>
+            )}
           </div>
 
           <div className="detail-card">
-            <h2 className="detail-card__title">Media</h2>
-            <div className="media-summary">
-              <div className="media-stat">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-                <span>{product.imageCount} images</span>
+            <h2 className="detail-card__title">Units / Sizes</h2>
+            {product.sizes.length > 0 ? (
+              <div className="size-grid">
+                {product.sizes.map((size) => (
+                  <div key={size.id} className="size-card">
+                    <div className="size-card__title">{size.title}</div>
+                    <div className="size-card__description">{size.description || 'No description provided.'}</div>
+                  </div>
+                ))}
               </div>
-              <Link href={`/products/${params.id}/edit#images`} className="btn-link">
-                Manage images →
-              </Link>
-            </div>
+            ) : (
+              <p className="empty-copy">No sizes linked to this product yet.</p>
+            )}
           </div>
         </div>
 
@@ -189,47 +204,34 @@ export default function ProductDetailPage({ params }: Props) {
             <div className="quick-stats">
               <div className="quick-stat">
                 <span className="quick-stat__label">Colours</span>
-                <span className="quick-stat__value">{product.colourCount}</span>
+                <span className="quick-stat__value">{product.colours.length}</span>
+              </div>
+              <div className="quick-stat">
+                <span className="quick-stat__label">Sizes</span>
+                <span className="quick-stat__value">{product.sizes.length}</span>
               </div>
               <div className="quick-stat">
                 <span className="quick-stat__label">Images</span>
-                <span className="quick-stat__value">{product.imageCount}</span>
+                <span className="quick-stat__value">{product.images.length}</span>
               </div>
+            </div>
+          </div>
+
+          <div className="sidebar-card">
+            <h3 className="sidebar-card__title">Catalogue Metadata</h3>
+            <div className="sidebar-list">
+              <span>Product ID: {product.id}</span>
+              <span>Primary image: {primaryImage ? 'Ready' : 'Missing'}</span>
+              <span>Range: {product.rangeName}</span>
+              <span>Category: {categoryLabel}</span>
             </div>
           </div>
 
           <div className="sidebar-card">
             <h3 className="sidebar-card__title">Timestamps</h3>
-            <div className="timestamps">
-              <div className="timestamp">
-                <span className="timestamp__label">Created</span>
-                <span className="timestamp__value">{product.createdAt}</span>
-              </div>
-              <div className="timestamp">
-                <span className="timestamp__label">Last updated</span>
-                <span className="timestamp__value">{product.updatedAt}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="sidebar-card">
-            <h3 className="sidebar-card__title">Actions</h3>
-            <div className="sidebar-actions">
-              <button className="sidebar-action-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-                View on website
-              </button>
-              <button className="sidebar-action-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                </svg>
-                Copy product URL
-              </button>
+            <div className="sidebar-list">
+              <span>Created: {formatDate(product.createdAt)}</span>
+              <span>Updated: {formatDate(product.updatedAt)}</span>
             </div>
           </div>
         </aside>
@@ -269,46 +271,75 @@ export default function ProductDetailPage({ params }: Props) {
         }
 
         .btn-primary {
-          display: inline-flex; align-items: center; gap: 7px;
-          height: 38px; padding: 0 16px;
-          background: #1A1A18; color: #F5F0E8;
-          border: none; border-radius: 8px;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          height: 38px;
+          padding: 0 16px;
+          background: #1A1A18;
+          color: #F5F0E8;
+          border: none;
+          border-radius: 8px;
           font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem; font-weight: 600;
-          text-decoration: none; cursor: pointer;
-          transition: background 0.15s; white-space: nowrap;
+          font-size: 0.875rem;
+          font-weight: 600;
+          text-decoration: none;
+          cursor: pointer;
+          transition: background 0.15s;
+          white-space: nowrap;
         }
 
         .btn-primary:hover { background: #2E2E2A; }
 
-        .btn-ghost {
-          display: inline-flex; align-items: center; gap: 6px;
-          height: 38px; padding: 0 12px;
-          background: #FFFFFF; color: #1A1A18;
-          border: 1.5px solid #E8E6E1; border-radius: 8px;
+        .btn-outline {
+          display: inline-flex;
+          align-items: center;
+          height: 38px;
+          padding: 0 14px;
+          border: 1.5px solid #E8E6E1;
+          border-radius: 8px;
+          background: #FFFFFF;
+          color: #1A1A18;
           font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem; font-weight: 500;
-          text-decoration: none; cursor: pointer;
-          transition: border-color 0.15s; white-space: nowrap;
+          font-size: 0.875rem;
+          font-weight: 500;
+          text-decoration: none;
+          cursor: pointer;
+          white-space: nowrap;
         }
 
-        .btn-ghost:hover { border-color: #1A1A18; }
+        .btn-outline:hover { border-color: #1A1A18; }
 
-        .btn-danger-ghost {
-          display: inline-flex; align-items: center; gap: 6px;
-          height: 38px; padding: 0 12px;
-          background: none; border: none;
+        .btn-danger {
+          display: inline-flex;
+          align-items: center;
+          height: 38px;
+          padding: 0 14px;
+          border: 1.5px solid #E7D1CF;
+          border-radius: 8px;
+          background: #FFF9F8;
+          color: #AF3E34;
           font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem; font-weight: 500;
-          color: #6B6B68; cursor: pointer;
-          transition: color 0.15s; white-space: nowrap;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.15s;
         }
 
-        .btn-danger-ghost:hover { color: #C0392B; }
+        .btn-danger:hover {
+          border-color: #AF3E34;
+          background: #FDEDEC;
+        }
+
+        .btn-danger:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
 
         .product-detail__layout {
           display: grid;
-          grid-template-columns: 1fr 260px;
+          grid-template-columns: minmax(0, 1fr) 280px;
           gap: 20px;
           align-items: start;
         }
@@ -317,13 +348,16 @@ export default function ProductDetailPage({ params }: Props) {
           .product-detail__layout { grid-template-columns: 1fr; }
         }
 
-        .product-detail__main {
+        .product-detail__main,
+        .product-detail__sidebar {
           display: flex;
           flex-direction: column;
           gap: 16px;
+          min-width: 0;
         }
 
-        .detail-card {
+        .detail-card,
+        .sidebar-card {
           background: #FFFFFF;
           border: 1.5px solid #E8E6E1;
           border-radius: 14px;
@@ -333,12 +367,89 @@ export default function ProductDetailPage({ params }: Props) {
           gap: 16px;
         }
 
-        .detail-card__title {
+        .detail-card--hero {
+          background: linear-gradient(180deg, #FCFBF7 0%, #FFFFFF 100%);
+        }
+
+        .eyebrow {
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #8B6914;
+        }
+
+        .detail-card__heading {
+          font-size: 1.375rem;
+          font-weight: 700;
+          color: #1A1A18;
+          line-height: 1.2;
+        }
+
+        .detail-card__description,
+        .empty-copy,
+        .rich-copy {
+          font-size: 0.9375rem;
+          line-height: 1.7;
+          color: #4B4B47;
+        }
+
+        .detail-card__title,
+        .sidebar-card__title {
           font-size: 0.8125rem;
           font-weight: 700;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           color: #6B6B68;
+        }
+
+        .gallery-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .gallery-featured,
+        .gallery-thumb {
+          overflow: hidden;
+          border-radius: 12px;
+          background: #F6F3EE;
+          border: 1px solid #ECE6DA;
+        }
+
+        .gallery-featured {
+          aspect-ratio: 16 / 10;
+        }
+
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 12px;
+        }
+
+        .gallery-thumb {
+          aspect-ratio: 4 / 3;
+        }
+
+        .gallery-image,
+        .gallery-thumb__image {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .gallery-empty {
+          min-height: 260px;
+          border: 1.5px dashed #D9D2C6;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #6B6B68;
+          background: #FAFAF8;
+          text-align: center;
+          padding: 24px;
         }
 
         .detail-grid {
@@ -349,7 +460,7 @@ export default function ProductDetailPage({ params }: Props) {
 
         .detail-row {
           display: grid;
-          grid-template-columns: 140px 1fr;
+          grid-template-columns: 170px 1fr;
           gap: 12px;
           padding: 11px 0;
           border-bottom: 1px solid #F0EDE8;
@@ -367,165 +478,107 @@ export default function ProductDetailPage({ params }: Props) {
         .detail-value {
           font-size: 0.9375rem;
           color: #1A1A18;
-          font-weight: 400;
+          word-break: break-word;
         }
 
-        .detail-value--price {
-          font-size: 1.25rem;
-          font-weight: 700;
-          font-variant-numeric: tabular-nums;
-          color: #8B6914;
+        .colour-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+          gap: 10px;
         }
 
-        .detail-value--compare {
+        .colour-chip {
           display: flex;
           align-items: center;
           gap: 10px;
-          text-decoration: line-through;
-          color: #6B6B68;
+          border: 1.5px solid #E8E6E1;
+          border-radius: 10px;
+          padding: 10px 12px;
+          background: #FFFFFF;
         }
 
-        .saving {
-          font-size: 0.8125rem;
+        .colour-chip__swatch {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .colour-chip__label {
+          font-size: 0.875rem;
           font-weight: 600;
-          color: #27AE60;
-          text-decoration: none;
-          background: #EAF7EF;
-          padding: 2px 8px;
-          border-radius: 20px;
-        }
-
-        .media-summary {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-        }
-
-        .media-stat {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.9375rem;
-          font-weight: 500;
           color: #1A1A18;
         }
 
-        .btn-link {
-          font-size: 0.875rem;
-          font-weight: 500;
-          color: #8B6914;
-          text-decoration: none;
-          transition: color 0.15s;
-        }
-
-        .btn-link:hover { color: #C9A84C; }
-
-        .product-detail__sidebar {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-
-        .sidebar-card {
-          background: #FFFFFF;
-          border: 1.5px solid #E8E6E1;
-          border-radius: 12px;
-          padding: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-
-        .sidebar-card__title {
-          font-size: 0.8125rem;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
+        .colour-chip__code {
+          margin-left: auto;
+          font-size: 0.75rem;
           color: #6B6B68;
+        }
+
+        .size-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 10px;
+        }
+
+        .size-card {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 14px;
+          border: 1.5px solid #E8E6E1;
+          border-radius: 10px;
+          background: #FCFBF8;
+        }
+
+        .size-card__title {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #1A1A18;
+        }
+
+        .size-card__description {
+          font-size: 0.8125rem;
+          color: #6B6B68;
+          line-height: 1.6;
         }
 
         .quick-stats {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr;
           gap: 10px;
         }
 
         .quick-stat {
           display: flex;
-          flex-direction: column;
-          gap: 2px;
-          padding: 10px;
-          background: #F7F5F0;
-          border-radius: 8px;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 12px;
+          border-radius: 10px;
+          background: #FAFAF8;
+          border: 1px solid #EFEAE1;
         }
 
         .quick-stat__label {
-          font-size: 0.75rem;
+          font-size: 0.8125rem;
           color: #6B6B68;
-          font-weight: 500;
         }
 
         .quick-stat__value {
-          font-size: 1.25rem;
+          font-size: 1rem;
           font-weight: 700;
           color: #1A1A18;
         }
 
-        .timestamps {
+        .sidebar-list {
           display: flex;
           flex-direction: column;
-          gap: 10px;
-        }
-
-        .timestamp {
-          display: flex;
-          justify-content: space-between;
           gap: 8px;
-        }
-
-        .timestamp__label {
-          font-size: 0.8125rem;
-          color: #6B6B68;
-        }
-
-        .timestamp__value {
-          font-size: 0.8125rem;
-          font-weight: 500;
+          font-size: 0.875rem;
           color: #1A1A18;
-        }
-
-        .sidebar-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .sidebar-action-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          width: 100%;
-          height: 36px;
-          padding: 0 12px;
-          background: #F7F5F0;
-          border: 1px solid #E8E6E1;
-          border-radius: 8px;
-          font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.8125rem;
-          font-weight: 500;
-          color: #1A1A18;
-          cursor: pointer;
-          transition: background 0.15s, border-color 0.15s;
-          text-align: left;
-        }
-
-        .sidebar-action-btn:hover {
-          background: #F0EDE8;
-          border-color: #D4CDBF;
         }
       `}</style>
     </div>
   )
 }
-export const dynamic = 'force-dynamic'

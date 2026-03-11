@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useCustomers } from "@/hooks/useCustomers";
 
 type CustomerStatus = "active" | "inactive" | "vip" | "blocked";
 type CustomerInterest = "Kitchen" | "Bedroom" | "Both";
@@ -29,17 +30,6 @@ export interface Customer {
   joinedAt: string;
   lastActivity: string;
 }
-
-const MOCK_CUSTOMERS: Customer[] = [
-  { id: "1", name: "James Thornton",  email: "james.t@email.com",  phone: "+44 7700 900123", interest: "Kitchen", status: "vip",      totalSpend: 18400, ordersCount: 2, appointmentsCount: 3, loyaltyPoints: 920,  joinedAt: "Jan 2025",  lastActivity: "28 Feb 2026" },
-  { id: "2", name: "Priya Sharma",    email: "priya.s@email.com",  phone: "+44 7700 900456", interest: "Both",    status: "active",   totalSpend: 9100,  ordersCount: 1, appointmentsCount: 2, loyaltyPoints: 455,  joinedAt: "Mar 2025",  lastActivity: "25 Feb 2026" },
-  { id: "3", name: "Oliver Patel",    email: "oliver.p@email.com", phone: "+44 7700 900789", interest: "Bedroom", status: "active",   totalSpend: 14600, ordersCount: 1, appointmentsCount: 1, loyaltyPoints: 730,  joinedAt: "Apr 2025",  lastActivity: "27 Feb 2026" },
-  { id: "4", name: "Emma Lawson",     email: "emma.l@email.com",   phone: "+44 7700 900321", interest: "Kitchen", status: "inactive", totalSpend: 6800,  ordersCount: 1, appointmentsCount: 1, loyaltyPoints: 340,  joinedAt: "Jun 2025",  lastActivity: "10 Jan 2026" },
-  { id: "5", name: "Daniel Huang",    email: "daniel.h@email.com", phone: "+44 7700 900654", interest: "Bedroom", status: "active",   totalSpend: 2900,  ordersCount: 1, appointmentsCount: 1, loyaltyPoints: 145,  joinedAt: "Aug 2025",  lastActivity: "26 Feb 2026" },
-  { id: "6", name: "Aisha Okoye",     email: "aisha.o@email.com",  phone: "+44 7700 900987", interest: "Kitchen", status: "vip",      totalSpend: 22100, ordersCount: 3, appointmentsCount: 4, loyaltyPoints: 1105, joinedAt: "Oct 2024",  lastActivity: "28 Feb 2026" },
-  { id: "7", name: "Tom Hendricks",   email: "tom.h@email.com",    phone: "+44 7700 900111", interest: "Both",    status: "active",   totalSpend: 17200, ordersCount: 2, appointmentsCount: 2, loyaltyPoints: 860,  joinedAt: "Nov 2024",  lastActivity: "24 Feb 2026" },
-  { id: "8", name: "Sarah Mitchell",  email: "sarah.m@email.com",  phone: "+44 7700 900222", interest: "Bedroom", status: "blocked",  totalSpend: 3200,  ordersCount: 1, appointmentsCount: 1, loyaltyPoints: 0,    joinedAt: "Dec 2024",  lastActivity: "05 Feb 2026" },
-];
 
 const STATUS_CONFIG: Record<CustomerStatus, { label: string; bg: string; text: string; dot: string }> = {
   active:   { label: "Active",   bg: "bg-emerald-400/10",  text: "text-emerald-400", dot: "bg-emerald-400" },
@@ -72,18 +62,35 @@ export function CustomerTable() {
   const [openMenu, setOpenMenu]     = useState<string | null>(null);
   const [selected, setSelected]     = useState<string[]>([]);
 
-  const filtered = MOCK_CUSTOMERS.filter((c) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      c.name.toLowerCase().includes(q) ||
-      c.email.toLowerCase().includes(q) ||
-      c.phone.includes(q);
+  const { data, isLoading, isError } = useCustomers({
+    page: 1,
+    limit: 100,
+    search: search || undefined,
+  });
+
+  const customers = ((data as { data?: Customer[] } | undefined)?.data ?? []) as Customer[];
+  const filtered = customers.filter((c) => {
     return (
-      matchSearch &&
-      (statusFilter   === "All" || c.status   === statusFilter) &&
+      (statusFilter === "All" || c.status === statusFilter) &&
       (interestFilter === "All" || c.interest === interestFilter)
     );
   });
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading customers...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load customers.</p>
+      </div>
+    );
+  }
 
   const toggleSelect = (id: string) =>
     setSelected((p) => p.includes(id) ? p.filter((s) => s !== id) : [...p, id]);

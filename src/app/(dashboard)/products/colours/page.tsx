@@ -11,13 +11,16 @@ export const metadata: Metadata = {
   title: 'Colours | Products',
 }
 
-const PRODUCT_SUBNAV = [
-  { href: '/products', label: 'All Products' },
+const SUB_NAV = [
+  { href: '/products',            label: 'All Products' },
   { href: '/products/categories', label: 'Categories' },
-  { href: '/products/colours', label: 'Colours' },
-  { href: '/products/sizes', label: 'Sizes' },
-  { href: '/products/inventory', label: 'Inventory' },
-  { href: '/products/pricing', label: 'Pricing' },
+  { href: '/products/colours',    label: 'Colours' },
+  { href: '/products/sizes',      label: 'Sizes' },
+  { href: '/products/style',      label: 'Style' },
+  { href: '/products/finish',     label: 'Finish' },
+  { href: '/products/package',    label: 'Packages' },
+  // { href: '/products/inventory',  label: 'Inventory' },
+  // { href: '/products/pricing',    label: 'Pricing' },
 ]
 
 const SAMPLE_COLOURS = [
@@ -49,7 +52,7 @@ export default function ColoursListPage() {
       </div>
 
       <nav className="subnav">
-        {PRODUCT_SUBNAV.map((item) => (
+        {SUB_NAV.map((item) => (
           <Link
             key={item.href}
             href={item.href}

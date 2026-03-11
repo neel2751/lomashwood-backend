@@ -10,6 +10,47 @@ This document covers the CI/CD pipeline, environment promotion strategy, and man
 | Staging | `develop` | `https://admin-dev.lomashwood.co.uk` | Yes, on push |
 | Production | `main` | `https://admin.lomashwood.co.uk` | On release tag |
 
+## Prisma On Vercel
+
+For Vercel deployments, do not run `prisma db push` when the app starts serving requests.
+
+- This repository already uses versioned migrations in `prisma/migrations`.
+- Vercel does not provide a reliable long-lived server startup phase for running schema changes.
+- Running schema updates on request startup can fail on cold starts and can race across multiple serverless instances.
+
+Use this flow instead:
+
+1. `prisma migrate deploy` during the Vercel build step.
+2. `prisma generate` during install/build so the generated client in `generated/prisma` is always current.
+3. `next build` after migrations have been applied.
+
+The repository includes `vercel.json` with:
+
+```json
+{
+	"buildCommand": "npm run vercel-build"
+}
+```
+
+And `package.json` includes:
+
+```bash
+npm run vercel-build
+```
+
+which runs:
+
+```bash
+prisma migrate deploy && prisma generate && next build
+```
+
+Required Vercel environment variables:
+
+- `DATABASE_URL`
+- any existing app runtime variables already required by the project
+
+If production is failing on the first request today, the usual cause is that the deployed database schema is behind the code. Running migrations in the build step fixes that at the correct point in the deploy lifecycle.
+
 ## CI/CD Pipeline
 
 The pipeline is defined in `.github/workflows/`:

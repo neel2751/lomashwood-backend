@@ -1,187 +1,228 @@
-"use client"
+"use client";
 
+import { useEffect, useMemo, useState } from "react";
 
-type TimelineEvent = {
-  id: string
-  type: 'created' | 'confirmed' | 'reminder' | 'rescheduled' | 'cancelled' | 'completed' | 'note'
-  label: string
-  description?: string
-  timestamp: string
-  actor?: string
+import Link from "next/link";
+
+import { useAppointment, useUpdateAppointment } from "@/hooks/useAppointments";
+import { useToast } from "@/hooks/use-toast";
+
+type PageProps = {
+  params: { id: string };
+};
+
+type AppointmentStatus = "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
+
+type AppointmentRecord = {
+  id: string;
+  type: "home" | "online" | "showroom";
+  forKitchen: boolean;
+  forBedroom: boolean;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  postcode: string;
+  address: string;
+  slot: string;
+  status: AppointmentStatus;
+  consultantName?: string;
+  showroomName?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+function toDatetimeLocalValue(value: string) {
+  const date = new Date(value);
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 16);
 }
 
-const MOCK_TIMELINE: Record<string, TimelineEvent[]> = {
-  'appt-001': [
-    { id: 'e1', type: 'created',   label: 'Appointment booked',    description: 'Booked via website enquiry form.',       timestamp: '20 Feb 2026, 9:14 AM',  actor: 'Eleanor Whitfield' },
-    { id: 'e2', type: 'confirmed', label: 'Appointment confirmed',  description: 'Confirmed by consultant.',               timestamp: '20 Feb 2026, 11:02 AM', actor: 'James Thornton' },
-    { id: 'e3', type: 'reminder',  label: 'Reminder sent',          description: '48-hour reminder email dispatched.',     timestamp: '26 Feb 2026, 9:00 AM',  actor: 'System' },
-  ],
-  'appt-002': [
-    { id: 'e1', type: 'created',   label: 'Appointment booked',    description: 'Booked via phone call.',                 timestamp: '22 Feb 2026, 2:45 PM',  actor: 'Marcus Chen' },
-  ],
-  'appt-003': [
-    { id: 'e1', type: 'created',   label: 'Appointment booked',    description: 'Booked via showroom walk-in.',           timestamp: '24 Feb 2026, 10:30 AM', actor: 'Priya Sharma' },
-    { id: 'e2', type: 'confirmed', label: 'Appointment confirmed',  description: 'Confirmed and showroom slot reserved.',  timestamp: '24 Feb 2026, 10:35 AM', actor: 'David Walsh' },
-    { id: 'e3', type: 'note',      label: 'Note added',             description: 'Interested in handle-less range.',       timestamp: '24 Feb 2026, 10:40 AM', actor: 'David Walsh' },
-  ],
+function formatInterest(item: AppointmentRecord) {
+  if (item.forKitchen && item.forBedroom) return "Kitchen + Bedroom";
+  if (item.forKitchen) return "Kitchen";
+  if (item.forBedroom) return "Bedroom";
+  return "General";
 }
 
-const TYPE_STYLE: Record<TimelineEvent['type'], { color: string; bg: string; icon: string }> = {
-  created:     { color: '#2980B9', bg: '#EBF4FB', icon: '📋' },
-  confirmed:   { color: '#27AE60', bg: '#EAF7EF', icon: '✅' },
-  reminder:    { color: '#8B6914', bg: '#FFF8E6', icon: '🔔' },
-  rescheduled: { color: '#7D3C98', bg: '#F5EEF8', icon: '📅' },
-  cancelled:   { color: '#C0392B', bg: '#FDF2F2', icon: '❌' },
-  completed:   { color: '#6B6B68', bg: '#F0EDE8', icon: '🏁' },
-  note:        { color: '#6B6B68', bg: '#F5F3EF', icon: '📝' },
-}
+export default function AppointmentDetailPage({ params }: PageProps) {
+  const toast = useToast();
+  const appointmentQuery = useAppointment(params.id);
+  const updateAppointment = useUpdateAppointment();
+  const appointment = appointmentQuery.data as AppointmentRecord | undefined;
 
-type Props = {
-  appointmentId: string
-}
+  const [status, setStatus] = useState<AppointmentStatus>("pending");
+  const [slotInput, setSlotInput] = useState("");
 
-export function AppointmentTimeline({ appointmentId }: Props) {
-  const events = MOCK_TIMELINE[appointmentId] ?? []
+  useEffect(() => {
+    if (!appointment) return;
+    setStatus(appointment.status);
+    setSlotInput(toDatetimeLocalValue(appointment.slot));
+  }, [appointment]);
 
-  if (events.length === 0) {
+  const slotDate = useMemo(
+    () => (appointment ? new Date(appointment.slot) : null),
+    [appointment],
+  );
+
+  async function handleSaveStatus() {
+    if (!appointment) return;
+
+    try {
+      await updateAppointment.mutateAsync({ id: appointment.id, payload: { status } });
+      toast.success("Appointment status updated");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update appointment status";
+      toast.error("Failed to update status", message);
+    }
+  }
+
+  async function handleReschedule() {
+    if (!appointment || !slotInput) return;
+
+    try {
+      const isoSlot = new Date(slotInput).toISOString();
+      await updateAppointment.mutateAsync({ id: appointment.id, payload: { slot: isoSlot } });
+      toast.success("Appointment rescheduled");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to reschedule appointment";
+      toast.error("Failed to reschedule", message);
+    }
+  }
+
+  async function handleCancel() {
+    if (!appointment) return;
+
+    try {
+      await updateAppointment.mutateAsync({ id: appointment.id, payload: { status: "cancelled" } });
+      setStatus("cancelled");
+      toast.success("Appointment cancelled");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to cancel appointment";
+      toast.error("Failed to cancel appointment", message);
+    }
+  }
+
+  if (appointmentQuery.isLoading) {
+    return <p className="text-sm text-neutral-500">Loading appointment...</p>;
+  }
+
+  if (appointmentQuery.isError || !appointment) {
     return (
-      <div className="timeline-empty">
-        No activity recorded yet.
+      <div className="space-y-3">
+        <p className="text-sm text-red-600">Unable to load appointment details.</p>
+        <Link href="/appointments" className="text-sm font-medium text-[#1A1A18] underline">Back to appointments</Link>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="timeline">
-      {events.map((event, index) => {
-        const style = TYPE_STYLE[event.type]
-        const isLast = index === events.length - 1
-        return (
-          <div key={event.id} className="timeline-item">
-            <div className="timeline-item__track">
-              <div
-                className="timeline-item__dot"
-                style={{ background: style.bg, borderColor: style.color }}
-                title={event.label}
-              >
-                <span className="timeline-item__dot-icon">{style.icon}</span>
-              </div>
-              {!isLast && <div className="timeline-item__line" />}
-            </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <Link href="/appointments" className="text-sm text-neutral-600 underline">Back to appointments</Link>
+          <h1 className="mt-1 text-2xl font-semibold text-[#1A1A18]">{appointment.customerName}</h1>
+          <p className="text-sm text-neutral-600">Booked on {new Date(appointment.createdAt).toLocaleString()}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleCancel()}
+          className="h-9 rounded-md border border-red-300 px-3 text-sm font-medium text-red-700"
+          disabled={updateAppointment.isPending || appointment.status === "cancelled"}
+        >
+          Cancel Appointment
+        </button>
+      </div>
 
-            <div className="timeline-item__body">
-              <div className="timeline-item__header">
-                <span className="timeline-item__label">{event.label}</span>
-                {event.actor && (
-                  <span className="timeline-item__actor">{event.actor}</span>
-                )}
-              </div>
-              {event.description && (
-                <p className="timeline-item__desc">{event.description}</p>
-              )}
-              <span className="timeline-item__time">{event.timestamp}</span>
-            </div>
-          </div>
-        )
-      })}
+      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4 md:grid-cols-2">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Type</p>
+          <p className="text-sm font-medium text-[#1A1A18] capitalize">{appointment.type}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Interest</p>
+          <p className="text-sm font-medium text-[#1A1A18]">{formatInterest(appointment)}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Date</p>
+          <p className="text-sm font-medium text-[#1A1A18]">{slotDate?.toLocaleDateString()}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Time</p>
+          <p className="text-sm font-medium text-[#1A1A18]">{slotDate?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Consultant</p>
+          <p className="text-sm font-medium text-[#1A1A18]">{appointment.consultantName || "Unassigned"}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Showroom</p>
+          <p className="text-sm font-medium text-[#1A1A18]">{appointment.showroomName || "Not set"}</p>
+        </div>
+      </section>
 
-      <style>{`
-        .timeline {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
-        }
+      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold text-[#1A1A18]">Status</h2>
+          <select
+            className="h-10 w-full rounded-md border border-neutral-300 px-3 text-sm"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as AppointmentStatus)}
+          >
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="no_show">No show</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => void handleSaveStatus()}
+            className="h-9 rounded-md bg-[#1A1A18] px-3 text-sm font-medium text-white"
+            disabled={updateAppointment.isPending}
+          >
+            Save Status
+          </button>
+        </div>
 
-        .timeline-empty {
-          font-size: 0.875rem;
-          color: #6B6B68;
-          padding: 16px 0;
-        }
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold text-[#1A1A18]">Reschedule</h2>
+          <input
+            className="h-10 w-full rounded-md border border-neutral-300 px-3 text-sm"
+            type="datetime-local"
+            value={slotInput}
+            onChange={(e) => setSlotInput(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => void handleReschedule()}
+            className="h-9 rounded-md border border-neutral-400 px-3 text-sm font-medium text-[#1A1A18]"
+            disabled={updateAppointment.isPending}
+          >
+            Save New Date and Time
+          </button>
+        </div>
+      </section>
 
-        .timeline-item {
-          display: flex;
-          gap: 14px;
-          align-items: stretch;
-        }
-
-        .timeline-item__track {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          flex-shrink: 0;
-          width: 34px;
-        }
-
-        .timeline-item__dot {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          border: 1.5px solid;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .timeline-item__dot-icon {
-          font-size: 0.875rem;
-          line-height: 1;
-        }
-
-        .timeline-item__line {
-          width: 2px;
-          flex: 1;
-          background: #E8E6E1;
-          margin: 4px 0;
-          min-height: 16px;
-        }
-
-        .timeline-item__body {
-          padding-bottom: 20px;
-          flex: 1;
-          padding-top: 6px;
-        }
-
-        .timeline-item:last-child .timeline-item__body {
-          padding-bottom: 0;
-        }
-
-        .timeline-item__header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin-bottom: 3px;
-        }
-
-        .timeline-item__label {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #1A1A18;
-        }
-
-        .timeline-item__actor {
-          font-size: 0.75rem;
-          color: #6B6B68;
-          background: #F5F3EF;
-          padding: 1px 8px;
-          border-radius: 20px;
-        }
-
-        .timeline-item__desc {
-          font-size: 0.8125rem;
-          color: #6B6B68;
-          margin: 0 0 4px;
-          line-height: 1.5;
-        }
-
-        .timeline-item__time {
-          font-size: 0.75rem;
-          color: #B8B5AE;
-          font-family: 'DM Mono', monospace;
-        }
-      `}</style>
+      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4 md:grid-cols-2">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Customer</p>
+          <p className="text-sm text-[#1A1A18]">{appointment.customerName}</p>
+          <p className="text-sm text-neutral-700">{appointment.customerEmail}</p>
+          <p className="text-sm text-neutral-700">{appointment.customerPhone}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Address</p>
+          <p className="text-sm text-[#1A1A18]">{appointment.address}</p>
+          <p className="text-sm text-neutral-700">{appointment.postcode}</p>
+        </div>
+        <div className="md:col-span-2">
+          <p className="text-xs uppercase tracking-wide text-neutral-500">Notes</p>
+          <p className="text-sm text-[#1A1A18]">{appointment.notes || "No notes"}</p>
+        </div>
+      </section>
     </div>
-  )
+  );
 }
-export const dynamic = 'force-dynamic'
+
+export const dynamic = "force-dynamic";

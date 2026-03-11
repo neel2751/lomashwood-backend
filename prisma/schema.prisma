@@ -1,0 +1,411 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductCategory {
+  kitchen
+  bedroom
+}
+
+enum ProductFinish {
+  gloss
+  matt
+  satin
+  handleless
+  shaker
+  in_frame
+}
+
+enum ProductStyle {
+  contemporary
+  traditional
+  modern
+  classic
+  rustic
+}
+
+enum LoyaltyTier {
+  bronze
+  silver
+  gold
+  platinum
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  shipped
+  delivered
+  cancelled
+  refunded
+}
+
+enum AppointmentType {
+  home
+  online
+  showroom
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+  no_show
+}
+
+enum MediaStatus {
+  active
+  in_use
+  archived
+  deleted
+  unused
+  untouched
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  category    ProductCategory
+  rangeName   String
+  images      String[]
+  price       Float?
+  packageId   String?
+  styleId     String?
+  finishId    String?
+  finish      ProductFinish?
+  style       ProductStyle?
+  isPublished Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  package         Package?                @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  styleRef        Style?                  @relation(fields: [styleId], references: [id], onDelete: SetNull)
+  finishRef       Finish?                 @relation(fields: [finishId], references: [id], onDelete: SetNull)
+  colours         ProductColour[]
+  sizes           ProductSize[]
+  orderItems      OrderItem[]
+  showroomDisplays ShowroomDisplayProduct[]
+
+  @@index([packageId])
+  @@index([styleId])
+  @@index([finishId])
+}
+
+model Colour {
+  id        String         @id @default(cuid())
+  name      String
+  hexCode   String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  products ProductColour[]
+}
+
+model Size {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  image       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  products ProductSize[]
+}
+
+model Style {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Finish {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Package {
+  id          String          @id @default(cuid())
+  title       String          @unique
+  description String?
+  image       String?
+  category    ProductCategory
+  price       Float?
+  features    String[]        @default([])
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  products Product[]
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model ProductColour {
+  productId String
+  colourId  String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colour  Colour  @relation(fields: [colourId], references: [id], onDelete: Cascade)
+
+  @@id([productId, colourId])
+}
+
+model ProductSize {
+  productId String
+  sizeId    String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size    Size    @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+
+  @@id([productId, sizeId])
+}
+
+model Customer {
+  id               String      @id @default(cuid())
+  name             String
+  email            String      @unique
+  phone            String
+  postcode         String
+  address          String
+  loyaltyPoints    Int         @default(0)
+  loyaltyTier      LoyaltyTier @default(bronze)
+  totalSpend       Float       @default(0)
+  orderCount       Int         @default(0)
+  appointmentCount Int         @default(0)
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  orders       Order[]
+  appointments Appointment[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  customerId      String
+  status          OrderStatus @default(pending)
+  subtotal        Float
+  tax             Float       @default(0)
+  total           Float
+  shippingAddress Json?
+  billingAddress  Json?
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+}
+
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  productId       String
+  productTitle    String?
+  productImage    String?
+  productCategory String?
+  quantity        Int
+  unitPrice       Float
+  totalPrice      Float
+  options         Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  type          AppointmentType
+  forKitchen    Boolean           @default(false)
+  forBedroom    Boolean           @default(false)
+  customerId    String?
+  customerName  String
+  customerEmail String
+  customerPhone String
+  postcode      String
+  address       String
+  slot          DateTime
+  status        AppointmentStatus @default(pending)
+  consultantId  String?
+  consultantName String?
+  showroomId    String?
+  showroomName  String?
+  notes         String?
+  confirmationEmailSentAt DateTime?
+  reminderEmailSentAt     DateTime?
+  missedEmailSentAt       DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  customer   Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  showroom   Showroom?   @relation(fields: [showroomId], references: [id], onDelete: SetNull)
+  consultant Consultant? @relation(fields: [consultantId], references: [id], onDelete: SetNull)
+  reminders  Reminder[]
+
+  @@index([slot])
+  @@index([consultantId])
+}
+
+model Consultant {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String?
+  avatar      String?
+  speciality  String[]
+  status      String   @default("active") // active, inactive
+  availability String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appointments Appointment[]
+
+  @@index([status])
+}
+
+model Reminder {
+  id            String    @id @default(cuid())
+  appointmentId String
+  type          String    // email, sms, etc
+  sentAt        DateTime?
+  scheduledAt   DateTime
+  status        String    @default("pending") // pending, sent, failed
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId])
+  @@index([scheduledAt])
+}
+
+model Availability {
+  id           String   @id @default(cuid())
+  consultantId String   @default("global")
+  date         DateTime
+  slots        String[]
+  isBlocked    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([consultantId, date])
+  @@index([date])
+  @@index([consultantId])
+}
+
+model AvailabilityWeeklyPattern {
+  id           String   @id @default(cuid())
+  consultantId String   @default("global")
+  weekday      Int
+  isEnabled    Boolean  @default(true)
+  startTime    String
+  endTime      String
+  slotDuration Int      @default(60)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([consultantId, weekday])
+  @@index([consultantId])
+}
+
+model Showroom {
+  id                String                  @id @default(cuid())
+  slug              String                  @unique
+  name              String
+  city              String
+  address           String
+  postcode          String
+  phone             String
+  email             String
+  latitude          Float
+  longitude         Float
+  image             String?
+  imageMediaId      String?
+  openToday         String?
+  facilities        String[]
+  team              Json?
+  openingHours      Json?
+  nearbyStores      String[]
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  imageMedia       Media?                  @relation(fields: [imageMediaId], references: [id], onDelete: SetNull)
+  appointments     Appointment[]
+  displayProducts  ShowroomDisplayProduct[]
+
+  @@index([imageMediaId])
+}
+
+model Media {
+  id         String      @id @default(cuid())
+  key        String      @unique
+  url        String
+  fileName   String?
+  mimeType   String?
+  folder     String?
+  sizeBytes  Int?
+  status     MediaStatus @default(untouched)
+  source     String?
+  metadata   Json?
+  deletedAt  DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  showrooms Showroom[]
+
+  @@index([status])
+}
+
+model ShowroomDisplayProduct {
+  id         String   @id @default(cuid())
+  showroomId String
+  productId  String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  showroom Showroom @relation(fields: [showroomId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([showroomId, productId])
+  @@index([showroomId])
+  @@index([productId])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  roleId       String?
+  roleName     String   @default("admin")
+  status       String   @default("active")
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

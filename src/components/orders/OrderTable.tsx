@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useOrders } from "@/hooks/useOrders";
 
 import { OrderStatusBadge, type OrderStatus } from "./OrderStatusBadge";
 
@@ -26,17 +27,6 @@ interface Order {
   date: string;
 }
 
-const MOCK_ORDERS: Order[] = [
-  { id: "1", orderNo: "#1048", customer: "James Thornton",  email: "james.t@email.com",  type: "Kitchen",           products: ["Luna White"],                  amount: 8400,  status: "completed",  paymentStatus: "paid",     date: "28 Feb 2026" },
-  { id: "2", orderNo: "#1047", customer: "Sarah Mitchell",  email: "sarah.m@email.com",  type: "Bedroom",           products: ["Halo Oak"],                    amount: 3200,  status: "processing", paymentStatus: "paid",     date: "27 Feb 2026" },
-  { id: "3", orderNo: "#1046", customer: "Oliver Patel",    email: "oliver.p@email.com", type: "Kitchen & Bedroom", products: ["Slate Grey", "Nordic Birch"],  amount: 14600, status: "confirmed",  paymentStatus: "paid",     date: "27 Feb 2026" },
-  { id: "4", orderNo: "#1045", customer: "Emma Lawson",     email: "emma.l@email.com",   type: "Kitchen",           products: ["Luna White"],                  amount: 6800,  status: "refunded",   paymentStatus: "refunded", date: "26 Feb 2026" },
-  { id: "5", orderNo: "#1044", customer: "Daniel Huang",    email: "daniel.h@email.com", type: "Bedroom",           products: ["Nordic Birch"],                amount: 2900,  status: "dispatched", paymentStatus: "paid",     date: "26 Feb 2026" },
-  { id: "6", orderNo: "#1043", customer: "Priya Sharma",    email: "priya.s@email.com",  type: "Kitchen",           products: ["Pebble J-Pull"],               amount: 9100,  status: "cancelled",  paymentStatus: "failed",   date: "25 Feb 2026" },
-  { id: "7", orderNo: "#1042", customer: "Tom Hendricks",   email: "tom.h@email.com",    type: "Kitchen & Bedroom", products: ["Ash Handleless", "Halo Oak"],  amount: 17200, status: "delivered",  paymentStatus: "paid",     date: "24 Feb 2026" },
-  { id: "8", orderNo: "#1041", customer: "Aisha Okoye",     email: "aisha.o@email.com",  type: "Bedroom",           products: ["Linen Shaker"],                amount: 4100,  status: "pending",    paymentStatus: "pending",  date: "23 Feb 2026" },
-];
-
 const PAYMENT_STYLES: Record<string, string> = {
   paid:     "bg-emerald-400/10 text-emerald-400",
   pending:  "bg-[#C8924A]/15 text-[#C8924A]",
@@ -51,14 +41,18 @@ export function OrderTable() {
   const [openMenu, setOpenMenu]   = useState<string | null>(null);
   const [selected, setSelected]   = useState<string[]>([]);
 
-  const filtered = MOCK_ORDERS.filter((o) => {
-    const matchSearch =
-      o.orderNo.toLowerCase().includes(search.toLowerCase()) ||
-      o.customer.toLowerCase().includes(search.toLowerCase()) ||
-      o.email.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || o.status === statusFilter;
-    const matchType   = typeFilter   === "All" || o.type    === typeFilter;
-    return matchSearch && matchStatus && matchType;
+  const { data, isLoading, isError } = useOrders({
+    page: 1,
+    limit: 100,
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
+  });
+
+  const orders = ((data as { data?: Order[] } | undefined)?.data ?? []) as Order[];
+
+  const filtered = orders.filter((o) => {
+    const matchType = typeFilter === "All" || o.type === typeFilter;
+    return matchType;
   });
 
   const toggleSelect = (id: string) =>
@@ -145,7 +139,26 @@ export function OrderTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#2E231A]">
-            {filtered.map((order) => (
+            {isLoading ? (
+              <tr>
+                <td colSpan={10} className="px-5 py-10 text-center text-[13px] text-[#5A4232]">
+                  Loading orders...
+                </td>
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td colSpan={10} className="px-5 py-10 text-center text-[13px] text-red-400">
+                  Failed to load orders. Please refresh.
+                </td>
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="px-5 py-10 text-center text-[13px] text-[#5A4232]">
+                  No orders found.
+                </td>
+              </tr>
+            ) : (
+            filtered.map((order) => (
               <tr key={order.id} className="group hover:bg-[#221A12] transition-colors">
                 <td className="px-5 py-3.5">
                   <input type="checkbox" checked={selected.includes(order.id)}
@@ -237,7 +250,8 @@ export function OrderTable() {
                   )}
                 </td>
               </tr>
-            ))}
+            ))
+            )}
           </tbody>
         </table>
       </div>

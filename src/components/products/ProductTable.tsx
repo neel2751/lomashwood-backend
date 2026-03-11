@@ -3,65 +3,83 @@
 import { useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   Search, Plus, Filter, MoreHorizontal,
-  Pencil, Trash2, Eye, ChevronDown,
+  Pencil, Trash2, Eye, ChevronDown, Copy,
 } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useDeleteProduct, useProducts, useUpdateProduct } from "@/hooks/useProducts";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-type Category = "Kitchen" | "Bedroom";
+type Category = "kitchen" | "bedroom";
 type ProductStatus = "active" | "draft" | "archived";
 
 interface Product {
   id: string;
   title: string;
   category: Category;
-  range: string;
-  colours: string[];
-  price: number;
-  status: ProductStatus;
-  images: number;
+  rangeName: string;
+  colours: Array<{ id: string; name: string; hexCode: string }>;
+  sizes: Array<{ id: string; title: string }>;
+  price?: number;
+  isPublished: boolean;
+  images: string[];
   updatedAt: string;
-  sizeId?: string;
 }
 
 interface ProductTableProps {
   sizeFilter?: string;
 }
 
-const MOCK_PRODUCTS: Product[] = [
-  { id: "1", title: "Luna White",        category: "Kitchen",  range: "Luna",    colours: ["#FFFFFF","#F5F0EB","#E8E0D8"], price: 8400,  status: "active",   images: 6, updatedAt: "28 Feb 2026", sizeId: "base-600" },
-  { id: "2", title: "Halo Oak",          category: "Bedroom",  range: "Halo",    colours: ["#C8924A","#8B6B4A","#5E4230"], price: 6200,  status: "active",   images: 4, updatedAt: "27 Feb 2026", sizeId: "wardrobe-1800" },
-  { id: "3", title: "Slate Grey Gloss",  category: "Kitchen",  range: "Slate",   colours: ["#6B7280","#4B5563","#374151"], price: 9100,  status: "active",   images: 5, updatedAt: "26 Feb 2026", sizeId: "base-600" },
-  { id: "4", title: "Nordic Birch",      category: "Bedroom",  range: "Nordic",  colours: ["#D4B896","#C4A882","#A8896A"], price: 4800,  status: "active",   images: 3, updatedAt: "25 Feb 2026", sizeId: "wardrobe-1800" },
-  { id: "5", title: "Pebble J-Pull",     category: "Kitchen",  range: "Classic", colours: ["#9CA3AF","#6B7280"],           price: 7300,  status: "draft",    images: 2, updatedAt: "24 Feb 2026", sizeId: "base-900" },
-  { id: "6", title: "Ash Handleless",    category: "Kitchen",  range: "Ash",     colours: ["#D1C4B0","#B8A898"],           price: 10200, status: "active",   images: 7, updatedAt: "23 Feb 2026", sizeId: "wall-600" },
-  { id: "7", title: "Linen Shaker",      category: "Bedroom",  range: "Shaker",  colours: ["#E8DDD0","#D4C8B8"],           price: 3900,  status: "archived", images: 4, updatedAt: "20 Feb 2026", sizeId: "wardrobe-1800" },
-];
-
 const STATUS_STYLES: Record<ProductStatus, string> = {
-  active:   "bg-emerald-400/10 text-emerald-400",
-  draft:    "bg-[#6B8A9A]/15 text-[#6B8A9A]",
-  archived: "bg-[#3D2E1E] text-[#5A4232]",
+  active:   "bg-emerald-100 text-emerald-700",
+  draft:    "bg-sky-100 text-sky-700",
+  archived: "bg-gray-100 text-gray-700",
 };
 
 export function ProductTable({ sizeFilter }: ProductTableProps) {
+  const router = useRouter();
+  const toast = useToast();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<"All" | Category>("All");
   const [statusFilter, setStatusFilter] = useState<"All" | ProductStatus>("All");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
 
-  const filtered = MOCK_PRODUCTS.filter((p) => {
-    const matchSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.range.toLowerCase().includes(search.toLowerCase());
-    const matchCat = categoryFilter === "All" || p.category === categoryFilter;
-    const matchStatus = statusFilter === "All" || p.status === statusFilter;
-    const matchSize = !sizeFilter || p.sizeId === sizeFilter;
-    return matchSearch && matchCat && matchStatus && matchSize;
+  const { data, isLoading, isError, error } = useProducts({
+    page: 1,
+    limit: 100,
+    search: search || undefined,
+    category: categoryFilter === "All" ? undefined : categoryFilter,
+    isPublished:
+      statusFilter === "All"
+        ? undefined
+        : statusFilter === "active"
+          ? "true"
+          : "false",
+  });
+
+  const products = ((data as { data?: Product[] } | undefined)?.data ?? []) as Product[];
+
+  const filtered = products.filter((p) => {
+    const matchSize = !sizeFilter || p.sizes.some((s) => s.id === sizeFilter);
+    return matchSize;
   });
 
   const toggleSelect = (id: string) =>
@@ -70,35 +88,65 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
   const toggleAll = () =>
     setSelected(selected.length === filtered.length ? [] : filtered.map((p) => p.id));
 
+  async function togglePublished(product: Product) {
+    try {
+      await updateProduct.mutateAsync({
+        id: product.id,
+        payload: {
+          isPublished: !product.isPublished,
+        },
+      });
+      setOpenMenu(null);
+    } catch {
+      // Existing mutation layer handles cache invalidation; table error state is sufficient for now.
+    }
+  }
+
+  async function handleDelete(productId: string) {
+    try {
+      await deleteProduct.mutateAsync(productId);
+      toast.success("Product deleted");
+      setOpenMenu(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to delete product";
+      toast.error("Failed to delete product", message);
+    }
+  }
+
+  function goToDuplicate(productId: string) {
+    setOpenMenu(null);
+    router.push(`/products/${productId}/duplicate`);
+  }
+
   return (
-    <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
+    <div className="rounded-[16px] bg-white border border-[#E8E6E1] overflow-hidden shadow-sm">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2E231A] flex-wrap">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E8E6E1] flex-wrap bg-[#FCFBF9]">
         {/* Search */}
         <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8884]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search products..."
-            className="h-9 pl-8 pr-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/40 w-[200px]"
+            className="h-9 pl-8 pr-3 rounded-[9px] bg-white border border-[#D9D5CD] text-[12.5px] text-[#2B2A28] placeholder:text-[#A39F96] focus:outline-none focus:border-[#C8924A] w-[200px]"
           />
         </div>
 
         {/* Category filter */}
         <div className="relative">
-          <Filter size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
+          <Filter size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8884]" />
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as "All" | Category)}
-            className="appearance-none h-9 pl-8 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40"
+            className="appearance-none h-9 pl-8 pr-7 rounded-[9px] bg-white border border-[#D9D5CD] text-[12.5px] text-[#2B2A28] focus:outline-none focus:border-[#C8924A]"
           >
             <option value="All">All Categories</option>
-            <option value="Kitchen">Kitchen</option>
-            <option value="Bedroom">Bedroom</option>
+            <option value="kitchen">Kitchen</option>
+            <option value="bedroom">Bedroom</option>
           </select>
-          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5A4232] pointer-events-none" />
+          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8A8884] pointer-events-none" />
         </div>
 
         {/* Status filter */}
@@ -106,14 +154,13 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "All" | ProductStatus)}
-            className="appearance-none h-9 px-3 pr-7 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[12.5px] text-[#9A7A5A] focus:outline-none focus:border-[#C8924A]/40"
+            className="appearance-none h-9 px-3 pr-7 rounded-[9px] bg-white border border-[#D9D5CD] text-[12.5px] text-[#2B2A28] focus:outline-none focus:border-[#C8924A]"
           >
             <option value="All">All Status</option>
             <option value="active">Active</option>
             <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
           </select>
-          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5A4232] pointer-events-none" />
+          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8A8884] pointer-events-none" />
         </div>
 
         {selected.length > 0 && (
@@ -135,7 +182,7 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px]">
           <thead>
-            <tr className="border-b border-[#2E231A]">
+            <tr className="border-b border-[#E8E6E1] bg-[#FCFBF9]">
               <th className="px-5 py-3 w-10">
                 <input
                   type="checkbox"
@@ -145,22 +192,34 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
                 />
               </th>
               {["Product", "Category", "Colours", "Price", "Images", "Status", "Updated", ""].map((h) => (
-                <th key={h} className="px-3 py-3 text-left text-[10px] font-semibold tracking-[0.1em] uppercase text-[#3D2E1E]">
+                <th key={h} className="px-3 py-3 text-left text-[10px] font-semibold tracking-[0.1em] uppercase text-[#7A776F]">
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#2E231A]">
-            {filtered.length === 0 ? (
+          <tbody className="divide-y divide-[#F0EEE9]">
+            {isLoading ? (
               <tr>
-                <td colSpan={9} className="px-5 py-10 text-center text-[13px] text-[#5A4232]">
+                <td colSpan={9} className="px-5 py-10 text-center text-[13px] text-[#7A776F]">
+                  Loading products...
+                </td>
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td colSpan={9} className="px-5 py-10 text-center text-[13px] text-red-400">
+                  Failed to load products. {error instanceof Error ? error.message : 'Please try refreshing the page.'}
+                </td>
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="px-5 py-10 text-center text-[13px] text-[#7A776F]">
                   No products found{sizeFilter ? ` for this size` : ""}.
                 </td>
               </tr>
             ) : (
               filtered.map((product) => (
-                <tr key={product.id} className="group hover:bg-[#221A12] transition-colors">
+                <tr key={product.id} className="group hover:bg-[#FAF7F1] transition-colors">
                   <td className="px-5 py-3.5">
                     <input
                       type="checkbox"
@@ -175,11 +234,11 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
                     <div>
                       <Link
                         href={`/products/${product.id}`}
-                        className="text-[13px] font-medium text-[#C8B99A] hover:text-[#E8D5B7] transition-colors"
+                        className="text-[13px] font-medium text-[#2B2A28] hover:text-[#8B6914] transition-colors"
                       >
                         {product.title}
                       </Link>
-                      <p className="text-[11px] text-[#5A4232] mt-0.5">{product.range} Range</p>
+                      <p className="text-[11px] text-[#8A8884] mt-0.5">{product.rangeName} Range</p>
                     </div>
                   </td>
 
@@ -187,78 +246,138 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
                   <td className="px-3 py-3.5">
                     <span className={cn(
                       "text-[10.5px] px-2 py-0.5 rounded-full font-medium",
-                      product.category === "Kitchen"
+                      product.category === "kitchen"
                         ? "bg-[#C8924A]/15 text-[#C8924A]"
                         : "bg-[#6B8A9A]/15 text-[#6B8A9A]"
                     )}>
-                      {product.category}
+                      {product.category === "kitchen" ? "Kitchen" : "Bedroom"}
                     </span>
                   </td>
 
                   {/* Colours */}
                   <td className="px-3 py-3.5">
                     <div className="flex items-center gap-1">
-                      {product.colours.slice(0, 4).map((hex, i) => (
+                      {product.colours.slice(0, 4).map((colour) => (
                         <span
-                          key={i}
-                          className="w-4 h-4 rounded-full border border-[#3D2E1E] shrink-0"
-                          style={{ background: hex }}
-                          title={hex}
+                          key={colour.id}
+                          className="w-4 h-4 rounded-full border border-[#D8D4CC] shrink-0"
+                          style={{ background: colour.hexCode }}
+                          title={colour.name}
                         />
                       ))}
                       {product.colours.length > 4 && (
-                        <span className="text-[10px] text-[#5A4232]">+{product.colours.length - 4}</span>
+                        <span className="text-[10px] text-[#8A8884]">+{product.colours.length - 4}</span>
                       )}
                     </div>
                   </td>
 
                   {/* Price */}
                   <td className="px-3 py-3.5">
-                    <span className="text-[13px] font-semibold text-[#E8D5B7]">
-                      £{product.price.toLocaleString()}
+                    <span className="text-[13px] font-semibold text-[#1A1A18]">
+                      £{(product.price ?? 0).toLocaleString()}
                     </span>
                   </td>
 
                   {/* Images */}
                   <td className="px-3 py-3.5">
-                    <span className="text-[12px] text-[#7A6045]">{product.images} imgs</span>
+                    <span className="text-[12px] text-[#6B6B68]">{product.images.length} imgs</span>
                   </td>
 
                   {/* Status */}
                   <td className="px-3 py-3.5">
-                    <span className={cn("text-[10.5px] px-2 py-0.5 rounded-full font-medium capitalize", STATUS_STYLES[product.status])}>
-                      {product.status}
+                    <span
+                      className={cn(
+                        "text-[10.5px] px-2 py-0.5 rounded-full font-medium capitalize",
+                        STATUS_STYLES[product.isPublished ? "active" : "draft"]
+                      )}
+                    >
+                      {product.isPublished ? "active" : "draft"}
                     </span>
                   </td>
 
                   {/* Updated */}
                   <td className="px-3 py-3.5">
-                    <span className="text-[11px] text-[#5A4232]">{product.updatedAt}</span>
+                    <span className="text-[11px] text-[#7A776F]">
+                      {new Date(product.updatedAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
                   </td>
 
                   {/* Actions */}
                   <td className="px-3 py-3.5 relative">
                     <button
                       onClick={() => setOpenMenu(openMenu === product.id ? null : product.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#3D2E1E] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all opacity-0 group-hover:opacity-100"
+                      className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#8A8884] hover:text-[#8B6914] hover:bg-[#F3EEE3] transition-all opacity-0 group-hover:opacity-100"
                     >
                       <MoreHorizontal size={14} />
                     </button>
                     {openMenu === product.id && (
-                      <div className="absolute right-3 top-full mt-1 z-20 w-[150px] bg-[#1C1611] border border-[#2E231A] rounded-[10px] shadow-xl overflow-hidden">
+                      <div className="absolute right-3 top-full mt-1 z-20 w-[150px] bg-white border border-[#E8E6E1] rounded-[10px] shadow-xl overflow-hidden">
                         {[
                           { icon: Eye,    label: "View", href: `/products/${product.id}` },
-                          { icon: Pencil, label: "Edit", href: `/products/${product.id}` },
+                          { icon: Pencil, label: "Edit", href: `/products/${product.id}/edit` },
                         ].map(({ icon: Icon, label, href }) => (
                           <Link key={label} href={href} onClick={() => setOpenMenu(null)}
-                            className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#7A6045] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all"
+                            className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#4A4946] hover:text-[#8B6914] hover:bg-[#F8F5EE] transition-all"
                           >
                             <Icon size={13} /> {label}
                           </Link>
                         ))}
-                        <button className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-red-400 hover:bg-red-400/10 transition-all">
-                          <Trash2 size={13} /> Delete
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#7A6045] hover:text-[#C8924A] hover:bg-[#2E231A] transition-all">
+                              <Copy size={13} /> Duplicate
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Duplicate this product?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will create a copy as Draft so you can edit it safely before publishing.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => goToDuplicate(product.id)}>
+                                Yes, Create Duplicate
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <button
+                          onClick={() => togglePublished(product)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#4A4946] hover:text-[#8B6914] hover:bg-[#F8F5EE] transition-all"
+                        >
+                          <Eye size={13} /> {product.isPublished ? "Move to Draft" : "Publish"}
                         </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-red-400 hover:bg-red-400/10 transition-all">
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete this product?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. The product will be permanently removed.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel disabled={deleteProduct.isPending}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => void handleDelete(product.id)}
+                                disabled={deleteProduct.isPending}
+                                className="bg-[#AF3E34] text-white hover:bg-[#922f27]"
+                              >
+                                {deleteProduct.isPending ? "Deleting..." : "Yes, Delete Product"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     )}
                   </td>
@@ -270,9 +389,9 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
       </div>
 
       {/* Footer */}
-      <div className="px-5 py-3 border-t border-[#2E231A] flex items-center justify-between">
-        <span className="text-[12px] text-[#5A4232]">{filtered.length} products</span>
-        <span className="text-[12px] text-[#3D2E1E]">Page 1 of 1</span>
+      <div className="px-5 py-3 border-t border-[#E8E6E1] flex items-center justify-between bg-[#FCFBF9]">
+        <span className="text-[12px] text-[#7A776F]">{filtered.length} products</span>
+        <span className="text-[12px] text-[#9A978F]">Page 1 of 1</span>
       </div>
     </div>
   );

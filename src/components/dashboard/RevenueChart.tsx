@@ -13,34 +13,23 @@ import {
 } from "recharts";
 
 import { cn } from "@/lib/utils";
+import { useOrders } from "@/hooks/useOrders";
 
-const MOCK_DATA = {
-  "6M": [
-    { month: "Sep", kitchen: 38000, bedroom: 22000 },
-    { month: "Oct", kitchen: 42000, bedroom: 26000 },
-    { month: "Nov", kitchen: 35000, bedroom: 19000 },
-    { month: "Dec", kitchen: 55000, bedroom: 31000 },
-    { month: "Jan", kitchen: 48000, bedroom: 28000 },
-    { month: "Feb", kitchen: 61000, bedroom: 34000 },
-  ],
-  "12M": [
-    { month: "Mar", kitchen: 29000, bedroom: 15000 },
-    { month: "Apr", kitchen: 33000, bedroom: 18000 },
-    { month: "May", kitchen: 37000, bedroom: 21000 },
-    { month: "Jun", kitchen: 40000, bedroom: 24000 },
-    { month: "Jul", kitchen: 44000, bedroom: 26000 },
-    { month: "Aug", kitchen: 39000, bedroom: 20000 },
-    { month: "Sep", kitchen: 38000, bedroom: 22000 },
-    { month: "Oct", kitchen: 42000, bedroom: 26000 },
-    { month: "Nov", kitchen: 35000, bedroom: 19000 },
-    { month: "Dec", kitchen: 55000, bedroom: 31000 },
-    { month: "Jan", kitchen: 48000, bedroom: 28000 },
-    { month: "Feb", kitchen: 61000, bedroom: 34000 },
-  ],
-};
+interface OrderItem {
+  productCategory?: string;
+  totalPrice?: number;
+}
+
+interface Order {
+  id: string;
+  createdAt?: string;
+  items?: OrderItem[];
+}
 
 const RANGES = ["6M", "12M"] as const;
 type Range = (typeof RANGES)[number];
+
+const gbNumber = new Intl.NumberFormat("en-GB");
 
 interface TooltipPayloadEntry {
   dataKey: string;
@@ -64,7 +53,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
           <span className="w-2 h-2 rounded-full" style={{ background: entry.color }} />
           <span className="text-[12px] text-[#9A7A5A] capitalize">{entry.dataKey}:</span>
           <span className="text-[12px] font-semibold text-[#E8D5B7]">
-            £{entry.value.toLocaleString()}
+            £{gbNumber.format(entry.value)}
           </span>
         </div>
       ))}
@@ -74,7 +63,39 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 export function RevenueChart() {
   const [range, setRange] = useState<Range>("6M");
-  const data = MOCK_DATA[range];
+
+  const { data: ordersData, isLoading, isError } = useOrders({ page: 1, limit: 500 });
+  const orders = ((ordersData as { data?: Order[] } | undefined)?.data ?? []) as Order[];
+
+  const monthsBack = range === "6M" ? 6 : 12;
+  const monthBuckets = Array.from({ length: monthsBack }, (_, idx) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (monthsBack - 1 - idx));
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const month = d.toLocaleDateString("en-GB", { month: "short" });
+    return { key, month, kitchen: 0, bedroom: 0 };
+  });
+
+  const bucketMap = new Map(monthBuckets.map((b) => [b.key, b]));
+
+  orders.forEach((order) => {
+    if (!order.createdAt) return;
+    const d = new Date(order.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const bucket = bucketMap.get(key);
+    if (!bucket) return;
+
+    (order.items ?? []).forEach((item) => {
+      const amount = item.totalPrice ?? 0;
+      if (item.productCategory?.toLowerCase() === "bedroom") {
+        bucket.bedroom += amount;
+      } else {
+        bucket.kitchen += amount;
+      }
+    });
+  });
+
+  const data = monthBuckets.map(({ month, kitchen, bedroom }) => ({ month, kitchen, bedroom }));
 
   const totalKitchen = data.reduce((s, d) => s + d.kitchen, 0);
   const totalBedroom = data.reduce((s, d) => s + d.bedroom, 0);
@@ -113,19 +134,24 @@ export function RevenueChart() {
           <span className="w-2.5 h-2.5 rounded-full bg-[#C8924A]" />
           <span className="text-[11px] text-[#5A4232]">Kitchen</span>
           <span className="text-[13px] font-semibold text-[#E8D5B7]">
-            £{totalKitchen.toLocaleString()}
+            £{gbNumber.format(totalKitchen)}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#6B8A9A]" />
           <span className="text-[11px] text-[#5A4232]">Bedroom</span>
           <span className="text-[13px] font-semibold text-[#E8D5B7]">
-            £{totalBedroom.toLocaleString()}
+            £{gbNumber.format(totalBedroom)}
           </span>
         </div>
       </div>
 
       {/* Chart */}
+      {isLoading ? (
+        <div className="h-[200px] flex items-center justify-center text-[13px] text-[#5A4232]">Loading revenue...</div>
+      ) : isError ? (
+        <div className="h-[200px] flex items-center justify-center text-[13px] text-red-400">Failed to load revenue data.</div>
+      ) : (
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <defs>
@@ -172,6 +198,7 @@ export function RevenueChart() {
           />
         </AreaChart>
       </ResponsiveContainer>
+      )}
     </div>
   );
 }

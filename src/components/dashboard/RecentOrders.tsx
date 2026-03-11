@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { useOrders } from "@/hooks/useOrders";
 
 type OrderStatus = "completed" | "processing" | "pending" | "refunded" | "cancelled";
 
@@ -16,14 +17,19 @@ interface RecentOrder {
   date: string;
 }
 
-const MOCK_ORDERS: RecentOrder[] = [
-  { id: "1", orderNo: "#1048", customer: "James Thornton",  type: "Kitchen",           amount: 8400,  status: "completed",  date: "28 Feb" },
-  { id: "2", orderNo: "#1047", customer: "Sarah Mitchell",  type: "Bedroom",           amount: 3200,  status: "processing", date: "27 Feb" },
-  { id: "3", orderNo: "#1046", customer: "Oliver Patel",    type: "Kitchen & Bedroom", amount: 14600, status: "pending",    date: "27 Feb" },
-  { id: "4", orderNo: "#1045", customer: "Emma Lawson",     type: "Kitchen",           amount: 6800,  status: "refunded",   date: "26 Feb" },
-  { id: "5", orderNo: "#1044", customer: "Daniel Huang",    type: "Bedroom",           amount: 2900,  status: "completed",  date: "26 Feb" },
-  { id: "6", orderNo: "#1043", customer: "Priya Sharma",    type: "Kitchen",           amount: 9100,  status: "cancelled",  date: "25 Feb" },
-];
+interface OrderItem {
+  productCategory?: string;
+}
+
+interface RawOrder {
+  id: string;
+  orderNumber?: string;
+  customerName?: string;
+  total?: number;
+  status?: string;
+  createdAt?: string;
+  items?: OrderItem[];
+}
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
   completed:  "bg-emerald-400/10 text-emerald-400",
@@ -33,7 +39,36 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   cancelled:  "bg-red-400/10 text-red-400",
 };
 
+const gbNumber = new Intl.NumberFormat("en-GB");
+
 export function RecentOrders() {
+  const { data, isLoading, isError } = useOrders({ page: 1, limit: 6 });
+  const rawOrders = ((data as { data?: RawOrder[] } | undefined)?.data ?? []) as RawOrder[];
+
+  const recentOrders: RecentOrder[] = rawOrders.slice(0, 6).map((order) => {
+    const categories = new Set((order.items ?? []).map((item) => item.productCategory?.toLowerCase()));
+    const type: RecentOrder["type"] =
+      categories.has("kitchen") && categories.has("bedroom")
+        ? "Kitchen & Bedroom"
+        : categories.has("bedroom")
+          ? "Bedroom"
+          : "Kitchen";
+
+    const status = (order.status ?? "pending") as OrderStatus;
+
+    return {
+      id: order.id,
+      orderNo: order.orderNumber ?? order.id.slice(-6),
+      customer: order.customerName ?? "Unknown customer",
+      type,
+      amount: order.total ?? 0,
+      status,
+      date: order.createdAt
+        ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
+        : "-",
+    };
+  });
+
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
       {/* Header */}
@@ -66,7 +101,20 @@ export function RecentOrders() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#2E231A]">
-            {MOCK_ORDERS.map((order) => (
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-[13px] text-[#5A4232]">Loading recent orders...</td>
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-[13px] text-red-400">Failed to load recent orders.</td>
+              </tr>
+            ) : recentOrders.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-[13px] text-[#5A4232]">No recent orders.</td>
+              </tr>
+            ) : (
+              recentOrders.map((order) => (
               <tr key={order.id} className="group hover:bg-[#221A12] transition-colors">
                 <td className="py-2.5 pr-3 pl-0">
                   <Link
@@ -86,14 +134,14 @@ export function RecentOrders() {
                 </td>
                 <td className="px-1 py-2.5">
                   <span className="text-[12.5px] font-semibold text-[#E8D5B7]">
-                    £{order.amount.toLocaleString()}
+                    £{gbNumber.format(order.amount)}
                   </span>
                 </td>
                 <td className="px-1 py-2.5">
                   <span
                     className={cn(
                       "inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-medium capitalize",
-                      STATUS_STYLES[order.status]
+                      STATUS_STYLES[order.status] ?? STATUS_STYLES.pending
                     )}
                   >
                     {order.status}
@@ -103,7 +151,8 @@ export function RecentOrders() {
                   <span className="text-[11px] text-[#5A4232]">{order.date}</span>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>

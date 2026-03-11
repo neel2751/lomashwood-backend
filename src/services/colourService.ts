@@ -3,7 +3,7 @@ import { apiClient } from "@/lib/api-client";
 type Colour = {
   id: string;
   name: string;
-  hex?: string;
+  hexCode?: string;
   createdAt?: string;
   updatedAt?: string;
 };

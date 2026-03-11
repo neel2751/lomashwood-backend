@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { useCustomers } from "@/hooks/useCustomers";
 
 interface RecentCustomer {
   id: string;
@@ -13,14 +14,6 @@ interface RecentCustomer {
   joinedAt: string;
   hasBooking: boolean;
 }
-
-const MOCK_CUSTOMERS: RecentCustomer[] = [
-  { id: "1", name: "James Thornton",  email: "james.t@email.com",   interest: "Kitchen",           totalSpend: 8400,  joinedAt: "28 Feb", hasBooking: true  },
-  { id: "2", name: "Sarah Mitchell",  email: "sarah.m@email.com",   interest: "Bedroom",           totalSpend: 3200,  joinedAt: "27 Feb", hasBooking: false },
-  { id: "3", name: "Oliver Patel",    email: "oliver.p@email.com",  interest: "Kitchen & Bedroom", totalSpend: 14600, joinedAt: "27 Feb", hasBooking: true  },
-  { id: "4", name: "Emma Lawson",     email: "emma.l@email.com",    interest: "Kitchen",           totalSpend: 6800,  joinedAt: "26 Feb", hasBooking: true  },
-  { id: "5", name: "Daniel Huang",    email: "daniel.h@email.com",  interest: "Bedroom",           totalSpend: 2900,  joinedAt: "25 Feb", hasBooking: false },
-];
 
 function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
@@ -34,7 +27,28 @@ const AVATAR_COLORS = [
   "from-[#9A6B8A] to-[#6B4A5E]",
 ];
 
+const gbNumber = new Intl.NumberFormat("en-GB");
+
 export function RecentCustomers() {
+  const { data, isLoading, isError } = useCustomers({ page: 1, limit: 5 });
+
+  const customers = ((data as { data?: RecentCustomer[] } | undefined)?.data ?? []) as RecentCustomer[];
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
+        <p className="text-center text-sm text-[#5A4232]">Loading customers...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
+        <p className="text-center text-sm text-red-400">Failed to load customers.</p>
+      </div>
+    );
+  }
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
       {/* Header */}
@@ -53,7 +67,7 @@ export function RecentCustomers() {
 
       {/* List */}
       <div className="flex flex-col divide-y divide-[#2E231A]">
-        {MOCK_CUSTOMERS.map((customer, i) => (
+        {customers.slice(0, 5).map((customer, i) => (
           <div key={customer.id} className="flex items-center gap-3 py-3 group">
             {/* Avatar */}
             <div
@@ -80,7 +94,7 @@ export function RecentCustomers() {
             {/* Meta */}
             <div className="shrink-0 text-right">
               <p className="text-[12.5px] font-semibold text-[#E8D5B7]">
-                £{customer.totalSpend.toLocaleString()}
+                £{gbNumber.format(customer.totalSpend)}
               </p>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <span

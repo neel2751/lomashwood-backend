@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useReviews } from "@/hooks/useReviews";
 
 type ReviewStatus = "pending" | "approved" | "rejected" | "flagged";
 
@@ -27,16 +28,6 @@ interface Review {
   submittedAt: string;
   helpful: number;
 }
-
-const MOCK_REVIEWS: Review[] = [
-  { id: "1", customer: "James Thornton",  customerId: "1", product: "Luna White Kitchen",       productId: "1", rating: 5, title: "Exceptional quality",        body: "Absolutely stunning kitchen. The Luna White has transformed our home completely. Installation team were brilliant.",            status: "approved",  verified: true,  submittedAt: "15 Mar 2025", helpful: 12 },
-  { id: "2", customer: "Oliver Patel",    customerId: "3", product: "Nordic Birch Bedroom",     productId: "4", rating: 5, title: "Beautiful craftsmanship",     body: "Superb finish and incredibly sturdy. Every detail is perfect. We're so happy with the result.",                            status: "approved",  verified: true,  submittedAt: "20 Apr 2025", helpful: 8  },
-  { id: "3", customer: "Sarah Mitchell",  customerId: "8", product: "Slate Grey Gloss Kitchen", productId: "3", rating: 2, title: "Disappointed with finish",    body: "The doors had minor scratches on delivery. Customer service was slow to respond. Eventually resolved but took 3 weeks.",   status: "pending",   verified: true,  submittedAt: "28 Feb 2026", helpful: 0  },
-  { id: "4", customer: "Priya Sharma",    customerId: "2", product: "Halo Oak Bedroom",         productId: "2", rating: 4, title: "Great product, minor delay",  body: "Love the look and feel. Only reason for 4 stars is the installation was delayed by a week. Product itself is 5 stars.",   status: "approved",  verified: true,  submittedAt: "10 Jan 2026", helpful: 5  },
-  { id: "5", customer: "Unknown User",    customerId: "",  product: "Pebble J-Pull Kitchen",    productId: "5", rating: 1, title: "Terrible experience",         body: "Absolute rubbish. Never delivered. This company is a scam. Avoid at all costs!!!",                                         status: "flagged",   verified: false, submittedAt: "25 Feb 2026", helpful: 0  },
-  { id: "6", customer: "Aisha Okoye",     customerId: "6", product: "Ash Handleless Kitchen",   productId: "6", rating: 5, title: "Worth every penny",           body: "We went for the handleless design and it's exactly what we dreamed of. Lomash Wood exceeded every expectation.",          status: "approved",  verified: true,  submittedAt: "05 Feb 2026", helpful: 14 },
-  { id: "7", customer: "Tom Hendricks",   customerId: "7", product: "Halo Oak Bedroom",         productId: "2", rating: 3, title: "Mixed feelings",              body: "The design is beautiful but we had some issues with the fitting. One door hinge needed adjusting after install.",          status: "pending",   verified: true,  submittedAt: "27 Feb 2026", helpful: 0  },
-];
 
 const STATUS_CONFIG: Record<ReviewStatus, { label: string; bg: string; text: string }> = {
   pending:  { label: "Pending",  bg: "bg-[#C8924A]/15",    text: "text-[#C8924A]"  },
@@ -62,29 +53,46 @@ export function ReviewTable() {
   const [search, setSearch]         = useState("");
   const [statusFilter, setStatus]   = useState<"All" | ReviewStatus>("All");
   const [ratingFilter, setRating]   = useState<RatingFilter>("All");
+
+  const { data, isLoading, isError } = useReviews({
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
+    rating: ratingFilter === "All" ? undefined : ratingFilter,
+  });
+
+  const reviews = ((data as { data?: Review[] } | undefined)?.data ?? []) as Review[];
   const [statuses, setStatuses]     = useState<Record<string, ReviewStatus>>(
-    Object.fromEntries(MOCK_REVIEWS.map((r) => [r.id, r.status]))
+    Object.fromEntries(reviews.map((r) => [r.id, r.status]))
   );
 
-  const filtered = MOCK_REVIEWS.filter((r) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      r.customer.toLowerCase().includes(q) ||
-      r.product.toLowerCase().includes(q) ||
-      r.title.toLowerCase().includes(q);
+  const filtered = reviews.filter((r) => {
     return (
-      matchSearch &&
-      (statusFilter === "All" || statuses[r.id] === statusFilter) &&
       (ratingFilter === "All" || r.rating === parseInt(ratingFilter))
     );
   });
 
-  const pendingCount = MOCK_REVIEWS.filter((r) => statuses[r.id] === "pending").length;
+  const pendingCount = reviews.filter((r) => statuses[r.id] === "pending").length;
 
   const approve = (id: string) => setStatuses((p) => ({ ...p, [id]: "approved" }));
   const reject  = (id: string) => setStatuses((p) => ({ ...p, [id]: "rejected" }));
 
-  const avgRating = (MOCK_REVIEWS.reduce((s, r) => s + r.rating, 0) / MOCK_REVIEWS.length).toFixed(1);
+  const avgRating = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "0.0";
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading reviews...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load reviews.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
@@ -139,7 +147,7 @@ export function ReviewTable() {
         <div className="ml-auto flex items-center gap-1.5 text-[12px] text-[#5A4232]">
           <Star size={13} className="text-[#C8924A] fill-[#C8924A]" />
           <span className="font-semibold text-[#E8D5B7]">{avgRating}</span>
-          <span>avg from {MOCK_REVIEWS.length} reviews</span>
+          <span>avg from {reviews.length} reviews</span>
         </div>
       </div>
 

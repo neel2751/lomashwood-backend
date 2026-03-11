@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useCmsPages } from "@/hooks/useCmsPages";
 
 type PageStatus   = "published" | "draft" | "hidden";
 type PageTemplate = "default" | "full_width" | "landing" | "product" | "contact";
@@ -24,20 +25,6 @@ interface CmsPage {
   editedBy: string;
   seoScore: number; // 0-100
 }
-
-const MOCK_PAGES: CmsPage[] = [
-  { id: "1",  title: "Home",                    slug: "/",                          template: "full_width", status: "published", lastEdited: "15 Feb 2026", editedBy: "Sarah Alderton", seoScore: 92 },
-  { id: "2",  title: "About Us",                slug: "/about",                     template: "default",    status: "published", lastEdited: "10 Jan 2026", editedBy: "Admin",          seoScore: 78 },
-  { id: "3",  title: "Kitchen Range",           slug: "/kitchen",                   template: "product",    status: "published", lastEdited: "20 Feb 2026", editedBy: "Marcus Webb",    seoScore: 88 },
-  { id: "4",  title: "Bedroom Range",           slug: "/bedroom",                   template: "product",    status: "published", lastEdited: "20 Feb 2026", editedBy: "Marcus Webb",    seoScore: 85 },
-  { id: "5",  title: "Our Showroom",            slug: "/showroom",                  template: "default",    status: "published", lastEdited: "05 Feb 2026", editedBy: "Admin",          seoScore: 74 },
-  { id: "6",  title: "Book a Consultation",     slug: "/book",                      template: "contact",    status: "published", lastEdited: "28 Jan 2026", editedBy: "Jade Nguyen",    seoScore: 81 },
-  { id: "7",  title: "Contact Us",              slug: "/contact",                   template: "contact",    status: "published", lastEdited: "01 Jan 2026", editedBy: "Admin",          seoScore: 70 },
-  { id: "8",  title: "Privacy Policy",          slug: "/privacy",                   template: "default",    status: "published", lastEdited: "01 Jan 2026", editedBy: "Admin",          seoScore: 55 },
-  { id: "9",  title: "Sustainability",          slug: "/sustainability",             template: "default",    status: "draft",     lastEdited: "25 Feb 2026", editedBy: "Sarah Alderton", seoScore: 40 },
-  { id: "10", title: "Trade Programme",         slug: "/trade",                     template: "landing",    status: "draft",     lastEdited: "22 Feb 2026", editedBy: "Marcus Webb",    seoScore: 0  },
-  { id: "11", title: "Old Promotions Archive",  slug: "/promotions-2025",           template: "default",    status: "hidden",    lastEdited: "01 Dec 2025", editedBy: "Admin",          seoScore: 35 },
-];
 
 const STATUS_CONFIG: Record<PageStatus, { label: string; bg: string; text: string; dot: string }> = {
   published: { label: "Published", bg: "bg-emerald-400/10",  text: "text-emerald-400", dot: "bg-emerald-400" },
@@ -78,11 +65,30 @@ export function CmsPageTable() {
   const [search, setSearch]       = useState("");
   const [statusFilter, setStatus] = useState<"All" | PageStatus>("All");
 
-  const filtered = MOCK_PAGES.filter((p) => {
+  const { data, isLoading, isError } = useCmsPages();
+
+  const pages = ((data as { data?: CmsPage[] } | undefined)?.data ?? []) as CmsPage[];
+  const filtered = pages.filter((p) => {
     const q = search.toLowerCase();
     const matchSearch = p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q);
     return matchSearch && (statusFilter === "All" || p.status === statusFilter);
   });
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading CMS pages...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load CMS pages.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
@@ -207,8 +213,8 @@ export function CmsPageTable() {
       <div className="px-5 py-3 border-t border-[#2E231A] flex items-center justify-between">
         <span className="text-[12px] text-[#5A4232]">{filtered.length} pages</span>
         <span className="text-[12px] text-[#3D2E1E]">
-          {MOCK_PAGES.filter((p) => p.status === "published").length} live ·{" "}
-          {MOCK_PAGES.filter((p) => p.status === "draft").length} draft
+          {pages.filter((p) => p.status === "published").length} live ·{" "}
+          {pages.filter((p) => p.status === "draft").length} draft
         </span>
       </div>
     </div>

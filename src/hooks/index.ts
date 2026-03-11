@@ -35,6 +35,20 @@ export { usePayments } from "./usePayments";
 export { usePermissions } from "./usePermissions";
 export { usePricing } from "./usePricing";
 export { useProducts } from "./useProducts";
+export {
+  useProductStyles,
+  useProductStyle,
+  useCreateProductStyle,
+  useUpdateProductStyle,
+  useDeleteProductStyle,
+} from "./useProductStyles";
+export {
+  useProductFinishes,
+  useProductFinish,
+  useCreateProductFinish,
+  useUpdateProductFinish,
+  useDeleteProductFinish,
+} from "./useProductFinishes";
 export { useRefunds } from "./useRefunds";
 export { useReminders } from "./useReminders";
 export { useReviews } from "./useReviews";
@@ -42,6 +56,7 @@ export { useRoles } from "./useRoles";
 export { useSeo } from "./useSeo";
 export { useSessions } from "./useSessions";
 export { useSettings } from "./useSettings";
+export { useShowroom, useShowrooms, useCreateShowroom, useUpdateShowroom } from "./useShowrooms";
 export { useSizes, useSize, useCreateSize, useUpdateSize, useDeleteSize } from "./useSizes";
 export { useTemplates } from "./useTemplates";
 export { useUsers } from "./useUsers";

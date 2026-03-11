@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { consultantService } from "@/services/consultantService";
+import { fetchWithAuth } from "@/lib/fetch-client";
 
 import type { CreateConsultantPayload } from "@/types/appointment.types";
 
 export function useConsultants() {
   return useQuery({
     queryKey: ["consultants"],
-    queryFn: () => consultantService.getAll(),
+    queryFn: () => fetchWithAuth('/api/consultants'),
   });
 }
 
 export function useConsultant(id: string) {
   return useQuery({
     queryKey: ["consultants", id],
-    queryFn: () => consultantService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/consultants/${id}`),
     enabled: !!id,
   });
 }

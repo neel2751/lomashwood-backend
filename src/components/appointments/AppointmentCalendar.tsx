@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import Link from "next/link";
 
@@ -8,208 +8,203 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-type AppType = "home_visit" | "showroom" | "online";
+type AppType = "home" | "showroom" | "online";
 
-interface CalendarAppt {
+type CalendarAppointment = {
   id: string;
-  customer: string;
+  customerName: string;
   type: AppType;
-  time: string;
-  duration: number;
-  consultant: string;
-  day: number;
-}
+  slot: string;
+  consultantName?: string;
+};
+
+type Props = {
+  appointments: CalendarAppointment[];
+  isLoading?: boolean;
+};
 
 const TYPE_COLORS: Record<AppType, string> = {
-  home_visit: "bg-[#C8924A]/20 border-[#C8924A]/40 text-[#C8924A]",
-  showroom:   "bg-[#6B8A9A]/20 border-[#6B8A9A]/40 text-[#6B8A9A]",
-  online:     "bg-emerald-400/10 border-emerald-400/30 text-emerald-400",
+  home: "bg-[#FFF3DC] border-[#D4820A] text-[#8B5E00]",
+  showroom: "bg-[#EBF4FB] border-[#2980B9] text-[#1A5A96]",
+  online: "bg-[#DCF4EA] border-[#16A34A] text-[#15803D]",
 };
 
 const TYPE_LABELS: Record<AppType, string> = {
-  home_visit: "Home",
-  showroom:   "Showroom",
-  online:     "Online",
+  home: "Home",
+  showroom: "Showroom",
+  online: "Online",
 };
 
-const WEEK_START = new Date(2026, 2, 2);
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const HOURS = Array.from({ length: 10 }, (_, i) => i + 8);
 
-const MOCK_APPTS: CalendarAppt[] = [
-  { id: "1", customer: "James Thornton", type: "home_visit", time: "10:00", duration: 90,  consultant: "Sarah Alderton", day: 2 },
-  { id: "2", customer: "Priya Sharma",   type: "showroom",   time: "14:30", duration: 60,  consultant: "Marcus Webb",    day: 2 },
-  { id: "3", customer: "Oliver Patel",   type: "online",     time: "09:00", duration: 45,  consultant: "Sarah Alderton", day: 3 },
-  { id: "4", customer: "Emma Lawson",    type: "home_visit", time: "11:30", duration: 90,  consultant: "Jade Nguyen",    day: 3 },
-  { id: "5", customer: "Daniel Huang",   type: "showroom",   time: "13:00", duration: 60,  consultant: "Marcus Webb",    day: 4 },
-  { id: "6", customer: "Sophie Clark",   type: "online",     time: "10:00", duration: 45,  consultant: "Jade Nguyen",    day: 0 },
-  { id: "7", customer: "Ryan Foster",    type: "home_visit", time: "15:00", duration: 120, consultant: "Sarah Alderton", day: 1 },
-];
+function getWeekStart(date: Date) {
+  const current = new Date(date);
+  const day = current.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  current.setDate(current.getDate() + diff);
+  current.setHours(0, 0, 0, 0);
+  return current;
+}
 
-function timeToMinutes(t: string): number {
-  const parts = t.split(":");
-  const h = parseInt(parts[0] ?? "0", 10);
-  const m = parseInt(parts[1] ?? "0", 10);
-  return h * 60 + m;
+function timeToMinutes(date: Date): number {
+  return date.getHours() * 60 + date.getMinutes();
 }
 
 function getWeekDates(start: Date): Date[] {
-  return DAYS.map((_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    return d;
+  return DAYS.map((_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    return date;
   });
 }
 
-const CONSULTANTS = ["All", "Sarah Alderton", "Marcus Webb", "Jade Nguyen"];
+function getDurationByType(type: AppType) {
+  if (type === "home") return 90;
+  if (type === "online") return 45;
+  return 60;
+}
 
-export function AppointmentCalendar() {
+export function AppointmentCalendar({ appointments, isLoading }: Props) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [consultant, setConsultant] = useState("All");
 
-  const weekStart = new Date(WEEK_START);
-  weekStart.setDate(WEEK_START.getDate() + weekOffset * 7);
+  const baseWeekStart = getWeekStart(new Date());
+  const weekStart = new Date(baseWeekStart);
+  weekStart.setDate(baseWeekStart.getDate() + weekOffset * 7);
   const dates = getWeekDates(weekStart);
 
-  const filtered = MOCK_APPTS.filter(
-    (a) => consultant === "All" || a.consultant === consultant
+  const consultants = useMemo(
+    () => ["All", ...new Set(appointments.map((item) => item.consultantName || "Unassigned"))],
+    [appointments],
+  );
+
+  const filtered = useMemo(
+    () => appointments.filter((item) => consultant === "All" || (item.consultantName || "Unassigned") === consultant),
+    [appointments, consultant],
   );
 
   const CELL_PX_PER_MIN = 1.2;
 
   return (
-    <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#2E231A] flex-wrap">
+    <div className="rounded-[16px] bg-[#FFFFFF] border border-[#E8E6E1] overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E8E6E1] flex-wrap">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setWeekOffset((w) => w - 1)}
-            className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#2E231A] border border-[#3D2E1E] text-[#5A4232] hover:text-[#C8924A] transition-all"
-          >
+          <button onClick={() => setWeekOffset((value) => value - 1)} className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#F5F3EF] border border-[#E8E6E1] text-[#6B6B68] hover:text-[#C8924A] hover:bg-[#FFF3DC] transition-all">
             <ChevronLeft size={14} />
           </button>
-          <span className="text-[13px] font-semibold text-[#E8D5B7] min-w-[200px] text-center">
-            {dates[0]?.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} —{" "}
-            {dates[6]?.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          <span className="text-[13px] font-semibold text-[#1A1A18] min-w-[200px] text-center">
+            {dates[0]?.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} — {dates[6]?.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </span>
-          <button
-            onClick={() => setWeekOffset((w) => w + 1)}
-            className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#2E231A] border border-[#3D2E1E] text-[#5A4232] hover:text-[#C8924A] transition-all"
-          >
+          <button onClick={() => setWeekOffset((value) => value + 1)} className="w-8 h-8 flex items-center justify-center rounded-[8px] bg-[#F5F3EF] border border-[#E8E6E1] text-[#6B6B68] hover:text-[#C8924A] hover:bg-[#FFF3DC] transition-all">
             <ChevronRight size={14} />
           </button>
           {weekOffset !== 0 && (
-            <button
-              onClick={() => setWeekOffset(0)}
-              className="text-[11px] text-[#C8924A] hover:underline ml-1"
-            >
-              Today
-            </button>
+            <button onClick={() => setWeekOffset(0)} className="text-[11px] text-[#C8924A] hover:underline ml-1">Today</button>
           )}
         </div>
 
-        <div className="flex gap-1 bg-[#2E231A] rounded-[8px] p-0.5 ml-auto flex-wrap">
-          {CONSULTANTS.map((c) => (
+        <div className="flex gap-1 bg-[#F5F3EF] rounded-[8px] p-0.5 ml-auto flex-wrap">
+          {consultants.map((item) => (
             <button
-              key={c}
-              onClick={() => setConsultant(c)}
+              key={item}
+              onClick={() => setConsultant(item)}
               className={cn(
                 "px-3 py-1 rounded-[6px] text-[11px] font-medium transition-all",
-                consultant === c ? "bg-[#C8924A] text-white" : "text-[#5A4232] hover:text-[#C8924A]"
+                consultant === item ? "bg-[#C8924A] text-white" : "text-[#6B6B68] hover:text-[#C8924A] hover:bg-[#FFF3DC]"
               )}
             >
-              {c}
+              {item}
             </button>
           ))}
         </div>
 
-        <Link
-          href="/appointments/new"
-          className="flex items-center gap-1.5 h-8 px-3 rounded-[8px] bg-[#C8924A] text-white text-[12px] font-medium hover:bg-[#B87E3E] transition-colors"
-        >
+        <Link href="/appointments/new" className="flex items-center gap-1.5 h-8 px-3 rounded-[8px] bg-[#C8924A] text-white text-[12px] font-medium hover:bg-[#B87E3E] transition-colors">
           <Plus size={13} /> New
         </Link>
       </div>
 
-      <div className="flex items-center gap-4 px-5 py-2 border-b border-[#2E231A] bg-[#1A100C]">
+      <div className="flex items-center gap-4 px-5 py-2 border-b border-[#E8E6E1] bg-[#F5F3EF]">
         {(Object.entries(TYPE_LABELS) as [AppType, string][]).map(([type, label]) => (
           <div key={type} className="flex items-center gap-1.5">
             <span className={cn("w-3 h-3 rounded-[3px] border", TYPE_COLORS[type])} />
-            <span className="text-[11px] text-[#5A4232]">{label}</span>
+            <span className="text-[11px] text-[#6B6B68]">{label}</span>
           </div>
         ))}
       </div>
 
-      <div className="overflow-auto" style={{ maxHeight: "600px" }}>
-        <div className="flex min-w-[700px]">
-          <div className="w-14 shrink-0 border-r border-[#2E231A]">
-            <div className="h-10" />
-            {HOURS.map((h) => (
-              <div key={h} className="h-[72px] flex items-start pt-1 pr-2 justify-end border-b border-[#2E231A]">
-                <span className="text-[10px] text-[#3D2E1E]">{h.toString().padStart(2, "0")}:00</span>
-              </div>
-            ))}
+      {isLoading ? (
+        <div className="p-5 text-[12.5px] text-[#6B6B68]">Loading calendar...</div>
+      ) : (
+        <div className="overflow-auto" style={{ maxHeight: "600px" }}>
+          <div className="flex min-w-[700px]">
+            <div className="w-14 shrink-0 border-r border-[#E8E6E1] bg-[#F5F3EF]">
+              <div className="h-10" />
+              {HOURS.map((hour) => (
+                <div key={hour} className="h-[72px] flex items-start pt-1 pr-2 justify-end border-b border-[#E8E6E1]">
+                  <span className="text-[10px] text-[#6B6B68]">{hour.toString().padStart(2, "0")}:00</span>
+                </div>
+              ))}
+            </div>
+
+            {DAYS.map((day, dayIdx) => {
+              const date = dates[dayIdx];
+              if (!date) return null;
+
+              const isToday = date.toDateString() === new Date().toDateString();
+              const dayAppointments = filtered.filter((item) => {
+                const slotDate = new Date(item.slot);
+                return slotDate.toDateString() === date.toDateString();
+              });
+
+              return (
+                <div key={day} className="flex-1 min-w-0 border-r border-[#E8E6E1] last:border-r-0">
+                  <div className={cn("h-10 flex flex-col items-center justify-center border-b border-[#E8E6E1] sticky top-0 z-10", isToday ? "bg-[#FFF3DC]" : "bg-[#FFFFFF]")}>
+                    <span className={cn("text-[10px] font-semibold uppercase tracking-wider", isToday ? "text-[#D4820A]" : "text-[#6B6B68]")}>{day}</span>
+                    <span className={cn("text-[12px] font-bold leading-none", isToday ? "text-[#D4820A]" : "text-[#1A1A18]")}>{date.getDate()}</span>
+                  </div>
+
+                  <div className="relative bg-[#FFFFFF]">
+                    {HOURS.map((hour) => (
+                      <div key={hour} className="h-[72px] border-b border-[#EEECE8] hover:bg-[#F5F3EF] transition-colors" />
+                    ))}
+
+                    {dayAppointments.map((appointment) => {
+                      const slotDate = new Date(appointment.slot);
+                      const startMin = timeToMinutes(slotDate) - 8 * 60;
+                      const topPx = startMin * CELL_PX_PER_MIN;
+                      const heightPx = Math.max(getDurationByType(appointment.type) * CELL_PX_PER_MIN, 28);
+
+                      return (
+                        <Link
+                          key={appointment.id}
+                          href={`/appointments/${appointment.id}`}
+                          className={cn(
+                            "absolute inset-x-1 rounded-[6px] border-2 px-2 py-1.5 overflow-hidden",
+                            "hover:shadow-md transition-all group cursor-pointer font-medium",
+                            TYPE_COLORS[appointment.type]
+                          )}
+                          style={{ top: `${topPx}px`, height: `${heightPx}px` }}
+                        >
+                          <p className="text-[10px] font-bold leading-tight truncate">{appointment.customerName}</p>
+                          {heightPx > 36 && (
+                            <p className="text-[9px] leading-tight truncate opacity-90">
+                              {slotDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} · {TYPE_LABELS[appointment.type]}
+                            </p>
+                          )}
+                          {heightPx > 52 && (
+                            <p className="text-[9px] leading-tight truncate opacity-75">{appointment.consultantName || 'Unassigned'}</p>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          {DAYS.map((day, dayIdx) => {
-            const date = dates[dayIdx];
-            if (!date) return null;
-
-            const isToday = date.toDateString() === new Date().toDateString();
-            const dayAppts = filtered.filter((a) => a.day === dayIdx);
-
-            return (
-              <div key={day} className="flex-1 min-w-0 border-r border-[#2E231A] last:border-r-0">
-                <div
-                  className={cn(
-                    "h-10 flex flex-col items-center justify-center border-b border-[#2E231A] sticky top-0 z-10",
-                    isToday ? "bg-[#C8924A]/10" : "bg-[#1A100C]"
-                  )}
-                >
-                  <span className={cn("text-[10px] font-semibold uppercase tracking-wider",
-                    isToday ? "text-[#C8924A]" : "text-[#5A4232]")}>{day}</span>
-                  <span className={cn("text-[12px] font-bold leading-none",
-                    isToday ? "text-[#C8924A]" : "text-[#3D2E1E]")}>
-                    {date.getDate()}
-                  </span>
-                </div>
-
-                <div className="relative">
-                  {HOURS.map((h) => (
-                    <div key={h} className="h-[72px] border-b border-[#2E231A] hover:bg-[#221A12] transition-colors" />
-                  ))}
-
-                  {dayAppts.map((appt) => {
-                    const startMin = timeToMinutes(appt.time) - 8 * 60;
-                    const topPx    = startMin * CELL_PX_PER_MIN;
-                    const heightPx = Math.max(appt.duration * CELL_PX_PER_MIN, 28);
-
-                    return (
-                      <Link
-                        key={appt.id}
-                        href={`/appointments/${appt.id}`}
-                        className={cn(
-                          "absolute inset-x-1 rounded-[6px] border px-1.5 py-1 overflow-hidden",
-                          "hover:opacity-90 hover:shadow-lg transition-all group cursor-pointer",
-                          TYPE_COLORS[appt.type]
-                        )}
-                        style={{ top: `${topPx}px`, height: `${heightPx}px` }}
-                      >
-                        <p className="text-[10.5px] font-semibold leading-tight truncate">{appt.customer}</p>
-                        {heightPx > 36 && (
-                          <p className="text-[9.5px] opacity-70 leading-tight truncate">{appt.time} · {TYPE_LABELS[appt.type]}</p>
-                        )}
-                        {heightPx > 52 && (
-                          <p className="text-[9.5px] opacity-60 leading-tight truncate">{appt.consultant}</p>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }

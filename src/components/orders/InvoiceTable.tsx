@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Search, Download, Eye, Send, ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useInvoices } from "@/hooks/useInvoices";
 
 type InvoiceStatus = "paid" | "unpaid" | "overdue" | "voided";
 
@@ -25,15 +26,6 @@ interface Invoice {
   dueAt: string;
 }
 
-const MOCK_INVOICES: Invoice[] = [
-  { id: "1", invoiceNo: "INV-1048", orderNo: "#1048", orderId: "1", customer: "James Thornton",  email: "james.t@email.com",  amount: 8400,  vat: 1680, total: 10080, status: "paid",   issuedAt: "28 Feb 2026", dueAt: "14 Mar 2026" },
-  { id: "2", invoiceNo: "INV-1047", orderNo: "#1047", orderId: "2", customer: "Sarah Mitchell",  email: "sarah.m@email.com",  amount: 3200,  vat: 640,  total: 3840,  status: "unpaid", issuedAt: "27 Feb 2026", dueAt: "13 Mar 2026" },
-  { id: "3", invoiceNo: "INV-1046", orderNo: "#1046", orderId: "3", customer: "Oliver Patel",    email: "oliver.p@email.com", amount: 14600, vat: 2920, total: 17520, status: "paid",   issuedAt: "27 Feb 2026", dueAt: "13 Mar 2026" },
-  { id: "4", invoiceNo: "INV-1045", orderNo: "#1045", orderId: "4", customer: "Emma Lawson",     email: "emma.l@email.com",   amount: 6800,  vat: 1360, total: 8160,  status: "voided", issuedAt: "26 Feb 2026", dueAt: "12 Mar 2026" },
-  { id: "5", invoiceNo: "INV-1043", orderNo: "#1043", orderId: "6", customer: "Priya Sharma",    email: "priya.s@email.com",  amount: 9100,  vat: 1820, total: 10920, status: "overdue",issuedAt: "25 Feb 2026", dueAt: "11 Mar 2026" },
-  { id: "6", invoiceNo: "INV-1041", orderNo: "#1041", orderId: "8", customer: "Aisha Okoye",     email: "aisha.o@email.com",  amount: 4100,  vat: 820,  total: 4920,  status: "unpaid", issuedAt: "23 Feb 2026", dueAt: "09 Mar 2026" },
-];
-
 const STATUS_STYLES: Record<InvoiceStatus, string> = {
   paid:    "bg-emerald-400/10 text-emerald-400",
   unpaid:  "bg-[#C8924A]/15 text-[#C8924A]",
@@ -45,16 +37,32 @@ export function InvoiceTable() {
   const [search, setSearch]       = useState("");
   const [statusFilter, setStatus] = useState<"All" | InvoiceStatus>("All");
 
-  const filtered = MOCK_INVOICES.filter((inv) => {
-    const matchSearch =
-      inv.invoiceNo.toLowerCase().includes(search.toLowerCase()) ||
-      inv.customer.toLowerCase().includes(search.toLowerCase()) ||
-      inv.orderNo.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || inv.status === statusFilter;
-    return matchSearch && matchStatus;
+  const { data, isLoading, isError } = useInvoices({
+    page: 1,
+    limit: 100,
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
   });
 
-  const overdueCount = MOCK_INVOICES.filter((i) => i.status === "overdue").length;
+  const invoices = ((data as { data?: Invoice[] } | undefined)?.data ?? []) as Invoice[];
+  const filtered = invoices;
+  const overdueCount = invoices.filter((i) => i.status === "overdue").length;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading invoices...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load invoices.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">

@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { dashboardService } from "@/services/dashboardService";
+import { fetchWithAuth } from "@/lib/fetch-client";
 
 import type { CreateDashboardPayload } from "@/types/analytics.types";
 
 export function useDashboards() {
   return useQuery({
     queryKey: ["dashboards"],
-    queryFn: () => dashboardService.getAll(),
+    queryFn: () => fetchWithAuth('/api/dashboards'),
   });
 }
 
 export function useDashboard(id: string) {
   return useQuery({
     queryKey: ["dashboards", id],
-    queryFn: () => dashboardService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/dashboards/${id}`),
     enabled: !!id,
   });
 }

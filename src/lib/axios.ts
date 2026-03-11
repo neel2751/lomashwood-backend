@@ -49,19 +49,39 @@ axiosInstance.interceptors.request.use(
     const { getAccessToken } = getAuthStoreLazy();
     const token = getAccessToken();
 
+    console.log('🔑 Axios request:', {
+      url: config.url,
+      baseURL: config.baseURL,
+      method: config.method,
+      hasToken: !!token,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'none'
+    });
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    console.error('❌ Axios request interceptor error:', error);
+    return Promise.reject(error);
+  },
 );
 
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
 
   async (error: AxiosError<{ message?: string; code?: string; details?: unknown }>) => {
+    console.error('❌ Axios response error:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL
+    });
+
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -82,6 +102,9 @@ axiosInstance.interceptors.response.use(
 
       try {
         const { refreshAccessToken } = getAuthStoreLazy();
+        if (!refreshAccessToken) {
+          throw new Error("Refresh token flow is not configured");
+        }
         const newToken = await refreshAccessToken();
         onRefreshSuccess(newToken);
         isRefreshing = false;
@@ -139,7 +162,7 @@ const HTTP_STATUS_MESSAGES: Record<number, string> = {
 
 type AuthStoreLazyApi = {
   getAccessToken: () => string | null;
-  refreshAccessToken: () => Promise<string>;
+  refreshAccessToken?: () => Promise<string>;
   logout: () => void;
 };
 
@@ -148,16 +171,24 @@ let authStoreModule: AuthStoreLazyApi | null = null;
 function getAuthStoreLazy(): AuthStoreLazyApi {
   if (authStoreModule) return authStoreModule;
 
-  
   const { useAuthStore } = require("@/stores/useAuthStore") as {
-    useAuthStore: { getState: () => AuthStoreLazyApi };
+    useAuthStore: {
+      getState: () => {
+        accessToken?: string | null;
+        clearUser: () => void;
+      };
+    };
   };
-  const state = useAuthStore.getState();
 
   authStoreModule = {
-    getAccessToken: state.getAccessToken,
-    refreshAccessToken: state.refreshAccessToken,
-    logout: state.logout,
+    getAccessToken: () => {
+      const state = useAuthStore.getState();
+      return state.accessToken ?? null;
+    },
+    logout: () => {
+      const state = useAuthStore.getState();
+      state.clearUser();
+    },
   };
 
   return authStoreModule;

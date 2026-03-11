@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Search, ChevronDown, Eye, Filter } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { usePayments } from "@/hooks/usePayments";
 
 type PaymentStatus = "paid" | "pending" | "failed" | "refunded" | "partially_refunded";
 type PaymentMethod = "credit_card" | "debit_card" | "bank_transfer" | "finance";
@@ -23,17 +24,6 @@ interface Payment {
   status: PaymentStatus;
   date: string;
 }
-
-const MOCK_PAYMENTS: Payment[] = [
-  { id: "1", transactionId: "TXN9821", orderNo: "#1048", orderId: "1", customer: "James Thornton",  method: "credit_card",   last4: "4242", amount: 8400,  status: "paid",               date: "28 Feb 2026" },
-  { id: "2", transactionId: "TXN9820", orderNo: "#1047", orderId: "2", customer: "Sarah Mitchell",  method: "debit_card",    last4: "1234", amount: 3200,  status: "paid",               date: "27 Feb 2026" },
-  { id: "3", transactionId: "TXN9819", orderNo: "#1046", orderId: "3", customer: "Oliver Patel",    method: "bank_transfer", last4: undefined,amount:14600, status: "paid",               date: "27 Feb 2026" },
-  { id: "4", transactionId: "TXN9818", orderNo: "#1045", orderId: "4", customer: "Emma Lawson",     method: "credit_card",   last4: "5678", amount: 6800,  status: "refunded",           date: "26 Feb 2026" },
-  { id: "5", transactionId: "TXN9817", orderNo: "#1044", orderId: "5", customer: "Daniel Huang",    method: "finance",       last4: undefined,amount: 2900, status: "paid",               date: "26 Feb 2026" },
-  { id: "6", transactionId: "TXN9816", orderNo: "#1043", orderId: "6", customer: "Priya Sharma",    method: "credit_card",   last4: "9876", amount: 9100,  status: "failed",             date: "25 Feb 2026" },
-  { id: "7", transactionId: "TXN9815", orderNo: "#1042", orderId: "7", customer: "Tom Hendricks",   method: "bank_transfer", last4: undefined,amount:17200, status: "partially_refunded", date: "24 Feb 2026" },
-  { id: "8", transactionId: "TXN9814", orderNo: "#1041", orderId: "8", customer: "Aisha Okoye",     method: "credit_card",   last4: "3333", amount: 4100,  status: "pending",            date: "23 Feb 2026" },
-];
 
 const STATUS_STYLES: Record<PaymentStatus, string> = {
   paid:               "bg-emerald-400/10 text-emerald-400",
@@ -62,16 +52,32 @@ export function PaymentTable() {
   const [search, setSearch]     = useState("");
   const [statusFilter, setStatus] = useState<"All" | PaymentStatus>("All");
 
-  const filtered = MOCK_PAYMENTS.filter((p) => {
-    const matchSearch =
-      p.transactionId.toLowerCase().includes(search.toLowerCase()) ||
-      p.customer.toLowerCase().includes(search.toLowerCase()) ||
-      p.orderNo.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || p.status === statusFilter;
-    return matchSearch && matchStatus;
+  const { data, isLoading, isError } = usePayments({
+    page: 1,
+    limit: 100,
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
   });
 
+  const payments = ((data as { data?: Payment[] } | undefined)?.data ?? []) as Payment[];
+  const filtered = payments;
   const totalPaid = filtered.filter((p) => p.status === "paid").reduce((s, p) => s + p.amount, 0);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading payments...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load payments.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">

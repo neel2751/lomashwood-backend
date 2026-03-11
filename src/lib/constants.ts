@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  (process.env.NEXT_PUBLIC_API_GATEWAY_URL as string | undefined) ?? "http://localhost:3002";
+  (process.env.NEXT_PUBLIC_API_GATEWAY_URL as string | undefined) ?? "/api";
 
 export const API_TIMEOUT_MS = 15_000;
 

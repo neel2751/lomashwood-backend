@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useOrders } from "@/hooks/useOrders";
 
 interface TopProduct {
   id: string;
@@ -17,17 +18,56 @@ interface TopProduct {
   change: number;
 }
 
-const MOCK_TOP_PRODUCTS: TopProduct[] = [
-  { id: "1", rank: 1, name: "Luna White",      category: "Kitchen",  range: "Luna",    sales: 38, revenue: 114000, change: 12.4 },
-  { id: "2", rank: 2, name: "Halo Oak",         category: "Bedroom",  range: "Halo",    sales: 29, revenue: 87000,  change: 8.1  },
-  { id: "3", rank: 3, name: "Slate Grey Gloss", category: "Kitchen",  range: "Slate",   sales: 24, revenue: 72000,  change: -3.2 },
-  { id: "4", rank: 4, name: "Nordic Birch",     category: "Bedroom",  range: "Nordic",  sales: 18, revenue: 54000,  change: 5.6  },
-  { id: "5", rank: 5, name: "Pebble J-Pull",    category: "Kitchen",  range: "Classic", sales: 15, revenue: 45000,  change: -1.8 },
-];
+interface OrderItem {
+  productId: string;
+  productTitle?: string;
+  productCategory?: string;
+  quantity?: number;
+  totalPrice?: number;
+}
+
+interface Order {
+  id: string;
+  items?: OrderItem[];
+}
 
 const RANK_COLORS = ["text-[#C8924A]", "text-[#9A7A5A]", "text-[#7A6045]"];
 
 export function TopProducts() {
+  const { data, isLoading, isError } = useOrders({ page: 1, limit: 200 });
+  const orders = ((data as { data?: Order[] } | undefined)?.data ?? []) as Order[];
+
+  const topProducts: TopProduct[] = Object.values(
+    orders.reduce<Record<string, Omit<TopProduct, "rank" | "change">>>((acc, order) => {
+      (order.items ?? []).forEach((item) => {
+        const id = item.productId;
+        if (!id) return;
+
+        if (!acc[id]) {
+          acc[id] = {
+            id,
+            name: item.productTitle ?? "Untitled product",
+            category: item.productCategory?.toLowerCase() === "bedroom" ? "Bedroom" : "Kitchen",
+            range: "-",
+            sales: 0,
+            revenue: 0,
+          };
+        }
+
+        acc[id].sales += item.quantity ?? 0;
+        acc[id].revenue += item.totalPrice ?? 0;
+      });
+      return acc;
+    }, {}),
+  )
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5)
+    .map((product, index) => ({
+      ...product,
+      rank: index + 1,
+      change: 0,
+    }));
+
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
       {/* Header */}
@@ -46,7 +86,14 @@ export function TopProducts() {
 
       {/* List */}
       <div className="flex flex-col divide-y divide-[#2E231A]">
-        {MOCK_TOP_PRODUCTS.map((product) => {
+        {isLoading ? (
+          <p className="py-4 text-[13px] text-[#5A4232] text-center">Loading top products...</p>
+        ) : isError ? (
+          <p className="py-4 text-[13px] text-red-400 text-center">Failed to load top products.</p>
+        ) : topProducts.length === 0 ? (
+          <p className="py-4 text-[13px] text-[#5A4232] text-center">No product sales yet.</p>
+        ) : (
+          topProducts.map((product) => {
           const isPositive = product.change > 0;
           return (
             <div key={product.id} className="flex items-center gap-3 py-3 group">
@@ -88,19 +135,15 @@ export function TopProducts() {
                 <p className="text-[13px] font-semibold text-[#E8D5B7]">
                   £{(product.revenue / 1000).toFixed(0)}k
                 </p>
-                <div
-                  className={cn(
-                    "flex items-center justify-end gap-0.5 text-[11px] font-medium",
-                    isPositive ? "text-emerald-400" : "text-red-400"
-                  )}
-                >
+                <div className="flex items-center justify-end gap-0.5 text-[11px] font-medium text-[#5A4232]">
                   {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                  {isPositive ? "+" : ""}{product.change}%
+                  n/a
                 </div>
               </div>
             </div>
           );
-        })}
+          })
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
@@ -15,12 +15,27 @@ interface SidebarProps {
 }
 
 export function Sidebar({ className }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.localStorage.getItem("lomash-sidebar-collapsed") === "true";
+  });
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--sidebar-width", collapsed ? "72px" : "260px");
+    window.localStorage.setItem("lomash-sidebar-collapsed", String(collapsed));
+
+    return () => {
+      document.documentElement.style.setProperty("--sidebar-width", "260px");
+    };
+  }, [collapsed]);
 
   return (
     <aside
       className={cn(
-        "relative flex flex-col h-screen bg-[#1C1611] border-r border-[#2E231A] transition-all duration-300 ease-in-out",
+        "sticky top-0 relative flex h-[100dvh] self-start flex-col border-r bg-[var(--color-sidebar-bg)] text-[var(--color-sidebar-text)] shadow-[8px_0_32px_rgba(92,72,41,0.08)] transition-all duration-300 ease-in-out border-[var(--color-sidebar-border)]",
         collapsed ? "w-[72px]" : "w-[260px]",
         className
       )}
@@ -28,13 +43,12 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Logo area */}
       <div
         className={cn(
-          "flex items-center h-[72px] px-5 border-b border-[#2E231A] shrink-0 overflow-hidden",
+          "flex h-[72px] shrink-0 items-center overflow-hidden border-b px-5 border-[var(--color-sidebar-border)]",
           collapsed && "justify-center px-0"
         )}
       >
-        {/* Wood grain accent bar */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="shrink-0 w-8 h-8 rounded-[6px] bg-gradient-to-br from-[#C8924A] to-[#8B5E2A] flex items-center justify-center shadow-lg shadow-[#C8924A]/20">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-[var(--color-sidebar-accent)] to-[#7A551C] shadow-lg shadow-[rgba(167,121,43,0.22)]">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M2 13 L8 3 L14 13" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M4.5 9 L11.5 9" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
@@ -42,10 +56,10 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold tracking-[0.08em] uppercase text-[#E8D5B7] leading-none">
+              <p className="leading-none text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--color-sidebar-text)]">
                 Lomash
               </p>
-              <p className="text-[10px] tracking-[0.12em] uppercase text-[#7A6045] leading-none mt-0.5">
+              <p className="mt-0.5 leading-none text-[10px] uppercase tracking-[0.12em] text-[var(--color-sidebar-muted)]">
                 Wood Admin
               </p>
             </div>
@@ -54,7 +68,7 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#2E231A]">
+      <div className="flex-1 overflow-x-hidden overflow-y-auto py-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[var(--color-sidebar-border)]">
         <SidebarNav collapsed={collapsed} />
       </div>
 
@@ -66,9 +80,9 @@ export function Sidebar({ className }: SidebarProps) {
         onClick={() => setCollapsed(!collapsed)}
         className={cn(
           "absolute -right-3 top-[52px] z-10 w-6 h-6 rounded-full",
-          "bg-[#2E231A] border border-[#3D2E1E] text-[#C8924A]",
+          "border bg-[var(--color-sidebar-subtle)] text-[var(--color-sidebar-accent)] border-[var(--color-sidebar-border)]",
           "flex items-center justify-center",
-          "hover:bg-[#C8924A] hover:text-white hover:border-[#C8924A]",
+          "hover:border-[var(--color-sidebar-accent)] hover:bg-[var(--color-sidebar-accent)] hover:text-white",
           "transition-all duration-200 shadow-md"
         )}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}

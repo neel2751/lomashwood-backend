@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { blogService } from "@/services/blogService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { CreateBlogPostPayload, UpdateBlogPostPayload } from "@/types/content.types";
 
@@ -9,14 +10,14 @@ type BlogFilters = Record<string, unknown>;
 export function useBlogs(filters?: BlogFilters) {
   return useQuery({
     queryKey: ["blogs", filters],
-    queryFn: () => blogService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/blogs${buildQueryString(filters || {})}`),
   });
 }
 
 export function useBlog(id: string) {
   return useQuery({
     queryKey: ["blogs", id],
-    queryFn: () => blogService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/blogs/${id}`),
     enabled: !!id,
   });
 }

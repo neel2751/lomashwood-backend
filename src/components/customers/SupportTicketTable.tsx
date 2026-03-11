@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useSupportTickets } from "@/hooks/useSupportTickets";
 
 export type TicketStatus   = "open" | "in_progress" | "waiting" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
@@ -30,16 +31,6 @@ export interface SupportTicket {
   updatedAt: string;
   dueAt?: string;
 }
-
-const MOCK_TICKETS: SupportTicket[] = [
-  { id: "1", ticketNo: "TKT-0091", customer: "Sarah Mitchell",  customerId: "8", subject: "Scratched doors on delivery",           category: "delivery",      priority: "high",   status: "in_progress", assignee: "Support Team", messages: 4, createdAt: "28 Feb 2026", updatedAt: "28 Feb 2026", dueAt: "03 Mar 2026" },
-  { id: "2", ticketNo: "TKT-0090", customer: "Tom Hendricks",   customerId: "7", subject: "Door hinge adjustment needed",           category: "installation",  priority: "medium", status: "waiting",     assignee: "Install Team", messages: 2, createdAt: "27 Feb 2026", updatedAt: "28 Feb 2026", dueAt: "05 Mar 2026" },
-  { id: "3", ticketNo: "TKT-0089", customer: "Aisha Okoye",     customerId: "6", subject: "Invoice discrepancy — overcharged",      category: "billing",       priority: "urgent", status: "open",        assignee: "Unassigned",   messages: 1, createdAt: "26 Feb 2026", updatedAt: "26 Feb 2026", dueAt: "28 Feb 2026" },
-  { id: "4", ticketNo: "TKT-0088", customer: "Daniel Huang",    customerId: "5", subject: "Query on delivery timescale",            category: "delivery",      priority: "low",    status: "resolved",    assignee: "Support Team", messages: 5, createdAt: "24 Feb 2026", updatedAt: "26 Feb 2026" },
-  { id: "5", ticketNo: "TKT-0087", customer: "Emma Lawson",     customerId: "4", subject: "Poor installation — gaps in carcass",    category: "complaint",     priority: "high",   status: "open",        assignee: "Unassigned",   messages: 1, createdAt: "23 Feb 2026", updatedAt: "23 Feb 2026", dueAt: "27 Feb 2026" },
-  { id: "6", ticketNo: "TKT-0086", customer: "Priya Sharma",    customerId: "2", subject: "General inquiry — brochure request",     category: "general",       priority: "low",    status: "closed",      assignee: "Support Team", messages: 3, createdAt: "20 Feb 2026", updatedAt: "22 Feb 2026" },
-  { id: "7", ticketNo: "TKT-0085", customer: "Oliver Patel",    customerId: "3", subject: "Bedroom unit colour mismatch",           category: "quality",       priority: "high",   status: "in_progress", assignee: "Quality Team", messages: 6, createdAt: "18 Feb 2026", updatedAt: "27 Feb 2026", dueAt: "02 Mar 2026" },
-];
 
 const STATUS_CONFIG: Record<TicketStatus, { label: string; bg: string; text: string; dot: string }> = {
   open:        { label: "Open",        bg: "bg-red-400/10",      text: "text-red-400",     dot: "bg-red-400"     },
@@ -77,21 +68,33 @@ export function SupportTicketTable() {
   const [statusFilter, setStatus]   = useState<"All" | TicketStatus>("All");
   const [priorityFilter, setPriority] = useState<"All" | TicketPriority>("All");
 
-  const filtered = MOCK_TICKETS.filter((t) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      t.ticketNo.toLowerCase().includes(q) ||
-      t.customer.toLowerCase().includes(q) ||
-      t.subject.toLowerCase().includes(q);
-    return (
-      matchSearch &&
-      (statusFilter   === "All" || t.status   === statusFilter) &&
-      (priorityFilter === "All" || t.priority === priorityFilter)
-    );
+  const { data, isLoading, isError } = useSupportTickets({
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
+    priority: priorityFilter === "All" ? undefined : priorityFilter,
   });
 
-  const urgentCount  = MOCK_TICKETS.filter((t) => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length;
-  const overdueCount = MOCK_TICKETS.filter((t) => isOverdue(t.dueAt) && t.status !== "closed" && t.status !== "resolved").length;
+  const tickets = ((data as { data?: SupportTicket[] } | undefined)?.data ?? []) as SupportTicket[];
+  const filtered = tickets;
+
+  const urgentCount  = tickets.filter((t) => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length;
+  const overdueCount = tickets.filter((t) => isOverdue(t.dueAt) && t.status !== "closed" && t.status !== "resolved").length;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading support tickets...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load support tickets.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden">
@@ -246,7 +249,7 @@ export function SupportTicketTable() {
       <div className="px-5 py-3 border-t border-[#2E231A] flex items-center justify-between">
         <span className="text-[12px] text-[#5A4232]">{filtered.length} tickets</span>
         <span className="text-[12px] text-[#3D2E1E]">
-          {MOCK_TICKETS.filter((t) => t.status === "open" || t.status === "in_progress").length} active
+          {tickets.filter((t) => t.status === "open" || t.status === "in_progress").length} active
         </span>
       </div>
     </div>

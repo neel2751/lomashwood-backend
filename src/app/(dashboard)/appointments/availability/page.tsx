@@ -1,11 +1,19 @@
 "use client"
-'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import Link from 'next/link'
 
 import { PageHeader } from '@/components/layout/PageHeader'
+import {
+  useAvailableSlots,
+  useAvailability,
+  useDeleteAvailability,
+  useUpdateAvailability,
+  useUpdateWeeklyAvailabilityPattern,
+  useWeeklyAvailabilityPattern,
+} from '@/hooks/useAvailability'
+import { useToast } from '@/hooks/use-toast'
 
 const APPT_SUBNAV = [
   { href: '/appointments', label: 'All Appointments' },
@@ -14,54 +22,190 @@ const APPT_SUBNAV = [
   { href: '/appointments/reminders', label: 'Reminders' },
 ]
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-type DayConfig = { enabled: boolean; start: string; end: string; slotDuration: number }
+const DEFAULT_SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00']
 
-const DEFAULT_SCHEDULE: Record<string, DayConfig> = {
-  Monday:    { enabled: true,  start: '09:00', end: '17:00', slotDuration: 60 },
-  Tuesday:   { enabled: true,  start: '09:00', end: '17:00', slotDuration: 60 },
-  Wednesday: { enabled: true,  start: '09:00', end: '17:00', slotDuration: 60 },
-  Thursday:  { enabled: true,  start: '09:00', end: '17:00', slotDuration: 60 },
-  Friday:    { enabled: true,  start: '09:00', end: '16:00', slotDuration: 60 },
-  Saturday:  { enabled: true,  start: '10:00', end: '16:00', slotDuration: 90 },
-  Sunday:    { enabled: false, start: '10:00', end: '14:00', slotDuration: 90 },
+type AvailabilityItem = {
+  id: string
+  consultantId?: string
+  date: string
+  slots: string[]
+  isBlocked: boolean
+  createdAt: string
+  updatedAt: string
 }
 
-const BLOCKED_DATES = ['2026-03-15', '2026-03-16', '2026-04-01']
+type WeeklyPatternItem = {
+  weekday: number
+  consultantId?: string
+  isEnabled: boolean
+  startTime: string
+  endTime: string
+  slotDuration: number
+}
+
+function buildDefaultWeeklyPattern(): WeeklyPatternItem[] {
+  return [
+    { weekday: 0, isEnabled: false, startTime: '10:00', endTime: '14:00', slotDuration: 90 },
+    { weekday: 1, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
+    { weekday: 2, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
+    { weekday: 3, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
+    { weekday: 4, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
+    { weekday: 5, isEnabled: true, startTime: '09:00', endTime: '16:00', slotDuration: 60 },
+    { weekday: 6, isEnabled: true, startTime: '10:00', endTime: '16:00', slotDuration: 90 },
+  ]
+}
+
+function normalizeWeeklyPattern(items: WeeklyPatternItem[]): WeeklyPatternItem[] {
+  const byWeekday = new Map(items.map((item) => [item.weekday, item]))
+  return buildDefaultWeeklyPattern().map((fallback) => ({
+    ...fallback,
+    ...(byWeekday.get(fallback.weekday) ?? {}),
+  }))
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10)
+}
 
 export default function AvailabilityPage() {
-  const [schedule, setSchedule] = useState<Record<string, DayConfig>>(DEFAULT_SCHEDULE)
-  const [activeTab, setActiveTab] = useState<'weekly' | 'blocked' | 'slots'>('weekly')
-  const [saved, setSaved] = useState(false)
+  const toast = useToast()
+  const [activeTab, setActiveTab] = useState<'weekly' | 'blocked' | 'slots'>('slots')
+  const [selectedDate, setSelectedDate] = useState(todayKey())
+  const [blockedDateInput, setBlockedDateInput] = useState(todayKey())
+  const [selectedSlots, setSelectedSlots] = useState<string[]>([])
+  const [isBlocked, setIsBlocked] = useState(false)
 
-  function toggleDay(day: string) {
-    setSchedule(s => {
-      const current = s[day]
-      if (!current) return s
-      return { ...s, [day]: { ...current, enabled: !current.enabled } as DayConfig }
-    })
+  const availabilityQuery = useAvailability()
+  const slotQuery = useAvailableSlots(selectedDate)
+  const saveAvailability = useUpdateAvailability()
+  const deleteAvailability = useDeleteAvailability()
+  const weeklyPatternQuery = useWeeklyAvailabilityPattern()
+  const saveWeeklyPattern = useUpdateWeeklyAvailabilityPattern()
+  const [weeklyPattern, setWeeklyPattern] = useState<WeeklyPatternItem[]>(buildDefaultWeeklyPattern())
+
+  const availabilityItems = (((availabilityQuery.data as { data?: AvailabilityItem[] } | undefined)?.data) ?? []) as AvailabilityItem[]
+
+  const blockedDates = useMemo(
+    () => availabilityItems.filter((item) => item.isBlocked),
+    [availabilityItems],
+  )
+
+  const configuredDates = useMemo(
+    () => availabilityItems.filter((item) => !item.isBlocked),
+    [availabilityItems],
+  )
+
+  const existingForDate = useMemo(
+    () => availabilityItems.find((item) => item.date === selectedDate),
+    [availabilityItems, selectedDate],
+  )
+
+  useEffect(() => {
+    const data = ((weeklyPatternQuery.data as { data?: WeeklyPatternItem[] } | undefined)?.data) ?? []
+    setWeeklyPattern(normalizeWeeklyPattern(data))
+  }, [weeklyPatternQuery.data])
+
+  const slotOptions = useMemo(() => {
+    const data = slotQuery.data as Array<{ time: string; available: boolean }> | undefined
+    if (existingForDate?.slots?.length) return existingForDate.slots
+    if (data?.length) return data.map((item) => item.time)
+    return DEFAULT_SLOTS
+  }, [existingForDate?.slots, slotQuery.data])
+
+  useEffect(() => {
+    if (!existingForDate) {
+      setSelectedSlots([])
+      setIsBlocked(false)
+      return
+    }
+
+    setSelectedSlots(existingForDate.slots)
+    setIsBlocked(existingForDate.isBlocked)
+  }, [existingForDate])
+
+  async function handleSave() {
+    try {
+      await saveAvailability.mutateAsync({
+        date: selectedDate,
+        slots: isBlocked ? [] : [...selectedSlots].sort(),
+        isBlocked,
+      })
+      toast.success('Availability saved')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save availability'
+      toast.error('Failed to save availability', message)
+    }
   }
 
-  function updateTime(day: string, field: 'start' | 'end', val: string) {
-    setSchedule(s => {
-      const current = s[day]
-      if (!current) return s
-      return { ...s, [day]: { ...current, [field]: val } as DayConfig }
-    })
+  async function handleRemove(id: string) {
+    try {
+      await deleteAvailability.mutateAsync(id)
+      toast.success('Availability override removed')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete availability override'
+      toast.error('Failed to delete availability', message)
+    }
   }
 
-  function updateSlotDuration(day: string, val: number) {
-    setSchedule(s => {
-      const current = s[day]
-      if (!current) return s
-      return { ...s, [day]: { ...current, slotDuration: val } as DayConfig }
-    })
+  async function handleBlockDate() {
+    try {
+      await saveAvailability.mutateAsync({
+        date: blockedDateInput,
+        slots: [],
+        isBlocked: true,
+      })
+      toast.success('Date blocked')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to block date'
+      toast.error('Failed to block date', message)
+    }
   }
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+  async function handleUnblockDate() {
+    try {
+      const blocked = blockedDates.find((item) => item.date === blockedDateInput)
+      if (!blocked) {
+        toast.error('Date is not blocked', 'Select a blocked date to unblock it.')
+        return
+      }
+
+      await deleteAvailability.mutateAsync(blocked.id)
+      toast.success('Date unblocked')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to unblock date'
+      toast.error('Failed to unblock date', message)
+    }
+  }
+
+  async function handleSaveWeeklyPattern() {
+    try {
+      const normalized = normalizeWeeklyPattern(weeklyPattern)
+
+      await saveWeeklyPattern.mutateAsync({
+        patterns: [...normalized].sort((a, b) => a.weekday - b.weekday),
+      })
+
+      toast.success('Weekly pattern saved')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save weekly pattern'
+      toast.error('Failed to save weekly pattern', message)
+    }
+  }
+
+  function updateWeeklyItem(weekday: number, patch: Partial<WeeklyPatternItem>) {
+    setWeeklyPattern((current) =>
+      current.map((item) =>
+        item.weekday === weekday ? { ...item, ...patch } : item,
+      ),
+    )
+  }
+
+  function toggleSlot(slot: string) {
+    setSelectedSlots((current) =>
+      current.includes(slot) ? current.filter((item) => item !== slot) : [...current, slot],
+    )
   }
 
   return (
@@ -69,19 +213,12 @@ export default function AvailabilityPage() {
       <div className="avail-page__topbar">
         <PageHeader
           title="Availability"
-          description="Configure weekly schedules, blocked dates, and appointment slot durations."
+          description="Manage blocked dates and bookable times sent to the frontend booking flow."
           backHref="/appointments"
           backLabel="Appointments"
         />
-        <button className="btn-primary" onClick={handleSave}>
-          {saved ? (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Saved
-            </>
-          ) : 'Save Changes'}
+        <button className="btn-primary" onClick={() => void handleSave()} disabled={saveAvailability.isPending}>
+          {saveAvailability.isPending ? 'Saving...' : 'Save Availability'}
         </button>
       </div>
 
@@ -96,9 +233,9 @@ export default function AvailabilityPage() {
 
       <div className="avail-tabs">
         {[
-          { key: 'weekly', label: 'Weekly Schedule' },
+          { key: 'slots', label: 'Date Slots' },
           { key: 'blocked', label: 'Blocked Dates' },
-          { key: 'slots', label: 'Slot Configuration' },
+          { key: 'weekly', label: 'Default Weekly Pattern' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -110,201 +247,228 @@ export default function AvailabilityPage() {
         ))}
       </div>
 
-      {activeTab === 'weekly' && (
-        <div className="avail-schedule-card">
-          <div className="avail-schedule-header">
-            <h2 className="card-title">Weekly Availability</h2>
-            <p className="card-sub">Set default working hours for each day. Consultants can override these individually.</p>
+      {activeTab === 'slots' && (
+        <div className="avail-card">
+          <div className="avail-card__header">
+            <h2 className="card-title">Date-specific availability</h2>
+            <p className="card-sub">Select which times remain bookable on a given date. Times not selected here are treated as unavailable.</p>
           </div>
-          <div className="avail-schedule-grid">
-            {DAYS.map(day => {
-              const cfg: DayConfig | undefined = schedule[day]
-              if (!cfg) return null
-              return (
-                <div key={day} className={`day-row${!cfg.enabled ? ' day-row--disabled' : ''}`}>
-                  <div className="day-row__head">
-                    <label className="day-toggle">
-                      <input type="checkbox" checked={cfg.enabled} onChange={() => toggleDay(day)} />
-                      <span className="day-toggle__track">
-                        <span className="day-toggle__thumb" />
-                      </span>
-                    </label>
-                    <span className="day-name">{day}</span>
-                  </div>
-                  <div className={`day-row__times${!cfg.enabled ? ' day-row__times--hidden' : ''}`}>
-                    <input type="time" value={cfg.start} onChange={e => updateTime(day, 'start', e.target.value)} disabled={!cfg.enabled} className="time-input" />
-                    <span className="time-sep">to</span>
-                    <input type="time" value={cfg.end} onChange={e => updateTime(day, 'end', e.target.value)} disabled={!cfg.enabled} className="time-input" />
-                    <select
-                      value={cfg.slotDuration}
-                      disabled={!cfg.enabled}
-                      onChange={e => updateSlotDuration(day, Number(e.target.value))}
-                      className="slot-select"
-                    >
-                      <option value={30}>30 min slots</option>
-                      <option value={60}>60 min slots</option>
-                      <option value={90}>90 min slots</option>
-                      <option value={120}>2 hr slots</option>
-                    </select>
-                  </div>
-                  {!cfg.enabled && <span className="day-row__closed">Closed</span>}
-                </div>
-              )
-            })}
+
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="selected-date">Date</label>
+              <input id="selected-date" type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+            </div>
+            <label className="block-toggle">
+              <input type="checkbox" checked={isBlocked} onChange={(e) => setIsBlocked(e.target.checked)} />
+              <span>Block this date completely</span>
+            </label>
+          </div>
+
+          <div className="slot-grid">
+            {slotOptions.map((slot) => (
+              <button
+                key={slot}
+                type="button"
+                disabled={isBlocked}
+                className={`slot-chip${selectedSlots.includes(slot) ? ' slot-chip--selected' : ''}`}
+                onClick={() => toggleSlot(slot)}
+              >
+                {slot}
+              </button>
+            ))}
+          </div>
+
+          <div className="note-box">
+            Frontend booking should call <strong>/api/availability/slots?date=YYYY-MM-DD</strong>. This response now excludes blocked dates and already-booked appointment times automatically.
           </div>
         </div>
       )}
 
       {activeTab === 'blocked' && (
-        <div className="avail-blocked-card">
-          <div className="avail-schedule-header">
-            <h2 className="card-title">Blocked Dates</h2>
-            <p className="card-sub">Dates when no appointments can be booked (holidays, training days, etc.).</p>
+        <div className="avail-card">
+          <div className="avail-card__header">
+            <h2 className="card-title">Blocked dates</h2>
+            <p className="card-sub">These dates return no bookable slots to the frontend.</p>
           </div>
-          <div className="blocked-list">
-            {BLOCKED_DATES.map(date => (
-              <div key={date} className="blocked-date-row">
-                <span className="blocked-date-row__date">{new Date(date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                <button className="blocked-date-row__remove" title="Remove blocked date">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </div>
-            ))}
-            <button className="add-blocked-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Add blocked date
-            </button>
+          <div className="blocked-controls">
+            <div className="field">
+              <label htmlFor="blocked-date">Date</label>
+              <input
+                id="blocked-date"
+                type="date"
+                value={blockedDateInput}
+                onChange={(e) => setBlockedDateInput(e.target.value)}
+              />
+            </div>
+            <div className="blocked-controls__actions">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => void handleBlockDate()}
+                disabled={saveAvailability.isPending}
+              >
+                Block Date
+              </button>
+              <button
+                type="button"
+                className="btn-outline-danger"
+                onClick={() => void handleUnblockDate()}
+                disabled={deleteAvailability.isPending}
+              >
+                Unblock Date
+              </button>
+            </div>
+          </div>
+          <div className="list-grid">
+            {blockedDates.length === 0 ? (
+              <p className="empty-message">No blocked dates configured yet.</p>
+            ) : (
+              blockedDates.map((item) => (
+                <div key={item.id} className="list-row">
+                  <span>{item.date}</span>
+                  <button type="button" className="danger-link" onClick={() => void handleRemove(item.id)}>
+                    Remove
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
 
-      {activeTab === 'slots' && (
-        <div className="avail-slots-card">
-          <div className="avail-schedule-header">
-            <h2 className="card-title">Slot Configuration</h2>
-            <p className="card-sub">Configure appointment types and their durations and lead times.</p>
+      {activeTab === 'weekly' && (
+        <div className="avail-card">
+          <div className="avail-card__header">
+            <h2 className="card-title">Default weekly pattern</h2>
+            <p className="card-sub">This fallback schedule is used whenever a date has no specific override stored.</p>
           </div>
-          <div className="slot-config-grid">
-            {[
-              { type: 'Home Measurement', icon: '🏠', duration: '90 min', buffer: '30 min', maxPerDay: 4 },
-              { type: 'Online',           icon: '💻', duration: '60 min', buffer: '15 min', maxPerDay: 8 },
-              { type: 'Showroom',         icon: '🏪', duration: '60 min', buffer: '15 min', maxPerDay: 6 },
-            ].map(slot => (
-              <div key={slot.type} className="slot-config-card">
-                <div className="slot-config-card__header">
-                  <span className="slot-config-card__icon">{slot.icon}</span>
-                  <span className="slot-config-card__type">{slot.type}</span>
-                </div>
-                <div className="slot-config-card__fields">
-                  <div className="slot-field">
-                    <label>Duration</label>
-                    <select className="slot-select" defaultValue={slot.duration}>
-                      <option>30 min</option>
-                      <option>60 min</option>
-                      <option>90 min</option>
-                      <option>120 min</option>
+          <div className="weekly-toolbar">
+            <button className="btn-primary" onClick={() => void handleSaveWeeklyPattern()} disabled={saveWeeklyPattern.isPending || weeklyPatternQuery.isLoading}>
+              {saveWeeklyPattern.isPending ? 'Saving Pattern...' : 'Save Weekly Pattern'}
+            </button>
+          </div>
+          <div className="list-grid">
+            {weeklyPatternQuery.isLoading ? (
+              <p className="empty-message">Loading weekly schedule...</p>
+            ) : weeklyPattern.length === 0 ? (
+              <p className="empty-message">No weekly schedule found.</p>
+            ) : (
+              weeklyPattern.map((item) => (
+                <div key={item.weekday} className="weekly-row weekly-row--editable">
+                  <div className="weekly-row__day-wrap">
+                    <span className="weekly-row__day">{WEEKDAY_LABELS[item.weekday]}</span>
+                    <label className="block-toggle">
+                      <input
+                        type="checkbox"
+                        checked={item.isEnabled}
+                        onChange={(e) => updateWeeklyItem(item.weekday, { isEnabled: e.target.checked })}
+                      />
+                      <span>Open</span>
+                    </label>
+                  </div>
+                  <div className="weekly-row__inputs">
+                    <input
+                      type="time"
+                      value={item.startTime}
+                      disabled={!item.isEnabled}
+                      onChange={(e) => updateWeeklyItem(item.weekday, { startTime: e.target.value })}
+                    />
+                    <span>to</span>
+                    <input
+                      type="time"
+                      value={item.endTime}
+                      disabled={!item.isEnabled}
+                      onChange={(e) => updateWeeklyItem(item.weekday, { endTime: e.target.value })}
+                    />
+                    <select
+                      value={String(item.slotDuration)}
+                      disabled={!item.isEnabled}
+                      onChange={(e) => updateWeeklyItem(item.weekday, { slotDuration: Number(e.target.value) })}
+                    >
+                      {[30, 45, 60, 90, 120].map((minutes) => (
+                        <option key={minutes} value={minutes}>{minutes} min</option>
+                      ))}
                     </select>
                   </div>
-                  <div className="slot-field">
-                    <label>Buffer after</label>
-                    <select className="slot-select" defaultValue={slot.buffer}>
-                      <option>0 min</option>
-                      <option>15 min</option>
-                      <option>30 min</option>
-                    </select>
-                  </div>
-                  <div className="slot-field">
-                    <label>Max per day</label>
-                    <input type="number" min={1} max={20} defaultValue={slot.maxPerDay} className="slot-number-input" />
-                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       )}
+
+      <div className="avail-card">
+        <div className="avail-card__header">
+          <h2 className="card-title">Saved overrides</h2>
+          <p className="card-sub">These are the date-level records currently used by the booking API.</p>
+        </div>
+        <div className="list-grid">
+          {configuredDates.length === 0 ? (
+            <p className="empty-message">No date-specific slot overrides saved yet.</p>
+          ) : (
+            configuredDates.map((item) => (
+              <div key={item.id} className="list-row list-row--stacked">
+                <div>
+                  <strong>{item.date}</strong>
+                  <p>{item.slots.join(', ') || 'No slots selected'}</p>
+                </div>
+                <button type="button" className="danger-link" onClick={() => void handleRemove(item.id)}>
+                  Delete Override
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
       <style>{`
         .avail-page { display: flex; flex-direction: column; gap: 24px; }
         .avail-page__topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-
         .btn-primary { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px; background: #1A1A18; color: #F5F0E8; border: none; border-radius: 8px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 4px; }
         .btn-primary:hover { background: #2E2E2A; }
-
+        .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
         .subnav { display: flex; gap: 2px; border-bottom: 1.5px solid #E8E6E1; overflow-x: auto; }
         .subnav__item { height: 38px; padding: 0 14px; display: flex; align-items: center; font-size: 0.875rem; font-weight: 500; color: #6B6B68; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1.5px; white-space: nowrap; transition: color 0.15s; }
         .subnav__item:hover { color: #1A1A18; }
         .subnav__item--active { color: #1A1A18; font-weight: 600; border-bottom-color: #1A1A18; }
-
         .avail-tabs { display: flex; gap: 4px; background: #F0EDE8; border-radius: 10px; padding: 4px; width: fit-content; }
-        .avail-tab { height: 34px; padding: 0 16px; border: none; border-radius: 7px; background: none; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: #6B6B68; cursor: pointer; transition: background 0.15s, color 0.15s; }
-        .avail-tab:hover { color: #1A1A18; }
+        .avail-tab { height: 34px; padding: 0 16px; border: none; border-radius: 7px; background: none; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: #6B6B68; cursor: pointer; }
         .avail-tab--active { background: #FFFFFF; color: #1A1A18; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-
-        .avail-schedule-card, .avail-blocked-card, .avail-slots-card { background: #FFFFFF; border: 1.5px solid #E8E6E1; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-        .avail-schedule-header { display: flex; flex-direction: column; gap: 4px; }
+        .avail-card { background: #FFFFFF; border: 1.5px solid #E8E6E1; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+        .avail-card__header { display: flex; flex-direction: column; gap: 4px; }
         .card-title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.125rem; font-weight: 700; color: #1A1A18; }
         .card-sub { font-size: 0.875rem; color: #6B6B68; }
-
-        .avail-schedule-grid { display: flex; flex-direction: column; gap: 2px; }
-
-        .day-row { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 10px; transition: background 0.1s; flex-wrap: wrap; }
-        .day-row:hover { background: #FAFAF8; }
-        .day-row--disabled { opacity: 0.6; }
-
-        .day-row__head { display: flex; align-items: center; gap: 10px; min-width: 150px; }
-
-        .day-toggle { position: relative; display: flex; align-items: center; cursor: pointer; }
-        .day-toggle input { display: none; }
-        .day-toggle__track { width: 36px; height: 20px; background: #D8D5CE; border-radius: 20px; display: flex; align-items: center; padding: 2px; transition: background 0.2s; }
-        .day-toggle input:checked + .day-toggle__track { background: #1A1A18; }
-        .day-toggle__thumb { width: 16px; height: 16px; background: #FFFFFF; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .day-toggle input:checked + .day-toggle__track .day-toggle__thumb { transform: translateX(16px); }
-
-        .day-name { font-size: 0.9375rem; font-weight: 500; color: #1A1A18; width: 100px; }
-
-        .day-row__times { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; }
-        .day-row__times--hidden { visibility: hidden; }
-
-        .time-input { height: 36px; padding: 0 10px; border: 1.5px solid #E8E6E1; border-radius: 8px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; color: #1A1A18; outline: none; background: #FFFFFF; transition: border-color 0.15s; }
-        .time-input:focus { border-color: #8B6914; }
-        .time-input:disabled { opacity: 0.4; cursor: not-allowed; }
-        .time-sep { font-size: 0.875rem; color: #6B6B68; }
-
-        .slot-select { height: 36px; padding: 0 30px 0 10px; border: 1.5px solid #E8E6E1; border-radius: 8px; background: #FFFFFF; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; color: #1A1A18; cursor: pointer; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B6B68' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; transition: border-color 0.15s; }
-        .slot-select:disabled { opacity: 0.4; cursor: not-allowed; }
-        .slot-select:focus { border-color: #8B6914; }
-
-        .day-row__closed { font-size: 0.8125rem; color: #B8B5AE; font-style: italic; }
-
-        .blocked-list { display: flex; flex-direction: column; gap: 8px; }
-        .blocked-date-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FAFAF8; border: 1.5px solid #E8E6E1; border-radius: 10px; }
-        .blocked-date-row__date { font-size: 0.9375rem; color: #1A1A18; font-weight: 500; }
-        .blocked-date-row__remove { background: none; border: none; cursor: pointer; color: #B8B5AE; padding: 4px; border-radius: 4px; transition: color 0.15s, background 0.15s; display: flex; }
-        .blocked-date-row__remove:hover { color: #C0392B; background: #FDF2F2; }
-
-        .add-blocked-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: none; border: 1.5px dashed #D8D5CE; border-radius: 10px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: #6B6B68; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; align-self: flex-start; }
-        .add-blocked-btn:hover { border-color: #8B6914; color: #8B6914; background: #FFFDF7; }
-
-        .slot-config-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-        @media (max-width: 900px) { .slot-config-grid { grid-template-columns: 1fr; } }
-
-        .slot-config-card { background: #FAFAF8; border: 1.5px solid #E8E6E1; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
-        .slot-config-card__header { display: flex; align-items: center; gap: 10px; }
-        .slot-config-card__icon { font-size: 1.25rem; }
-        .slot-config-card__type { font-size: 0.9375rem; font-weight: 600; color: #1A1A18; }
-        .slot-config-card__fields { display: flex; flex-direction: column; gap: 12px; }
-        .slot-field { display: flex; flex-direction: column; gap: 5px; }
-        .slot-field label { font-size: 0.8125rem; font-weight: 500; color: #6B6B68; }
-        .slot-number-input { width: 80px; height: 36px; padding: 0 10px; border: 1.5px solid #E8E6E1; border-radius: 8px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; color: #1A1A18; outline: none; -moz-appearance: textfield; }
-        .slot-number-input::-webkit-outer-spin-button, .slot-number-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-        .slot-number-input:focus { border-color: #8B6914; }
+        .field-row { display: flex; align-items: end; gap: 16px; flex-wrap: wrap; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 0.875rem; font-weight: 500; color: #1A1A18; }
+        .field input { height: 40px; padding: 0 12px; border: 1.5px solid #E8E6E1; border-radius: 10px; }
+        .block-toggle { display: inline-flex; align-items: center; gap: 10px; font-size: 0.875rem; font-weight: 500; color: #1A1A18; }
+        .slot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+        .slot-chip { height: 40px; border: 1.5px solid #E8E6E1; border-radius: 10px; background: #FAFAF8; color: #1A1A18; font-size: 0.875rem; font-weight: 500; cursor: pointer; }
+        .slot-chip--selected { background: #1A1A18; color: #F5F0E8; border-color: #1A1A18; }
+        .slot-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+        .blocked-controls { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+        .blocked-controls__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-outline-danger { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px; background: #FFFFFF; color: #AF3E34; border: 1.5px solid #E8C9C4; border-radius: 8px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s; margin-top: 4px; }
+        .btn-outline-danger:hover { background: #FFF6F5; }
+        .btn-outline-danger:disabled { opacity: 0.65; cursor: not-allowed; }
+        .note-box { padding: 12px 14px; border-radius: 10px; background: #F7F5F0; border: 1px solid #E8E0D0; color: #6B6B68; font-size: 0.875rem; line-height: 1.6; }
+        .list-grid { display: flex; flex-direction: column; gap: 10px; }
+        .list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1.5px solid #E8E6E1; border-radius: 10px; background: #FAFAF8; }
+        .list-row--stacked { align-items: flex-start; }
+        .list-row--stacked p { margin-top: 4px; font-size: 0.8125rem; color: #6B6B68; }
+        .weekly-toolbar { display: flex; justify-content: flex-end; }
+        .weekly-row { display: grid; grid-template-columns: 160px 1fr 120px; gap: 12px; padding: 12px 14px; border: 1.5px solid #E8E6E1; border-radius: 10px; background: #FAFAF8; }
+        .weekly-row--editable { grid-template-columns: 220px 1fr; align-items: center; }
+        .weekly-row__day-wrap { display: flex; flex-direction: column; gap: 8px; }
+        .weekly-row__inputs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .weekly-row__inputs input, .weekly-row__inputs select { height: 36px; padding: 0 10px; border: 1.5px solid #E8E6E1; border-radius: 8px; background: #FFFFFF; }
+        .weekly-row__day { font-weight: 600; color: #1A1A18; }
+        .weekly-row__hours, .weekly-row__duration { color: #6B6B68; font-size: 0.875rem; }
+        .danger-link { border: none; background: none; color: #AF3E34; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+        .empty-message { color: #6B6B68; font-size: 0.875rem; }
+        @media (max-width: 720px) { .weekly-row { grid-template-columns: 1fr; } }
       `}</style>
     </div>
   )

@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { loyaltyService } from "@/services/loyaltyService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { AdjustLoyaltyPointsPayload } from "@/types/customer.types";
 
 export function useLoyalty(customerId?: string) {
   return useQuery({
     queryKey: ["loyalty", customerId],
-    queryFn: () => loyaltyService.getAll(customerId ? { customerId } : undefined),
+    queryFn: () => fetchWithAuth(`/api/loyalty${buildQueryString(customerId ? { customerId } : {})}`),
   });
 }
 
 export function useLoyaltyItem(id: string) {
   return useQuery({
     queryKey: ["loyalty", id],
-    queryFn: () => loyaltyService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/loyalty/${id}`),
     enabled: !!id,
   });
 }

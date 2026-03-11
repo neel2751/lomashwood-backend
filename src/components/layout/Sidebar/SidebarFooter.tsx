@@ -27,7 +27,7 @@ export function SidebarFooter({ collapsed }: SidebarFooterProps) {
     : "LW";
 
   return (
-    <div className="shrink-0 border-t border-[#2E231A]">
+    <div className="shrink-0 border-t border-[var(--color-sidebar-border)] bg-[var(--color-sidebar-subtle)]/60">
      
       {!collapsed && (
         <div className="flex items-center gap-1 px-3 py-2">
@@ -35,7 +35,7 @@ export function SidebarFooter({ collapsed }: SidebarFooterProps) {
             onClick={() => setDarkMode(!darkMode)}
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-[8px] transition-all",
-              "text-[#5A4232] hover:text-[#C8924A] hover:bg-[#2E231A]"
+              "text-[var(--color-sidebar-muted)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-sidebar-accent)]"
             )}
             aria-label="Toggle theme"
           >
@@ -46,7 +46,7 @@ export function SidebarFooter({ collapsed }: SidebarFooterProps) {
             href="/settings"
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-[8px] transition-all",
-              "text-[#5A4232] hover:text-[#C8924A] hover:bg-[#2E231A]"
+              "text-[var(--color-sidebar-muted)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-sidebar-accent)]"
             )}
             aria-label="Help & docs"
           >
@@ -57,7 +57,7 @@ export function SidebarFooter({ collapsed }: SidebarFooterProps) {
             onClick={clearUser}
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-[8px] transition-all ml-auto",
-              "text-[#5A4232] hover:text-red-400 hover:bg-red-500/10"
+              "text-[var(--color-sidebar-muted)] hover:bg-red-50 hover:text-red-600"
             )}
             aria-label="Sign out"
           >
@@ -78,25 +78,25 @@ export function SidebarFooter({ collapsed }: SidebarFooterProps) {
           <div
             className={cn(
               "flex items-center justify-center rounded-full",
-              "bg-gradient-to-br from-[#C8924A] to-[#8B5E2A]",
+              "bg-gradient-to-br from-[var(--color-sidebar-accent)] to-[#7A551C]",
               "text-white font-semibold text-[12px] tracking-wide",
-              "shadow-md shadow-[#C8924A]/20",
+              "shadow-md shadow-[rgba(167,121,43,0.2)]",
               collapsed ? "w-9 h-9" : "w-8 h-8"
             )}
           >
             {initials}
           </div>
       
-          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#1C1611]" />
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--color-sidebar-bg)] bg-emerald-500" />
         </div>
 
       
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-medium text-[#E8D5B7] truncate leading-none">
+            <p className="truncate leading-none text-[13px] font-medium text-[var(--color-sidebar-text)]">
               {user?.name ?? "Admin User"}
             </p>
-            <p className="text-[11px] text-[#5A4232] truncate leading-none mt-0.5 capitalize">
+            <p className="mt-0.5 truncate leading-none text-[11px] capitalize text-[var(--color-sidebar-muted)]">
               {user?.roleName ?? "administrator"}
             </p>
           </div>

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useBlogs } from "@/hooks/useBlogs";
 
 export type BlogStatus   = "draft" | "published" | "scheduled" | "archived";
 export type BlogCategory = "kitchen" | "bedroom" | "inspiration" | "how_to" | "news" | "case_study";
@@ -31,16 +32,6 @@ export interface BlogPost {
   readTime: number;
   views: number;
 }
-
-const MOCK_POSTS: BlogPost[] = [
-  { id: "1", title: "10 Kitchen Design Trends for 2026",          slug: "kitchen-design-trends-2026",        excerpt: "Discover the bold new directions shaping kitchen design this year, from handleless cabinetry to statement islands.",  category: "kitchen",     status: "published", author: "Sarah Alderton",  tags: ["kitchen","trends","2026"],         publishedAt: "10 Feb 2026", updatedAt: "10 Feb 2026", readTime: 5,  views: 1842 },
-  { id: "2", title: "How to Choose the Perfect Bedroom Colour",   slug: "choose-bedroom-colour",             excerpt: "Colour has a profound effect on sleep and mood. We guide you through the best palettes for a restful bedroom.",         category: "bedroom",     status: "published", author: "Marcus Webb",     tags: ["bedroom","colour","guide"],        publishedAt: "22 Jan 2026", updatedAt: "22 Jan 2026", readTime: 7,  views: 1201 },
-  { id: "3", title: "Case Study: The Thornton Kitchen Refit",     slug: "thornton-kitchen-refit",            excerpt: "A complete transformation of a Victorian terraced house kitchen using our Luna White range and bespoke island.",         category: "case_study",  status: "published", author: "Sarah Alderton",  tags: ["case-study","luna","kitchen"],     publishedAt: "05 Feb 2026", updatedAt: "05 Feb 2026", readTime: 6,  views: 987  },
-  { id: "4", title: "The Complete Guide to Handleless Kitchens",  slug: "handleless-kitchens-guide",         excerpt: "Handleless kitchen cabinetry offers a sleek, minimalist look. Everything you need to know before you buy.",             category: "how_to",      status: "draft",     author: "Jade Nguyen",     tags: ["handleless","guide","kitchen"],    updatedAt: "27 Feb 2026", readTime: 9,  views: 0    },
-  { id: "5", title: "Spring Bedroom Collection Launch 2026",      slug: "spring-bedroom-collection-2026",    excerpt: "Introducing our stunning new spring bedroom range — lighter tones, natural textures, and refined hardware.",             category: "news",        status: "scheduled", author: "Marcus Webb",     tags: ["bedroom","collection","spring"],  scheduledFor: "01 Mar 2026", updatedAt: "28 Feb 2026", readTime: 4, views: 0 },
-  { id: "6", title: "Behind the Scenes: Our Manchester Workshop",  slug: "manchester-workshop-behind-scenes", excerpt: "Step inside our Manchester workshop to see how every Lomash Wood piece is crafted with precision and care.",            category: "inspiration", status: "published", author: "Sarah Alderton",  tags: ["workshop","craft","behind-scenes"],publishedAt: "15 Jan 2026", updatedAt: "15 Jan 2026", readTime: 5,  views: 2340 },
-  { id: "7", title: "6 Ways to Make a Small Kitchen Feel Larger",  slug: "small-kitchen-feel-larger",         excerpt: "Space-saving design tricks and optical illusions that make compact kitchens feel open, airy and functional.",           category: "how_to",      status: "draft",     author: "Jade Nguyen",     tags: ["small-kitchen","tips","design"],  updatedAt: "25 Feb 2026", readTime: 6,  views: 0    },
-];
 
 const STATUS_CONFIG: Record<BlogStatus, { label: string; bg: string; text: string; dot: string }> = {
   draft:     { label: "Draft",     bg: "bg-[#3D2E1E]",       text: "text-[#5A4232]",   dot: "bg-[#5A4232]"   },
@@ -68,22 +59,37 @@ export function BlogTable() {
   const [openMenu, setOpenMenu]   = useState<string | null>(null);
   const [selected, setSelected]   = useState<string[]>([]);
 
-  const filtered = MOCK_POSTS.filter((p) => {
-    const q = search.toLowerCase();
-    const matchSearch = p.title.toLowerCase().includes(q) || p.author.toLowerCase().includes(q);
-    return (
-      matchSearch &&
-      (statusFilter === "All" || p.status   === statusFilter) &&
-      (catFilter    === "All" || p.category === catFilter)
-    );
+  const { data, isLoading, isError } = useBlogs({
+    search: search || undefined,
+    status: statusFilter === "All" ? undefined : statusFilter,
+    category: catFilter === "All" ? undefined : catFilter,
   });
+
+  const posts = ((data as { data?: BlogPost[] } | undefined)?.data ?? []) as BlogPost[];
+  const filtered = posts;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-[#5A4232]">Loading blog posts...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden p-8">
+        <p className="text-center text-red-400">Failed to load blog posts.</p>
+      </div>
+    );
+  }
 
   const toggleSelect = (id: string) =>
     setSelected((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
   const toggleAll = () =>
     setSelected(selected.length === filtered.length ? [] : filtered.map((p) => p.id));
 
-  const totalViews = MOCK_POSTS.filter((p) => p.status === "published")
+  const totalViews = posts.filter((p) => p.status === "published")
     .reduce((s, p) => s + p.views, 0);
 
   return (
@@ -253,8 +259,8 @@ export function BlogTable() {
       <div className="px-5 py-3 border-t border-[#2E231A] flex items-center justify-between">
         <span className="text-[12px] text-[#5A4232]">{filtered.length} posts</span>
         <span className="text-[12px] text-[#3D2E1E]">
-          {MOCK_POSTS.filter((p) => p.status === "published").length} published ·{" "}
-          {MOCK_POSTS.filter((p) => p.status === "draft").length} drafts
+          {posts.filter((p) => p.status === "published").length} published ·{" "}
+          {posts.filter((p) => p.status === "draft").length} drafts
         </span>
       </div>
     </div>

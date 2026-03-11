@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { refundService } from "@/services/refundService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { CreateRefundPayload } from "@/types/order.types";
 
 export function useRefunds(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: ["refunds", filters],
-    queryFn: () => refundService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/refunds${buildQueryString(filters)}`),
   });
 }
 
 export function useRefund(id: string) {
   return useQuery({
     queryKey: ["refunds", id],
-    queryFn: () => refundService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/refunds/${id}`),
     enabled: !!id,
   });
 }

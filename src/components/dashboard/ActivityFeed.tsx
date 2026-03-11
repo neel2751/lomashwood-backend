@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useAuditLogs } from "@/hooks/useAuditLogs";
 
 type ActivityType =
   | "order"
@@ -42,109 +43,6 @@ interface ActivityItem {
   meta?: string;
   href?: string;
 }
-
-const MOCK_ACTIVITIES: ActivityItem[] = [
-  {
-    id: "1",
-    type: "order",
-    title: "New Kitchen Order",
-    description: "Order #LW-4821 placed for Luna White kitchen",
-    timestamp: "2 min ago",
-    status: "success",
-    meta: "£3,499",
-    href: "/orders/4821",
-  },
-  {
-    id: "2",
-    type: "appointment",
-    title: "Appointment Booked",
-    description: "Sarah Mitchell scheduled a home measurement for bedroom",
-    timestamp: "14 min ago",
-    status: "info",
-    meta: "Home Visit",
-    href: "/appointments/1234",
-  },
-  {
-    id: "3",
-    type: "review",
-    title: "New Customer Review",
-    description: "James Thornton left a 5-star review for J-Pull kitchen",
-    timestamp: "38 min ago",
-    status: "success",
-    meta: "★ 5.0",
-    href: "/customers/reviews/567",
-  },
-  {
-    id: "4",
-    type: "brochure",
-    title: "Brochure Requested",
-    description: "Emma Clarke requested the bedroom brochure pack",
-    timestamp: "1 hr ago",
-    status: "info",
-    meta: "Bedroom",
-    href: "/customers/support/890",
-  },
-  {
-    id: "5",
-    type: "refund",
-    title: "Refund Initiated",
-    description: "Refund #RF-0041 opened for Order #LW-4795",
-    timestamp: "2 hr ago",
-    status: "warning",
-    meta: "£240",
-    href: "/orders/refunds/41",
-  },
-  {
-    id: "6",
-    type: "product",
-    title: "Product Updated",
-    description: "Inventory updated for Pebble Grey Gloss – 3 units added",
-    timestamp: "3 hr ago",
-    status: "info",
-    meta: "Stock",
-    href: "/products/inventory/102",
-  },
-  {
-    id: "7",
-    type: "customer",
-    title: "New Customer Registered",
-    description: "Daniel Osei created an account via the website",
-    timestamp: "4 hr ago",
-    status: "success",
-    meta: "New",
-    href: "/customers/3310",
-  },
-  {
-    id: "8",
-    type: "content",
-    title: "Blog Post Published",
-    description: '"Top Kitchen Trends 2025" is now live on the site',
-    timestamp: "6 hr ago",
-    status: "success",
-    meta: "Blog",
-    href: "/content/blogs/88",
-  },
-  {
-    id: "9",
-    type: "appointment",
-    title: "Showroom Appointment",
-    description: "Priya Sharma booked a showroom visit – both Kitchen & Bedroom",
-    timestamp: "8 hr ago",
-    status: "warning",
-    meta: "Dual Booking",
-    href: "/appointments/1198",
-  },
-  {
-    id: "10",
-    type: "notification",
-    title: "Email Campaign Sent",
-    description: "Spring Sale email dispatched to 1,420 subscribers",
-    timestamp: "Yesterday",
-    status: "info",
-    meta: "1,420 sent",
-    href: "/notifications/email/55",
-  },
-];
 
 const ACTIVITY_CONFIG: Record<
   ActivityType,
@@ -289,10 +187,30 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 export function ActivityFeed() {
   const [activeFilter, setActiveFilter] = useState<"all" | ActivityType>("all");
 
+  const { data, isLoading, isError } = useAuditLogs({ limit: 20 });
+
+  const activities = ((data as { data?: ActivityItem[] } | undefined)?.data ?? []) as ActivityItem[];
+
   const filtered =
     activeFilter === "all"
-      ? MOCK_ACTIVITIES
-      : MOCK_ACTIVITIES.filter((a) => a.type === activeFilter);
+      ? activities
+      : activities.filter((a) => a.type === activeFilter);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden p-8">
+        <p className="text-center text-sm text-muted-foreground">Loading activity...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-full flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden p-8">
+        <p className="text-center text-sm text-muted-foreground">Failed to load activity.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -305,7 +223,7 @@ export function ActivityFeed() {
             variant="secondary"
             className="h-5 px-1.5 text-[10px] font-semibold tabular-nums"
           >
-            {MOCK_ACTIVITIES.length}
+            {activities.length}
           </Badge>
         </div>
         <Button

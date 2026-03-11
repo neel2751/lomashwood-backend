@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { landingPageService } from "@/services/landingPageService";
+import { fetchWithAuth } from "@/lib/fetch-client";
 
 import type { CreateLandingPagePayload } from "@/types/content.types";
 
 export function useLandingPages() {
   return useQuery({
     queryKey: ["landing-pages"],
-    queryFn: () => landingPageService.getAll(),
+    queryFn: () => fetchWithAuth('/api/landing-pages'),
   });
 }
 
 export function useLandingPage(id: string) {
   return useQuery({
     queryKey: ["landing-pages", id],
-    queryFn: () => landingPageService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/landing-pages/${id}`),
     enabled: !!id,
   });
 }

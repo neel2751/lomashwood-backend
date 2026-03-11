@@ -12,7 +12,8 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import type { AppointmentStatus, AppointmentType } from "./AppointmentTable";
+type AppointmentType = "home_visit" | "showroom" | "online";
+type AppointmentStatus = "pending" | "confirmed" | "completed" | "cancelled" | "no_show" | "rescheduled";
 
 const TYPE_CONFIG: Record<AppointmentType, { label: string; bg: string; text: string }> = {
   home_visit: { label: "Home Visit", bg: "bg-[#C8924A]/15",   text: "text-[#C8924A]"  },

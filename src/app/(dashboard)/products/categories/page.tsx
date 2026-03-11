@@ -16,8 +16,11 @@ const SUB_NAV = [
   { href: '/products/categories', label: 'Categories' },
   { href: '/products/colours',    label: 'Colours' },
   { href: '/products/sizes',      label: 'Sizes' },
-  { href: '/products/inventory',  label: 'Inventory' },
-  { href: '/products/pricing',    label: 'Pricing' },
+  { href: '/products/style',      label: 'Style' },
+  { href: '/products/finish',     label: 'Finish' },
+  { href: '/products/package',    label: 'Packages' },
+  // { href: '/products/inventory',  label: 'Inventory' },
+  // { href: '/products/pricing',    label: 'Pricing' },
 ]
 
 const CATEGORIES = [
@@ -31,17 +34,10 @@ export default function CategoriesListPage() {
       <div className="categories-page__topbar">
         <PageHeader
           title="Categories"
-          description="Manage the top-level product categories used across the catalogue."
+          description="Browse the fixed top-level product categories used across the catalogue."
           backHref="/products"
           backLabel="Products"
         />
-        <Link href="/products/categories/new" className="btn-primary">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          New Category
-        </Link>
       </div>
 
       <nav className="sub-nav">
@@ -105,29 +101,6 @@ export default function CategoriesListPage() {
           gap: 16px;
           flex-wrap: wrap;
         }
-
-        .btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          height: 38px;
-          padding: 0 16px;
-          background: #1A1A18;
-          color: #F5F0E8;
-          border: none;
-          border-radius: 8px;
-          font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem;
-          font-weight: 600;
-          text-decoration: none;
-          cursor: pointer;
-          transition: background 0.15s;
-          white-space: nowrap;
-          flex-shrink: 0;
-          margin-top: 4px;
-        }
-
-        .btn-primary:hover { background: #2E2E2A; }
 
         .sub-nav {
           display: flex;

@@ -26,6 +26,9 @@ export type Appointment = {
   showroomId?: string;
   showroomName?: string;
   notes?: string;
+  confirmationEmailSentAt?: string;
+  reminderEmailSentAt?: string;
+  missedEmailSentAt?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -40,11 +43,11 @@ export type TimeSlot = {
 
 export type Availability = {
   id: string;
-  consultantId: string;
+  consultantId?: string;
   consultantName?: string;
   date: string;
   slots: string[];
-  blockedDates: string[];
+  isBlocked: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -102,9 +105,24 @@ export type CreateConsultantPayload = {
 };
 
 export type SetAvailabilityPayload = {
-  consultantId: string;
+  consultantId?: string;
   date: string;
   slots: string[];
+  isBlocked?: boolean;
+};
+
+export type WeeklyAvailabilityPattern = {
+  weekday: number;
+  consultantId?: string;
+  isEnabled: boolean;
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+};
+
+export type SetWeeklyAvailabilityPatternPayload = {
+  consultantId?: string;
+  patterns: WeeklyAvailabilityPattern[];
 };
 
 export type BlockDatesPayload = {

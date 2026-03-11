@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { customerService } from "@/services/customerService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { CustomerFilterParams } from "@/types/customer.types";
 
 export function useCustomers(filters?: CustomerFilterParams) {
   return useQuery({
     queryKey: ["customers", filters],
-    queryFn: () => customerService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/customers${buildQueryString(filters as Record<string, unknown>)}`),
   });
 }
 
 export function useCustomer(id: string) {
   return useQuery({
     queryKey: ["customers", id],
-    queryFn: () => customerService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/customers/${id}`),
     enabled: !!id,
   });
 }

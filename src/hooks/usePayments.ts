@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { paymentService } from "@/services/paymentService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 export function usePayments(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: ["payments", filters],
-    queryFn: () => paymentService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/payments${buildQueryString(filters)}`),
   });
 }
 

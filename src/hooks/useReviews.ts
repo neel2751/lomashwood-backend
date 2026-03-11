@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { reviewService } from "@/services/reviewService";
+import { fetchWithAuth, buildQueryString } from "@/lib/fetch-client";
 
 import type { CreateReviewPayload } from "@/types/customer.types";
 
 export function useReviews(filters?: Record<string, unknown>) {
   return useQuery({
     queryKey: ["reviews", filters],
-    queryFn: () => reviewService.getAll(filters),
+    queryFn: () => fetchWithAuth(`/api/reviews${buildQueryString(filters || {})}`),
   });
 }
 
 export function useReview(id: string) {
   return useQuery({
     queryKey: ["reviews", id],
-    queryFn: () => reviewService.getById(id),
+    queryFn: () => fetchWithAuth(`/api/reviews/${id}`),
     enabled: !!id,
   });
 }

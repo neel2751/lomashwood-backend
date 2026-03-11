@@ -70,15 +70,15 @@ export function GlobalSearch() {
         onClick={() => setOpen(true)}
         className={cn(
           "flex items-center gap-2 h-9 px-3 rounded-[10px]",
-          "bg-[#2E231A] border border-[#3D2E1E] text-[#5A4232]",
-          "hover:border-[#C8924A]/40 hover:text-[#C8924A] transition-all duration-200",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8924A]/40"
+          "border border-[var(--color-header-border)] bg-[var(--color-header-panel)] text-[var(--color-header-muted)]",
+          "hover:border-[var(--color-sidebar-accent)]/40 hover:text-[var(--color-sidebar-accent)] transition-all duration-200",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-sidebar-accent)]/30"
         )}
         aria-label="Open search"
       >
         <Search size={14} />
         <span className="text-[12px] hidden sm:block">Search...</span>
-        <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded-[5px] bg-[#221A12] border border-[#3D2E1E] text-[10px] text-[#5A4232] font-mono leading-none">
+        <kbd className="hidden sm:flex items-center gap-0.5 rounded-[5px] border border-[var(--color-header-border)] bg-[#F7F0E5] px-1.5 py-0.5 text-[10px] font-mono leading-none text-[var(--color-header-muted)]">
           ⌘K
         </kbd>
       </button>
@@ -90,26 +90,26 @@ export function GlobalSearch() {
           onClick={close}
         >
          
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-[rgba(35,27,18,0.35)] backdrop-blur-sm" />
 
           
           <div
-            className="relative w-full max-w-lg bg-[#1C1611] border border-[#3D2E1E] rounded-[14px] shadow-2xl shadow-black/60 overflow-hidden"
+            className="relative w-full max-w-lg overflow-hidden rounded-[14px] border border-[var(--color-header-border)] bg-[var(--color-header-panel)] shadow-2xl shadow-[rgba(92,72,41,0.18)]"
             onClick={(e) => e.stopPropagation()}
           >
            
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[#2E231A]">
-              <Search size={16} className="text-[#C8924A] shrink-0" />
+            <div className="flex items-center gap-3 border-b border-[var(--color-header-border)] px-4 py-3">
+              <Search size={16} className="shrink-0 text-[var(--color-sidebar-accent)]" />
               <input
                 autoFocus
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search pages, products, orders..."
-                className="flex-1 bg-transparent text-[14px] text-[#E8D5B7] placeholder:text-[#5A4232] focus:outline-none"
+                className="flex-1 bg-transparent text-[14px] text-[var(--color-header-text)] placeholder:text-[var(--color-header-muted)] focus:outline-none"
               />
               {query && (
-                <button onClick={() => setQuery("")} className="text-[#5A4232] hover:text-[#C8924A]">
+                <button onClick={() => setQuery("")} className="text-[var(--color-header-muted)] hover:text-[var(--color-sidebar-accent)]">
                   <X size={14} />
                 </button>
               )}
@@ -118,33 +118,33 @@ export function GlobalSearch() {
           
             <div className="max-h-[340px] overflow-y-auto py-2">
               {filtered.length === 0 ? (
-                <p className="text-center text-[13px] text-[#5A4232] py-8">No results found.</p>
+                <p className="py-8 text-center text-[13px] text-[var(--color-header-muted)]">No results found.</p>
               ) : (
                 filtered.map((item) => (
                   <button
                     key={item.href}
                     onClick={() => navigate(item.href)}
-                    className="w-full flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-[#2E231A] transition-colors group"
+                    className="group flex w-full items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--color-header-hover)]"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-[10px] text-[#5A4232] bg-[#2E231A] group-hover:bg-[#3D2E1E] px-2 py-0.5 rounded-full shrink-0 transition-colors">
+                      <span className="shrink-0 rounded-full bg-[#F3E7D3] px-2 py-0.5 text-[10px] text-[var(--color-header-muted)] transition-colors group-hover:bg-[#E8D7BA]">
                         {item.group}
                       </span>
-                      <span className="text-[13px] text-[#9A7A5A] group-hover:text-[#E8D5B7] truncate transition-colors">
+                      <span className="truncate text-[13px] text-[var(--color-header-text)] transition-colors group-hover:text-[var(--color-sidebar-accent)]">
                         {item.label}
                       </span>
                     </div>
-                    <ArrowRight size={13} className="text-[#3D2E1E] group-hover:text-[#C8924A] shrink-0 transition-colors" />
+                    <ArrowRight size={13} className="shrink-0 text-[var(--color-header-muted)] transition-colors group-hover:text-[var(--color-sidebar-accent)]" />
                   </button>
                 ))
               )}
             </div>
 
          
-            <div className="flex items-center gap-3 px-4 py-2 border-t border-[#2E231A]">
-              <span className="text-[11px] text-[#3D2E1E]">↑↓ navigate</span>
-              <span className="text-[11px] text-[#3D2E1E]">↵ open</span>
-              <span className="text-[11px] text-[#3D2E1E] ml-auto">ESC close</span>
+            <div className="flex items-center gap-3 border-t border-[var(--color-header-border)] px-4 py-2">
+              <span className="text-[11px] text-[var(--color-header-muted)]">↑↓ navigate</span>
+              <span className="text-[11px] text-[var(--color-header-muted)]">↵ open</span>
+              <span className="ml-auto text-[11px] text-[var(--color-header-muted)]">ESC close</span>
             </div>
           </div>
         </div>

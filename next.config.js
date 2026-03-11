@@ -21,6 +21,7 @@ const nextConfig = {
       { protocol: "https", hostname: "**.amazonaws.com", pathname: "/**" },
       { protocol: "https", hostname: "**.r2.cloudflarestorage.com", pathname: "/**" },
       { protocol: "https", hostname: "storage.googleapis.com", pathname: "/**" },
+      { protocol: "https", hostname: "asset.nobiadigital.com", pathname: "/**" },
     ],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [375, 640, 750, 828, 1080, 1200, 1920],
@@ -46,14 +47,6 @@ const nextConfig = {
           { key: "Referrer-Policy", value: "same-origin" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
-        ],
-      },
-      {
-        source: "/api/(.*)",
-        headers: [
-          { key: "Access-Control-Allow-Origin", value: process.env.NEXT_PUBLIC_APP_URL || "" },
-          { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
         ],
       },
       {

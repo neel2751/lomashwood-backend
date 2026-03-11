@@ -1,5 +1,5 @@
 
-import { appointmentClient, apiClient } from "@/lib/api-client";
+import { appointmentClient } from "@/lib/api-client";
 import axios from "@/lib/axios";
 
 import type { ApiResponse, Appointment, TimeSlot } from "@/lib/api-client";
@@ -19,7 +19,7 @@ export const appointmentService = {
   remove: (id: string) => appointmentClient.delete(id),
 
   getSlots: (params: { date: string; consultantId?: string }): Promise<TimeSlot[]> =>
-    apiClient.availability.getAll(params),
+    axios.get("/availability/slots", { params }).then((r) => r.data),
 
   updateStatus: (
     id: string,
@@ -46,4 +46,12 @@ export const appointmentService = {
     axios
       .post(`/appointments/${id}/send-confirmation`)
       .then(() => undefined),
+
+  sendEmail: (
+    id: string,
+    type: "confirmation" | "reminder" | "missed"
+  ): Promise<{ message: string; type: string }> =>
+    axios
+      .post(`/appointments/${id}/email`, { type })
+      .then((r) => r.data),
 };
