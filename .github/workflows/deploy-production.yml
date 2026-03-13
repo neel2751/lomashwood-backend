@@ -113,4 +113,21 @@ jobs:
               -p 3000:3000 \
               --env-file "$ENV_FILE" \
               lomash-wood-admin:production
-            curl -fsS http://127.0.0.1:3000/api/health
+
+            echo "Waiting for application startup..."
+            ATTEMPT=1
+            MAX_ATTEMPTS=18
+            until curl -fsS http://127.0.0.1:3000/api/health >/dev/null; do
+              if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+                echo "Application failed health check after ${MAX_ATTEMPTS} attempts"
+                $DOCKER ps -a || true
+                $DOCKER logs --tail 200 lomash-wood-admin || true
+                exit 1
+              fi
+
+              echo "Health check attempt ${ATTEMPT}/${MAX_ATTEMPTS} failed, retrying in 5s..."
+              sleep 5
+              ATTEMPT=$((ATTEMPT + 1))
+            done
+
+            echo "Application is healthy"
