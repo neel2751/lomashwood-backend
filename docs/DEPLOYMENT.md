@@ -4,52 +4,29 @@ This document covers the CI/CD pipeline, environment promotion strategy, and man
 
 ## Environments
 
-| Environment | Branch | URL | Auto-deploy |
-|---|---|---|---|
-| Local | any | `http://localhost:3000` | — |
-| Staging | `develop` | `https://admin-dev.lomashwood.co.uk` | Yes, on push |
-| Production | `main` | `https://admin.lomashwood.co.uk` | On release tag |
+| Environment | Branch    | URL                                  | Auto-deploy                      |
+| ----------- | --------- | ------------------------------------ | -------------------------------- |
+| Local       | any       | `http://localhost:3000`              | —                                |
+| Staging     | `develop` | `https://admin-dev.lomashwood.co.uk` | Yes, on push                     |
+| Production  | `main`    | `https://admin.lomashwood.co.uk`     | Yes, on push (or manual trigger) |
 
-## Prisma On Vercel
+## Prisma With Docker + DigitalOcean
 
-For Vercel deployments, do not run `prisma db push` when the app starts serving requests.
+This project no longer deploys on Vercel.
 
-- This repository already uses versioned migrations in `prisma/migrations`.
-- Vercel does not provide a reliable long-lived server startup phase for running schema changes.
-- Running schema updates on request startup can fail on cold starts and can race across multiple serverless instances.
+- Staging and production run as Docker containers on DigitalOcean droplets.
+- Use versioned migrations from `prisma/migrations`.
+- Do not run `prisma db push` at request startup.
 
-Use this flow instead:
+Use this flow for each deploy:
 
-1. `prisma migrate deploy` during the Vercel build step.
-2. `prisma generate` during install/build so the generated client in `generated/prisma` is always current.
-3. `next build` after migrations have been applied.
+1. Upload current source from GitHub Actions to the droplet over SSH/SCP.
+2. Build Docker image directly on the droplet.
+3. Run `prisma migrate deploy` in a one-off container on the droplet using the same env-file as the app.
+4. Restart the app container.
+5. Keep `prisma generate` as part of build/install so `generated/prisma` is current.
 
-The repository includes `vercel.json` with:
-
-```json
-{
-	"buildCommand": "npm run vercel-build"
-}
-```
-
-And `package.json` includes:
-
-```bash
-npm run vercel-build
-```
-
-which runs:
-
-```bash
-prisma migrate deploy && prisma generate && next build
-```
-
-Required Vercel environment variables:
-
-- `DATABASE_URL`
-- any existing app runtime variables already required by the project
-
-If production is failing on the first request today, the usual cause is that the deployed database schema is behind the code. Running migrations in the build step fixes that at the correct point in the deploy lifecycle.
+The env-file used on the droplet must include `DATABASE_URL` that is reachable from the app container (for example, a Docker network hostname for your Postgres container).
 
 ## CI/CD Pipeline
 
@@ -67,6 +44,7 @@ The pipeline is defined in `.github/workflows/`:
 Triggered on every push and pull request to `main` and `develop`.
 
 Steps:
+
 1. Checkout with submodules
 2. Setup Node.js 20 and pnpm cache
 3. `pnpm install --frozen-lockfile`
@@ -80,56 +58,55 @@ All steps must pass before a PR can be merged.
 
 ### deploy-staging.yml — Staging Deployment
 
-Triggered on push to the `develop` branch after CI passes.
+Triggered on push to the `develop` branch (or manually).
 
 Steps:
-1. Run full CI pipeline
-2. `pnpm build` with staging env vars injected from GitHub Secrets
-3. Build Docker image tagged with short SHA
-4. Push to container registry
-5. Deploy to staging server via SSH
-6. Run smoke test against `https://admin-dev.lomashwood.co.uk/api/health`
+
+1. Install dependencies, run lint + type-check + build
+2. Upload source to the staging droplet
+3. Build image on the staging droplet
+4. Run Prisma migrations via one-off container, then restart `lomash-wood-admin-staging`
+5. Run smoke test on droplet via `http://127.0.0.1:3000/api/health`
 
 ### deploy-production.yml — Production Deployment
 
-Triggered manually via `workflow_dispatch` or automatically on a semver release tag (`v*.*.*`).
+Triggered on push to `main` or manually via `workflow_dispatch` (with confirmation).
 
 Steps:
-1. Run full CI pipeline
-2. `pnpm build` with production env vars injected from GitHub Secrets
-3. Build and tag Docker image (`latest` + version tag)
-4. Push to container registry
-5. Deploy to production server via SSH with zero-downtime rolling restart
-6. Run smoke test against `https://admin.lomashwood.co.uk/api/health`
-7. Create Sentry release and upload source maps
+
+1. Run pre-deploy tests
+2. Upload source to the production droplet
+3. Build image on the production droplet
+4. Run Prisma migrations via one-off container, then restart `lomash-wood-admin`
+5. Run smoke test on droplet via `http://127.0.0.1:3000/api/health`
+6. Create a GitHub release tag
 
 ## GitHub Secrets Required
 
 Configure these in `Settings → Secrets and variables → Actions`:
 
-| Secret | Used In | Description |
-|---|---|---|
-| `NEXTAUTH_SECRET` | staging, production | NextAuth signing secret |
-| `AUTH_SERVICE_URL` | staging, production | Internal auth service URL |
-| `PRODUCT_SERVICE_URL` | staging, production | Internal product service URL |
-| `ORDER_SERVICE_URL` | staging, production | Internal order service URL |
-| `APPOINTMENT_SERVICE_URL` | staging, production | Internal appointment service URL |
-| `CUSTOMER_SERVICE_URL` | staging, production | Internal customer service URL |
-| `CONTENT_SERVICE_URL` | staging, production | Internal content service URL |
-| `NOTIFICATION_SERVICE_URL` | staging, production | Internal notification service URL |
-| `ANALYTICS_SERVICE_URL` | staging, production | Internal analytics service URL |
-| `STORAGE_ACCESS_KEY_ID` | staging, production | S3 access key |
-| `STORAGE_SECRET_ACCESS_KEY` | staging, production | S3 secret key |
-| `SMTP_PASS` | staging, production | SMTP password |
-| `SENTRY_AUTH_TOKEN` | production | Sentry source map upload token |
-| `SSH_PRIVATE_KEY` | staging, production | SSH key for server deployment |
-| `REGISTRY_TOKEN` | staging, production | Container registry auth token |
+| Secret             | Used In             | Description                    |
+| ------------------ | ------------------- | ------------------------------ |
+| `DROPLET_HOST`     | production          | Production droplet hostname/IP |
+| `DROPLET_USER`     | staging, production | SSH user for droplet           |
+| `DROPLET_PASSWORD` | staging, production | SSH password for droplet user  |
+
+Workflow-level variables in the YAML (not secrets) must be set to your actual values:
+
+- `STAGING_DROPLET_HOST`
+- `STAGING_ENV_FILE_PATH`
+- `STAGING_APP_DIR`
+
+Production workflow uses fixed paths in YAML:
+
+- `/opt/lomashwood/.env.production`
+- `/opt/lomashwood/production-app`
 
 ## Docker
 
 The app uses `output: "standalone"` in `next.config.js`, producing a minimal self-contained bundle.
 
-### Dockerfile (reference)
+### Dockerfile
 
 ```dockerfile
 FROM node:20-alpine AS base
@@ -166,6 +143,18 @@ docker build -t lomash-wood-admin .
 docker run -p 3000:3000 --env-file .env.local lomash-wood-admin
 ```
 
+### Local Postgres with Docker
+
+```bash
+docker compose -f docker-compose.db.yml up -d
+```
+
+Use:
+
+```bash
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+```
+
 ## Manual Deployment
 
 If you need to deploy outside the automated pipeline:
@@ -183,6 +172,7 @@ NODE_ENV=production node server.js
 To roll back to a previous version in production:
 
 ```bash
+
 ```
 
 Or via SSH on the server:

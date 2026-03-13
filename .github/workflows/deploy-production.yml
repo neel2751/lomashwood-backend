@@ -10,8 +10,8 @@ on:
         required: true
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
 
 jobs:
   guard:
@@ -56,6 +56,8 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
     concurrency:
       group: production-deploy
       cancel-in-progress: false
@@ -76,21 +78,55 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL }}
-          NEXT_PUBLIC_APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
-          NEXT_PUBLIC_GTM_ID: ${{ secrets.PRODUCTION_GTM_ID }}
+      - name: Build app
+        run: pnpm build
 
-      - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
+      - name: Upload source to droplet
+        uses: appleboy/scp-action@v0.1.7
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: --prod
-          working-directory: ./
-          alias-domains: admin.lomashwood.co.uk
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          port: 22
+          source: "."
+          target: "/tmp/lomashwood-production-${{ github.sha }}"
+
+      - name: Deploy on DigitalOcean droplet
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            mkdir -p "/opt/lomashwood/production-app"
+            cp -a "/tmp/lomashwood-production-${{ github.sha }}/." "/opt/lomashwood/production-app/"
+            if [ ! -f "/opt/lomashwood/.env.production" ]; then
+              echo "Missing env file: /opt/lomashwood/.env.production"
+              exit 1
+            fi
+            if ! grep -Eq '^DATABASE_URL=' "/opt/lomashwood/.env.production"; then
+              echo "DATABASE_URL is missing in /opt/lomashwood/.env.production"
+              exit 1
+            fi
+            docker network create appnet || true
+            cd "/opt/lomashwood/production-app"
+            docker build -t lomash-wood-admin:production .
+            docker run --rm \
+              --network appnet \
+              --env-file "/opt/lomashwood/.env.production" \
+              lomash-wood-admin:production \
+              prisma migrate deploy --schema=prisma/schema.prisma
+            docker rm -f lomash-wood-admin || true
+            docker run -d \
+              --name lomash-wood-admin \
+              --restart unless-stopped \
+              --network appnet \
+              -p 3000:3000 \
+              --env-file "/opt/lomashwood/.env.production" \
+              lomash-wood-admin:production
+            curl -fsS http://127.0.0.1:3000/api/health
 
       - name: Create GitHub Release Tag
         uses: actions/github-script@v7
@@ -104,25 +140,3 @@ jobs:
               ref: `refs/tags/prod-${date}-${run}`,
               sha: context.sha
             });
-
-      - name: Notify Slack on Success
-        if: success()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "🚀 *Production deploy succeeded!* Branch: `${{ github.ref_name }}` | Actor: ${{ github.actor }} | <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: Notify Slack on Failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "🔥 *Production deploy FAILED!* Branch: `${{ github.ref_name }}` | Actor: ${{ github.actor }} | <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

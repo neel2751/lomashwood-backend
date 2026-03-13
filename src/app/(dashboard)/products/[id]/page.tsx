@@ -139,6 +139,8 @@ export default async function ProductDetailPage({ params }: Props) {
                 { label: 'Style', value: styleLabel },
                 { label: 'Finish', value: finishLabel },
                 { label: 'Status', value: status.label, badge: true },
+                { label: 'Featured', value: product.isFeatured ? 'Yes' : 'No' },
+                { label: 'Popular', value: product.isPopular ? 'Yes' : 'No' },
                 { label: 'Base Price', value: formatCurrency(product.price) },
                 { label: 'SEO Slug Preview', value: `/products/${seoSlug || product.id}` },
               ].map(({ label, value, badge }) => (

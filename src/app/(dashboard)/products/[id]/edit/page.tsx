@@ -30,6 +30,8 @@ type FormState = {
   finishId: string;
   status: "draft" | "active";
   price: string;
+  isFeatured: boolean;
+  isPopular: boolean;
 };
 
 function mapImages(urls: string[] = []): UploadedImage[] {
@@ -87,6 +89,8 @@ export default function ProductEditPage() {
     finishId: "",
     status: "draft",
     price: "",
+    isFeatured: false,
+    isPopular: false,
   });
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [selectedColourIds, setSelectedColourIds] = useState<string[]>([]);
@@ -119,6 +123,8 @@ export default function ProductEditPage() {
       styleId?: string | null;
       finishId?: string | null;
       isPublished?: boolean;
+      isFeatured?: boolean;
+      isPopular?: boolean;
       price?: number | null;
       images?: string[];
       colours?: Array<{ id: string }>;
@@ -135,6 +141,8 @@ export default function ProductEditPage() {
       finishId: record.finishId || "",
       status: record.isPublished ? "active" : "draft",
       price: record.price ? String(record.price) : "",
+      isFeatured: record.isFeatured ?? false,
+      isPopular: record.isPopular ?? false,
     });
     setUploadedImages(mapImages(record.images || []));
     setSelectedColourIds((record.colours || []).map((item) => item.id));
@@ -200,6 +208,8 @@ export default function ProductEditPage() {
           colourIds: selectedColourIds,
           sizeIds: selectedSizeIds,
           isPublished: nextPublishedState,
+          isFeatured: form.isFeatured,
+          isPopular: form.isPopular,
         },
       });
 
@@ -402,6 +412,26 @@ export default function ProductEditPage() {
                           <option value="active">Active</option>
                         </select>
                       </div>
+                      <div className="field">
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={form.isFeatured}
+                            onChange={(e) => setForm((prev) => ({ ...prev, isFeatured: e.target.checked }))}
+                            disabled={isSaving}
+                          />
+                          Featured product
+                        </label>
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={form.isPopular}
+                            onChange={(e) => setForm((prev) => ({ ...prev, isPopular: e.target.checked }))}
+                            disabled={isSaving}
+                          />
+                          Popular product
+                        </label>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -566,6 +596,8 @@ export default function ProductEditPage() {
                 <span>Website: {form.status === "active" ? "Visible" : "Hidden"}</span>
                 <span>Primary image: {uploadedImages[0] ? "Ready" : "Missing"}</span>
                 <span>Catalogue completeness: {selectedColourIds.length > 0 && selectedSizeIds.length > 0 ? "Good" : "Needs options"}</span>
+                <span>Featured: {form.isFeatured ? "Yes" : "No"}</span>
+                <span>Popular: {form.isPopular ? "Yes" : "No"}</span>
               </div>
             </div>
 

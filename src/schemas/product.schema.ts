@@ -10,6 +10,8 @@ export const productSchema = z.object({
   colourIds: z.array(z.string()).min(1, "At least one colour is required"),
   sizeIds: z.array(z.string()).optional(),
   isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  isPopular: z.boolean().default(false),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

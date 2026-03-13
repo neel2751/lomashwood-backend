@@ -38,6 +38,8 @@ export default function NewProductPage() {
     finishId: '',
     status: 'draft' as 'draft' | 'active' | 'archived',
     price: '',
+    isFeatured: false,
+    isPopular: false,
   })
 
   const createProduct = useCreateProduct()
@@ -94,6 +96,8 @@ export default function NewProductPage() {
         colourIds: selectedColourIds,
         sizeIds: selectedSizeIds,
         isPublished,
+        isFeatured: form.isFeatured,
+        isPopular: form.isPopular,
       }) as { id?: string }
 
       toast.success('Product created successfully')
@@ -263,6 +267,30 @@ export default function NewProductPage() {
                         <option value="active">Active</option>
                         <option value="archived">Archived</option>
                       </select>
+                    </div>
+                    <div className="field">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={form.isFeatured}
+                          onChange={(e) =>
+                            setForm((prev) => ({ ...prev, isFeatured: e.target.checked }))
+                          }
+                          disabled={isSaving}
+                        />
+                        Featured product
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={form.isPopular}
+                          onChange={(e) =>
+                            setForm((prev) => ({ ...prev, isPopular: e.target.checked }))
+                          }
+                          disabled={isSaving}
+                        />
+                        Popular product
+                      </label>
                     </div>
                   </div>
                 </div>

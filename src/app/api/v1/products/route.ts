@@ -7,7 +7,16 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const query = Object.fromEntries(searchParams);
-    const data = await listProducts({ ...query, isPublished: "true" });
+
+    const featured = searchParams.get("featured");
+    const popular = searchParams.get("popular");
+
+    const data = await listProducts({
+      ...query,
+      isPublished: "true",
+      ...(featured !== null ? { isFeatured: featured } : {}),
+      ...(popular !== null ? { isPopular: popular } : {}),
+    });
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {

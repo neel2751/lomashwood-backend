@@ -26,6 +26,8 @@ const createProductSchema = z.object({
   colourIds: z.array(z.string()).default([]),
   sizeIds: z.array(z.string()).default([]),
   isPublished: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
+  isPopular: z.boolean().optional(),
 });
 
 const updateProductSchema = createProductSchema.partial().extend({
@@ -45,6 +47,8 @@ const querySchema = paginationQuerySchema.extend({
   styleId: z.string().optional(),
   finishId: z.string().optional(),
   isPublished: z.string().optional(),
+  isFeatured: z.string().optional(),
+  isPopular: z.string().optional(),
 });
 
 const productInclude = {
@@ -182,6 +186,16 @@ export async function listProducts(rawQuery: Record<string, unknown>) {
     where.isPublished = published;
   }
 
+  const featured = parseBoolean(query.isFeatured);
+  if (featured !== undefined) {
+    where.isFeatured = featured;
+  }
+
+  const popular = parseBoolean(query.isPopular);
+  if (popular !== undefined) {
+    where.isPopular = popular;
+  }
+
   if (query.search) {
     andFilters.push({
       OR: [
@@ -241,6 +255,8 @@ export async function createProduct(payload: unknown) {
       finish: normalizeFinish(data.finish),
       style: normalizeStyle(data.style),
       isPublished: data.isPublished ?? false,
+      isFeatured: data.isFeatured ?? false,
+      isPopular: data.isPopular ?? false,
       colours: {
         createMany: {
           data: data.colourIds.map((colourId) => ({ colourId })),
@@ -307,6 +323,8 @@ export async function updateProduct(id: string, payload: unknown) {
         finish: data.finish === null ? null : normalizeFinish(data.finish),
         style: data.style === null ? null : normalizeStyle(data.style),
         isPublished: data.isPublished,
+        isFeatured: data.isFeatured,
+        isPopular: data.isPopular,
       },
       include: productInclude,
     });

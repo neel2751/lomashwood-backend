@@ -81,6 +81,8 @@ export type Product = {
   sizes: Size[];
   category_ref?: Category;
   isPublished: boolean;
+  isFeatured: boolean;
+  isPopular: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -180,6 +182,8 @@ export type CreateProductPayload = {
   colourIds: string[];
   sizeIds?: string[];
   isPublished?: boolean;
+  isFeatured?: boolean;
+  isPopular?: boolean;
 };
 
 export type UpdateProductPayload = Partial<CreateProductPayload>;
@@ -244,6 +248,8 @@ export type ProductFilterParams = PaginationParams & {
   finishId?: string;
   rangeId?: string;
   isPublished?: boolean;
+  isFeatured?: boolean;
+  isPopular?: boolean;
 };
 
 export type InventoryFilterParams = PaginationParams & {

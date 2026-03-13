@@ -37,6 +37,8 @@ interface Product {
   sizes: Array<{ id: string; title: string }>;
   price?: number;
   isPublished: boolean;
+  isFeatured: boolean;
+  isPopular: boolean;
   images: string[];
   updatedAt: string;
 }
@@ -191,7 +193,7 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
                   className="w-4 h-4 rounded accent-[#C8924A] cursor-pointer"
                 />
               </th>
-              {["Product", "Category", "Colours", "Price", "Images", "Status", "Updated", ""].map((h) => (
+              {["Product", "Category", "Colours", "Price", "Labels", "Images", "Status", "Updated", ""].map((h) => (
                 <th key={h} className="px-3 py-3 text-left text-[10px] font-semibold tracking-[0.1em] uppercase text-[#7A776F]">
                   {h}
                 </th>
@@ -276,6 +278,25 @@ export function ProductTable({ sizeFilter }: ProductTableProps) {
                     <span className="text-[13px] font-semibold text-[#1A1A18]">
                       £{(product.price ?? 0).toLocaleString()}
                     </span>
+                  </td>
+
+                  {/* Labels */}
+                  <td className="px-3 py-3.5">
+                    <div className="flex items-center gap-1.5">
+                      {product.isFeatured ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700">
+                          Featured
+                        </span>
+                      ) : null}
+                      {product.isPopular ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-rose-100 text-rose-700">
+                          Popular
+                        </span>
+                      ) : null}
+                      {!product.isFeatured && !product.isPopular ? (
+                        <span className="text-[11px] text-[#8A8884]">-</span>
+                      ) : null}
+                    </div>
                   </td>
 
                   {/* Images */}

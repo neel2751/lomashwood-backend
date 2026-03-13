@@ -6,13 +6,18 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+  STAGING_DROPLET_HOST: "YOUR_STAGING_DROPLET_IP"
+  STAGING_ENV_FILE_PATH: "/opt/lomashwood/.env.staging"
+  STAGING_APP_DIR: "/opt/lomashwood/staging-app"
 
 jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     concurrency:
       group: staging-deploy
       cancel-in-progress: true
@@ -33,39 +38,56 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.STAGING_API_URL }}
-          NEXT_PUBLIC_APP_URL: ${{ secrets.STAGING_APP_URL }}
-          NEXT_PUBLIC_GTM_ID: ${{ secrets.STAGING_GTM_ID }}
+      - run: pnpm lint
 
-      - name: Deploy to Vercel (Staging)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
-          alias-domains: staging-admin.lomashwood.co.uk
+      - run: pnpm type-check
 
-      - name: Notify Slack on Success
-        if: success()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "✅ Staging deploy succeeded for `${{ github.ref_name }}` by ${{ github.actor }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Build app
+        run: pnpm build
 
-      - name: Notify Slack on Failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
+      - name: Upload source to droplet
+        uses: appleboy/scp-action@v0.1.7
         with:
-          payload: |
-            {
-              "text": "❌ Staging deploy failed for `${{ github.ref_name }}` by ${{ github.actor }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          host: ${{ env.STAGING_DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          port: 22
+          source: "."
+          target: "/tmp/lomashwood-staging-${{ github.sha }}"
+
+      - name: Deploy on DigitalOcean droplet
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.STAGING_DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            mkdir -p "${{ env.STAGING_APP_DIR }}"
+            cp -a "/tmp/lomashwood-staging-${{ github.sha }}/." "${{ env.STAGING_APP_DIR }}/"
+            if [ ! -f "${{ env.STAGING_ENV_FILE_PATH }}" ]; then
+              echo "Missing env file: ${{ env.STAGING_ENV_FILE_PATH }}"
+              exit 1
+            fi
+            if ! grep -Eq '^DATABASE_URL=' "${{ env.STAGING_ENV_FILE_PATH }}"; then
+              echo "DATABASE_URL is missing in ${{ env.STAGING_ENV_FILE_PATH }}"
+              exit 1
+            fi
+            docker network create appnet || true
+            cd "${{ env.STAGING_APP_DIR }}"
+            docker build -t lomash-wood-admin:staging .
+            docker run --rm \
+              --network appnet \
+              --env-file "${{ env.STAGING_ENV_FILE_PATH }}" \
+              lomash-wood-admin:staging \
+              prisma migrate deploy --schema=prisma/schema.prisma
+            docker rm -f lomash-wood-admin-staging || true
+            docker run -d \
+              --name lomash-wood-admin-staging \
+              --restart unless-stopped \
+              --network appnet \
+              -p 3000:3000 \
+              --env-file "${{ env.STAGING_ENV_FILE_PATH }}" \
+              lomash-wood-admin:staging
+            curl -fsS http://127.0.0.1:3000/api/health

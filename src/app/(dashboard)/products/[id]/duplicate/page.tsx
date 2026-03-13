@@ -43,6 +43,8 @@ export default function ProductDuplicatePage() {
         price?: number | null;
         styleId?: string | null;
         finishId?: string | null;
+        isFeatured?: boolean;
+        isPopular?: boolean;
         colours?: Array<{ id: string }>;
         sizes?: Array<{ id: string }>;
       }
@@ -72,6 +74,8 @@ export default function ProductDuplicatePage() {
         colourIds: (productData.colours || []).map((item) => item.id),
         sizeIds: (productData.sizes || []).map((item) => item.id),
         isPublished: false,
+        isFeatured: productData.isFeatured ?? false,
+        isPopular: productData.isPopular ?? false,
       })) as { id?: string };
 
       toast.success("Product duplicated as draft");
