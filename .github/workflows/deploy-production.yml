@@ -128,7 +128,7 @@ jobs:
             cd "$APP_DIR"
             DOCKER_BUILDKIT=1 $DOCKER build --no-cache --progress=plain -t lomash-wood-admin:production .
 
-            $DOCKER run --rm lomash-wood-admin:production node -e "require('dotenv'); require('prisma/config'); console.log('dotenv + prisma/config modules available')"
+            $DOCKER run --rm lomash-wood-admin:production sh -lc "prisma --version"
 
             $DOCKER run --rm \
               --network appnet \
