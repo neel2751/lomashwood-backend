@@ -98,11 +98,19 @@ jobs:
           port: 22
           script: |
             set -e
+            mkdir -p "/opt/lomashwood"
             mkdir -p "/opt/lomashwood/production-app"
             cp -a "/tmp/lomashwood-production-${{ github.sha }}/." "/opt/lomashwood/production-app/"
             if [ ! -f "/opt/lomashwood/.env.production" ]; then
-              echo "Missing env file: /opt/lomashwood/.env.production"
-              exit 1
+              if [ -n "${{ secrets.PRODUCTION_ENV_FILE_CONTENT }}" ]; then
+                printf "%s" "${{ secrets.PRODUCTION_ENV_FILE_CONTENT }}" > "/opt/lomashwood/.env.production"
+                chmod 600 "/opt/lomashwood/.env.production"
+                echo "Created /opt/lomashwood/.env.production from PRODUCTION_ENV_FILE_CONTENT secret"
+              else
+                echo "Missing env file: /opt/lomashwood/.env.production"
+                echo "Set secret PRODUCTION_ENV_FILE_CONTENT or create the file manually on droplet"
+                exit 1
+              fi
             fi
             if ! grep -Eq '^DATABASE_URL=' "/opt/lomashwood/.env.production"; then
               echo "DATABASE_URL is missing in /opt/lomashwood/.env.production"
