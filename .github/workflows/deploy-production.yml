@@ -98,6 +98,25 @@ jobs:
           port: 22
           script: |
             set -e
+            if ! command -v docker >/dev/null 2>&1; then
+              echo "Docker not found. Installing Docker..."
+              if command -v sudo >/dev/null 2>&1; then
+                curl -fsSL https://get.docker.com | sudo sh
+              else
+                curl -fsSL https://get.docker.com | sh
+              fi
+            fi
+
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if command -v sudo >/dev/null 2>&1; then
+                DOCKER="sudo docker"
+              else
+                echo "Docker is installed but not accessible for current user"
+                exit 1
+              fi
+            fi
+
             mkdir -p "/opt/lomashwood"
             mkdir -p "/opt/lomashwood/production-app"
             cp -a "/tmp/lomashwood-production-${{ github.sha }}/." "/opt/lomashwood/production-app/"
@@ -116,16 +135,16 @@ jobs:
               echo "DATABASE_URL is missing in /opt/lomashwood/.env.production"
               exit 1
             fi
-            docker network create appnet || true
+            $DOCKER network create appnet || true
             cd "/opt/lomashwood/production-app"
-            docker build -t lomash-wood-admin:production .
-            docker run --rm \
+            $DOCKER build -t lomash-wood-admin:production .
+            $DOCKER run --rm \
               --network appnet \
               --env-file "/opt/lomashwood/.env.production" \
               lomash-wood-admin:production \
               prisma migrate deploy --schema=prisma/schema.prisma
-            docker rm -f lomash-wood-admin || true
-            docker run -d \
+            $DOCKER rm -f lomash-wood-admin || true
+            $DOCKER run -d \
               --name lomash-wood-admin \
               --restart unless-stopped \
               --network appnet \
