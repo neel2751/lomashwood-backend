@@ -126,7 +126,9 @@ jobs:
             fi
 
             cd "$APP_DIR"
-            DOCKER_BUILDKIT=1 $DOCKER build --progress=plain -t lomash-wood-admin:production .
+            DOCKER_BUILDKIT=1 $DOCKER build --no-cache --progress=plain -t lomash-wood-admin:production .
+
+            $DOCKER run --rm lomash-wood-admin:production node -e "require('dotenv'); console.log('dotenv module available')"
 
             $DOCKER run --rm \
               --network appnet \
