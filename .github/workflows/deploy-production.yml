@@ -40,6 +40,7 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           password: ${{ secrets.DROPLET_PASSWORD }}
           port: 22
+          command_timeout: 60m
           script: |
             set -e
             if ! command -v docker >/dev/null 2>&1; then
@@ -76,7 +77,9 @@ jobs:
               echo "DATABASE_URL is missing in $ENV_FILE"
               exit 1
             fi
-            $DOCKER network create appnet || true
+            if ! $DOCKER network inspect appnet >/dev/null 2>&1; then
+              $DOCKER network create appnet >/dev/null
+            fi
             cd "$APP_DIR"
             $DOCKER build -t lomash-wood-admin:production .
             $DOCKER rm -f lomash-wood-admin || true
