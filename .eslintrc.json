@@ -1,10 +1,6 @@
 {
   "extends": ["next/core-web-vitals"],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/require-await": "warn",
-    "@typescript-eslint/no-unnecessary-condition": "warn",
-    "@typescript-eslint/no-var-requires": "off",
     "jsx-a11y/label-has-associated-control": "warn",
     "jsx-a11y/click-events-have-key-events": "warn",
     "jsx-a11y/no-static-element-interactions": "warn",
