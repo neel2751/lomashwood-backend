@@ -49,7 +49,7 @@ jobs:
 
       - run: pnpm type-check
 
-      - run: pnpm test --ci
+      - run: pnpm run test:ci
 
   deploy-production:
     name: Deploy to Production
