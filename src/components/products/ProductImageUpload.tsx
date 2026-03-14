@@ -25,7 +25,9 @@ interface ProductImageUploadProps {
   uploadFolder?: string;
 }
 
-function uid() { return Math.random().toString(36).slice(2, 8); }
+function uid() {
+  return Math.random().toString(36).slice(2, 8);
+}
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -51,10 +53,13 @@ export function ProductImageUpload({
     }
   }, [value]);
 
-  const emit = useCallback((imgs: UploadedImage[]) => {
-    setImages(imgs);
-    onChange?.(imgs);
-  }, [onChange]);
+  const emit = useCallback(
+    (imgs: UploadedImage[]) => {
+      setImages(imgs);
+      onChange?.(imgs);
+    },
+    [onChange],
+  );
 
   const processFiles = useCallback(
     async (files: FileList | null) => {
@@ -67,11 +72,11 @@ export function ProductImageUpload({
 
       const toAdd = Array.from(files)
         .filter((file) => file.type.startsWith("image/"))
-        .filter((file) => file.size <= 5 * 1024 * 1024)
+        .filter((file) => file.size <= 20 * 1024 * 1024)
         .slice(0, remaining);
 
       if (toAdd.length === 0) {
-        setUploadError("Only image files up to 5MB are allowed.");
+        setUploadError("Only image files up to 20MB are allowed.");
         return;
       }
 
@@ -82,6 +87,12 @@ export function ProductImageUpload({
 
       try {
         for (const [index, file] of toAdd.entries()) {
+          console.log("Presign request:", {
+            filename: file.name,
+            contentType: file.type || "application/octet-stream",
+            folder: uploadFolder,
+            source: "product-image-upload",
+          });
           const presignResponse = await fetch("/api/uploads/presign", {
             method: "POST",
             headers: {
@@ -105,6 +116,15 @@ export function ProductImageUpload({
             key: string;
             mediaId: string;
           };
+
+          console.log("PUT upload:", {
+            uploadUrl,
+            fileType: file.type,
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+            file,
+          });
 
           const uploadResponse = await fetch(uploadUrl, {
             method: "PUT",
@@ -131,12 +151,13 @@ export function ProductImageUpload({
 
         emit([...images, ...uploaded]);
       } catch (error) {
+        console.error("Error during image upload:", error);
         setUploadError(error instanceof Error ? error.message : "Image upload failed");
       } finally {
         setIsUploading(false);
       }
     },
-    [emit, images, isUploading, maxImages, uploadFolder]
+    [emit, images, isUploading, maxImages, uploadFolder],
   );
 
   const onDrop = useCallback(
@@ -145,7 +166,7 @@ export function ProductImageUpload({
       setIsDragging(false);
       processFiles(e.dataTransfer.files);
     },
-    [processFiles]
+    [processFiles],
   );
 
   const removeImage = (id: string) => {
@@ -170,31 +191,42 @@ export function ProductImageUpload({
       {canAdd && (
         <button
           type="button"
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           onClick={() => inputRef.current?.click()}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+          }}
           disabled={isUploading}
           aria-label="Upload images — click or drag and drop"
           className={cn(
-            "flex flex-col items-center justify-center gap-3 h-36 rounded-[12px] border-2 border-dashed transition-all cursor-pointer w-full",
+            "flex h-36 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-[12px] border-2 border-dashed transition-all",
             isDragging
               ? "border-[#C8924A] bg-[#C8924A]/10"
-              : "border-[#3D2E1E] bg-[#2E231A] hover:border-[#C8924A]/40 hover:bg-[#221A12]"
+              : "border-[#3D2E1E] bg-[#2E231A] hover:border-[#C8924A]/40 hover:bg-[#221A12]",
           )}
         >
-          <div className={cn(
-            "flex items-center justify-center w-10 h-10 rounded-full transition-all",
-            isDragging ? "bg-[#C8924A]/20 text-[#C8924A]" : "bg-[#3D2E1E] text-[#5A4232]"
-          )}>
+          <div
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-full transition-all",
+              isDragging ? "bg-[#C8924A]/20 text-[#C8924A]" : "bg-[#3D2E1E] text-[#5A4232]",
+            )}
+          >
             <Upload size={18} />
           </div>
           <div className="text-center">
             <p className="text-[13px] font-medium text-[#9A7A5A]">
-              {isUploading ? "Uploading images..." : isDragging ? "Drop images here" : "Drag & drop or click to upload"}
+              {isUploading
+                ? "Uploading images..."
+                : isDragging
+                  ? "Drop images here"
+                  : "Drag & drop or click to upload"}
             </p>
-            <p className="text-[11px] text-[#3D2E1E] mt-0.5">
+            <p className="mt-0.5 text-[11px] text-[#3D2E1E]">
               JPG, PNG, WebP · Max 5MB · {images.length}/{maxImages} uploaded
             </p>
           </div>
@@ -209,19 +241,17 @@ export function ProductImageUpload({
         </button>
       )}
 
-      {uploadError && (
-        <p className="text-[12px] text-red-400">{uploadError}</p>
-      )}
+      {uploadError && <p className="text-[12px] text-red-400">{uploadError}</p>}
 
       {/* Image grid */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {images.map((img) => (
             <div
               key={img.id}
               className={cn(
-                "relative group rounded-[10px] border overflow-hidden bg-[#2E231A] aspect-square",
-                img.isPrimary ? "border-[#C8924A]/60" : "border-[#3D2E1E]"
+                "group relative aspect-square overflow-hidden rounded-[10px] border bg-[#2E231A]",
+                img.isPrimary ? "border-[#C8924A]/60" : "border-[#3D2E1E]",
               )}
             >
               {/* Image */}
@@ -230,37 +260,45 @@ export function ProductImageUpload({
                 alt={img.name}
                 fill
                 className="object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
                 unoptimized
               />
 
               {/* Primary badge */}
               {img.isPrimary && (
-                <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-[#C8924A] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                <div className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-[#C8924A] px-1.5 py-0.5 text-[9px] font-bold text-white">
                   <Star size={8} />
                   Primary
                 </div>
               )}
 
               {/* Drag handle */}
-              <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab text-white/70">
+              <div className="absolute right-1.5 top-1.5 cursor-grab text-white/70 opacity-0 transition-opacity group-hover:opacity-100">
                 <GripVertical size={14} />
               </div>
 
               {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                 {!img.isPrimary && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); setPrimary(img.id); }}
-                    className="flex items-center gap-1 text-[10px] font-medium text-white bg-[#C8924A]/80 hover:bg-[#C8924A] px-2 py-1 rounded-full transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPrimary(img.id);
+                    }}
+                    className="flex items-center gap-1 rounded-full bg-[#C8924A]/80 px-2 py-1 text-[10px] font-medium text-white transition-colors hover:bg-[#C8924A]"
                   >
                     <Star size={10} />
                     Set Primary
                   </button>
                 )}
                 <button
-                  onClick={(e) => { e.stopPropagation(); removeImage(img.id); }}
-                  className="flex items-center gap-1 text-[10px] font-medium text-white bg-red-500/70 hover:bg-red-500 px-2 py-1 rounded-full transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeImage(img.id);
+                  }}
+                  className="flex items-center gap-1 rounded-full bg-red-500/70 px-2 py-1 text-[10px] font-medium text-white transition-colors hover:bg-red-500"
                 >
                   <X size={10} />
                   Remove
@@ -268,8 +306,8 @@ export function ProductImageUpload({
               </div>
 
               {/* File info */}
-              <div className="absolute bottom-0 inset-x-0 bg-black/60 px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-[9px] text-white/80 truncate">{img.name}</p>
+              <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <p className="truncate text-[9px] text-white/80">{img.name}</p>
                 <p className="text-[9px] text-white/50">{formatBytes(img.size)}</p>
               </div>
             </div>
@@ -281,7 +319,7 @@ export function ProductImageUpload({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={isUploading}
-              className="aspect-square rounded-[10px] border-2 border-dashed border-[#3D2E1E] bg-[#2E231A] flex flex-col items-center justify-center gap-1.5 text-[#3D2E1E] hover:border-[#C8924A]/40 hover:text-[#C8924A] hover:bg-[#221A12] transition-all"
+              className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-[10px] border-2 border-dashed border-[#3D2E1E] bg-[#2E231A] text-[#3D2E1E] transition-all hover:border-[#C8924A]/40 hover:bg-[#221A12] hover:text-[#C8924A]"
             >
               <Upload size={16} />
               <span className="text-[10px] font-medium">Add more</span>

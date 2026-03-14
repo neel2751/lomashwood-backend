@@ -24,9 +24,7 @@ function requiredEnv(name: string): string {
 
 function buildFileUrl(bucket: string, region: string, key: string): string {
   const configuredBase =
-    process.env.STORAGE_PUBLIC_BASE_URL ||
-    process.env.NEXT_PUBLIC_CDN_URL ||
-    "";
+    process.env.STORAGE_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_CDN_URL || "";
 
   const isLocalhostBase = /^https?:\/\/localhost(?::\d+)?\/?$/i.test(configuredBase.trim());
   const base =
