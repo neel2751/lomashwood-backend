@@ -93,3 +93,11 @@ export const MediaStatus = {
 } as const
 
 export type MediaStatus = (typeof MediaStatus)[keyof typeof MediaStatus]
+
+
+export const HeroSlideType = {
+  image: 'image',
+  video: 'video'
+} as const
+
+export type HeroSlideType = (typeof HeroSlideType)[keyof typeof HeroSlideType]

@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 export default function LandingPagesPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           title="Landing Pages"
           description="Manage all campaign and promotional landing pages."
@@ -22,4 +22,4 @@ export default function LandingPagesPage() {
     </div>
   );
 }
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

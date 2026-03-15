@@ -141,3 +141,8 @@ export type ShowroomDisplayProduct = Prisma.ShowroomDisplayProductModel
  * 
  */
 export type AdminUser = Prisma.AdminUserModel
+/**
+ * Model HeroSlide
+ * 
+ */
+export type HeroSlide = Prisma.HeroSlideModel

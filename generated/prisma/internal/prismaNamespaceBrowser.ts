@@ -70,7 +70,8 @@ export const ModelName = {
   Showroom: 'Showroom',
   Media: 'Media',
   ShowroomDisplayProduct: 'ShowroomDisplayProduct',
-  AdminUser: 'AdminUser'
+  AdminUser: 'AdminUser',
+  HeroSlide: 'HeroSlide'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,6 +407,27 @@ export const AdminUserScalarFieldEnum = {
 } as const
 
 export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
+
+
+export const HeroSlideScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  src: 'src',
+  title: 'title',
+  subtitle: 'subtitle',
+  description: 'description',
+  ctaText: 'ctaText',
+  ctaLink: 'ctaLink',
+  secondaryCtaText: 'secondaryCtaText',
+  secondaryCtaLink: 'secondaryCtaLink',
+  overlayOpacity: 'overlayOpacity',
+  order: 'order',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HeroSlideScalarFieldEnum = (typeof HeroSlideScalarFieldEnum)[keyof typeof HeroSlideScalarFieldEnum]
 
 
 export const SortOrder = {

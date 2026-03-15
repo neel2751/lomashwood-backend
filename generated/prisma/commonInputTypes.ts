@@ -443,6 +443,23 @@ export type EnumMediaStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumMediaStatusFilter<$PrismaModel>
 }
 
+export type EnumHeroSlideTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HeroSlideType | Prisma.EnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHeroSlideTypeFilter<$PrismaModel> | $Enums.HeroSlideType
+}
+
+export type EnumHeroSlideTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HeroSlideType | Prisma.EnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHeroSlideTypeWithAggregatesFilter<$PrismaModel> | $Enums.HeroSlideType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHeroSlideTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHeroSlideTypeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -834,6 +851,23 @@ export type NestedEnumMediaStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumMediaStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumMediaStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumHeroSlideTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HeroSlideType | Prisma.EnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHeroSlideTypeFilter<$PrismaModel> | $Enums.HeroSlideType
+}
+
+export type NestedEnumHeroSlideTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HeroSlideType | Prisma.EnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHeroSlideTypeWithAggregatesFilter<$PrismaModel> | $Enums.HeroSlideType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHeroSlideTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHeroSlideTypeFilter<$PrismaModel>
 }
 
 

@@ -2,13 +2,7 @@ import { NextResponse } from "next/server";
 
 import type { NextRequest } from "next/server";
 
-
-const PUBLIC_PATHS = [
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-];
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
 
 const API_PUBLIC_PATHS = [
   "/api/auth/login",
@@ -29,15 +23,11 @@ const DEFAULT_CORS_ALLOWED_ORIGINS = [
 const STATIC_EXTENSIONS = /\.(ico|svg|png|jpg|jpeg|webp|gif|woff|woff2|ttf|otf|css|js|map)$/;
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(path + "/"),
-  );
+  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"));
 }
 
 function isApiPublicPath(pathname: string): boolean {
-  return API_PUBLIC_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(path + "/"),
-  );
+  return API_PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"));
 }
 
 function isStaticAsset(pathname: string): boolean {
@@ -55,11 +45,7 @@ function getAllowedCorsOrigins(): Set<string> {
     .filter(Boolean);
 
   const fallback = process.env.NEXT_PUBLIC_URL?.trim();
-  const all = [
-    ...DEFAULT_CORS_ALLOWED_ORIGINS,
-    ...(fallback ? [fallback] : []),
-    ...configured,
-  ];
+  const all = [...DEFAULT_CORS_ALLOWED_ORIGINS, ...(fallback ? [fallback] : []), ...configured];
 
   return new Set(all);
 }
@@ -96,9 +82,7 @@ function isTokenExpired(token: string): boolean {
   try {
     const [, payloadB64] = token.split(".");
     if (!payloadB64) return true;
-    const payload = JSON.parse(
-      Buffer.from(payloadB64, "base64url").toString("utf-8"),
-    );
+    const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf-8"));
     if (!payload.exp) return false;
     const bufferSeconds = 60;
     return Date.now() / 1000 >= payload.exp - bufferSeconds;
@@ -141,23 +125,23 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
     "http://localhost:8000",
     "https://*.amazonaws.com",
     "https://*.r2.cloudflarestorage.com",
+    "https://maps.googleapis.com",
+    "https://*.google.com",
+    "https://*.googleapis.com",
   ];
 
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()",
-  );
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   response.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://maps.googleapis.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https:",
+      "img-src 'self' data: blob: https: https://*.googleapis.com https://*.gstatic.com",
       `connect-src ${connectSources.join(" ")}`,
       "frame-ancestors 'none'",
     ].join("; "),
@@ -169,9 +153,7 @@ function getUserRole(token: string): string | null {
   try {
     const [, payloadB64] = token.split(".");
     if (!payloadB64) return null;
-    const payload = JSON.parse(
-      Buffer.from(payloadB64, "base64url").toString("utf-8"),
-    );
+    const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf-8"));
     return payload.role ?? null;
   } catch {
     return null;
@@ -185,28 +167,16 @@ const SUPER_ADMIN_ONLY_PATHS = [
   "/settings/audit-logs",
 ];
 
-const ADMIN_AND_ABOVE_PATHS = [
-  "/auth/users",
-  "/auth/sessions",
-  "/settings",
-];
+const ADMIN_AND_ABOVE_PATHS = ["/auth/users", "/auth/sessions", "/settings"];
 
 function isAuthorizedForPath(pathname: string, role: string | null): boolean {
   if (!role) return false;
 
-  if (
-    SUPER_ADMIN_ONLY_PATHS.some(
-      (path) => pathname === path || pathname.startsWith(path + "/"),
-    )
-  ) {
+  if (SUPER_ADMIN_ONLY_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"))) {
     return role === "super_admin";
   }
 
-  if (
-    ADMIN_AND_ABOVE_PATHS.some(
-      (path) => pathname === path || pathname.startsWith(path + "/"),
-    )
-  ) {
+  if (ADMIN_AND_ABOVE_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"))) {
     return role === "super_admin" || role === "admin";
   }
 
@@ -242,14 +212,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       }
 
       try {
-        const refreshRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refreshToken }),
-          },
-        );
+        const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
 
         if (!refreshRes.ok) {
           return addApiCorsHeaders(request, buildUnauthorizedApiResponse());
@@ -283,8 +250,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
     if (token && !isTokenExpired(token)) {
       const returnUrl = request.nextUrl.searchParams.get("returnUrl");
-      const destination =
-        returnUrl && returnUrl.startsWith("/") ? returnUrl : "/";
+      const destination = returnUrl && returnUrl.startsWith("/") ? returnUrl : "/";
       return NextResponse.redirect(new URL(destination, request.url));
     }
 
@@ -305,14 +271,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
 
     try {
-      const refreshRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken }),
-        },
-      );
+      const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
 
       if (!refreshRes.ok) {
         return buildLoginRedirect(request);
@@ -345,7 +308,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|fonts|logo.svg|logo-dark.svg).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|fonts|logo.svg|logo-dark.svg).*)"],
 };
