@@ -92,22 +92,6 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
   const activeCount = slides.filter((s) => s.isActive).length;
   const inactiveCount = slides.filter((s) => !s.isActive).length;
 
-  if (isLoading) {
-    return (
-      <div className="overflow-hidden rounded-[16px] border border-[#2E231A] bg-[#1C1611] p-8">
-        <p className="text-center text-[#5A4232]">Loading hero slides...</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="overflow-hidden rounded-[16px] border border-[#2E231A] bg-[#1C1611] p-8">
-        <p className="text-center text-red-400">Failed to load hero slides.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-hidden rounded-[16px] border border-[#2E231A] bg-[#1C1611]">
       {/* Stats strip */}
@@ -168,7 +152,17 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
 
       {/* Slides list */}
       <div className="divide-y divide-[#2E231A]">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="px-5 py-10 text-center">
+            <p className="text-[13px] text-[#5A4232]">Loading hero slides...</p>
+          </div>
+        ) : isError ? (
+          <div className="px-5 py-10 text-center">
+            <p className="text-[13px] text-red-400">
+              Failed to load hero slides. You can still create a new slide.
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="px-5 py-10 text-center">
             <p className="text-[13px] text-[#5A4232]">No slides found</p>
           </div>
