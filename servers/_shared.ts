@@ -37,6 +37,30 @@ export function calculatePagination(total: number, page: number, pageSize: numbe
   };
 }
 
+export function searchParamsToQuery(
+  searchParams: URLSearchParams,
+): Record<string, string | string[]> {
+  const query: Record<string, string | string[]> = {};
+
+  for (const [key, value] of searchParams.entries()) {
+    const existing = query[key];
+
+    if (existing === undefined) {
+      query[key] = value;
+      continue;
+    }
+
+    if (Array.isArray(existing)) {
+      existing.push(value);
+      continue;
+    }
+
+    query[key] = [existing, value];
+  }
+
+  return query;
+}
+
 export function parseZodError(error: unknown): string {
   if (error instanceof z.ZodError) {
     return error.issues.map((issue) => issue.message).join(", ");

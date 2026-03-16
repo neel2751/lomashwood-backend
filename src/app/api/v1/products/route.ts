@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { listProducts } from "@servers/products.actions";
-import { parseZodError } from "@servers/_shared";
+import { parseZodError, searchParamsToQuery } from "@servers/_shared";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const query = Object.fromEntries(searchParams);
+    const query = searchParamsToQuery(searchParams);
 
     const featured = searchParams.get("featured");
     const popular = searchParams.get("popular");

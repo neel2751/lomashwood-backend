@@ -2,20 +2,9 @@ import type { PaginationParams } from "./api.types";
 
 export type ProductCategory = "kitchen" | "bedroom";
 
-export type ProductFinish =
-  | "gloss"
-  | "matt"
-  | "satin"
-  | "handleless"
-  | "shaker"
-  | "in-frame";
+export type ProductFinish = "gloss" | "matt" | "satin" | "handleless" | "shaker" | "in-frame";
 
-export type ProductStyle =
-  | "contemporary"
-  | "traditional"
-  | "modern"
-  | "classic"
-  | "rustic";
+export type ProductStyle = "contemporary" | "traditional" | "modern" | "classic" | "rustic";
 
 export type ProductStyleOption = {
   id: string;
@@ -241,11 +230,20 @@ export type CreateShowroomPayload = {
 export type ProductFilterParams = PaginationParams & {
   search?: string;
   category?: ProductCategory;
-  colourId?: string;
-  style?: string;
-  finish?: string;
-  styleId?: string;
-  finishId?: string;
+  colourId?: string | string[];
+  colourIds?: string[];
+  sizeId?: string | string[];
+  sizeIds?: string[];
+  packageId?: string | string[];
+  packageIds?: string[];
+  style?: string | string[];
+  styles?: string[];
+  finish?: string | string[];
+  finishes?: string[];
+  styleId?: string | string[];
+  styleIds?: string[];
+  finishId?: string | string[];
+  finishIds?: string[];
   rangeId?: string;
   isPublished?: boolean;
   isFeatured?: boolean;

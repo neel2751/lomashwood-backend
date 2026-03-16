@@ -5,11 +5,17 @@ import { z } from "zod";
 
 import prisma from "@/lib/prisma";
 
-import { ActionError, calculatePagination, paginationQuerySchema, parseBoolean } from "@servers/_shared";
+import {
+  ActionError,
+  calculatePagination,
+  paginationQuerySchema,
+  parseBoolean,
+} from "@servers/_shared";
 
 const productCategorySchema = z.enum(["kitchen", "bedroom"]);
 const productFinishSchema = z.enum(["gloss", "matt", "satin", "handleless", "shaker", "in-frame"]);
 const productStyleSchema = z.enum(["contemporary", "traditional", "modern", "classic", "rustic"]);
+const multiValueStringSchema = z.union([z.string(), z.array(z.string())]).optional();
 
 const createProductSchema = z.object({
   title: z.string().min(1),
@@ -41,11 +47,20 @@ const updateProductSchema = createProductSchema.partial().extend({
 const querySchema = paginationQuerySchema.extend({
   search: z.string().optional(),
   category: productCategorySchema.optional(),
-  packageId: z.string().optional(),
-  style: z.string().optional(),
-  finish: z.string().optional(),
-  styleId: z.string().optional(),
-  finishId: z.string().optional(),
+  packageId: multiValueStringSchema,
+  packageIds: multiValueStringSchema,
+  style: multiValueStringSchema,
+  styles: multiValueStringSchema,
+  finish: multiValueStringSchema,
+  finishes: multiValueStringSchema,
+  styleId: multiValueStringSchema,
+  styleIds: multiValueStringSchema,
+  finishId: multiValueStringSchema,
+  finishIds: multiValueStringSchema,
+  colourId: multiValueStringSchema,
+  colourIds: multiValueStringSchema,
+  sizeId: multiValueStringSchema,
+  sizeIds: multiValueStringSchema,
   isPublished: z.string().optional(),
   isFeatured: z.string().optional(),
   isPopular: z.string().optional(),
@@ -74,9 +89,7 @@ function normalizeLegacyStyleFilter(value?: string) {
 
   const normalized = value.trim().toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_");
   const enumValues: ProductStyle[] = ["contemporary", "traditional", "modern", "classic", "rustic"];
-  return enumValues.includes(normalized as ProductStyle)
-    ? (normalized as ProductStyle)
-    : undefined;
+  return enumValues.includes(normalized as ProductStyle) ? (normalized as ProductStyle) : undefined;
 }
 
 async function resolveOptionReferences(input: {
@@ -84,7 +97,8 @@ async function resolveOptionReferences(input: {
   styleId?: string | null;
   finishId?: string | null;
 }) {
-  const updates: { packageId?: string | null; styleId?: string | null; finishId?: string | null } = {};
+  const updates: { packageId?: string | null; styleId?: string | null; finishId?: string | null } =
+    {};
 
   if (input.packageId !== undefined) {
     if (input.packageId === null) {
@@ -148,39 +162,110 @@ function toProductDto(product: Prisma.ProductGetPayload<{ include: typeof produc
   };
 }
 
+function toStringArray(value?: string | string[]) {
+  if (!value) {
+    return [];
+  }
+
+  const values = Array.isArray(value) ? value : [value];
+
+  return [
+    ...new Set(
+      values
+        .flatMap((entry) => entry.split(","))
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
 export async function listProducts(rawQuery: Record<string, unknown>) {
   const query = querySchema.parse(rawQuery);
   const { page, limit } = query;
   const skip = (page - 1) * limit;
-  const styleEnum = normalizeLegacyStyleFilter(query.style);
-  const finishEnum = normalizeFinish(query.finish);
   const andFilters: Prisma.ProductWhereInput[] = [];
+  const packageIds = toStringArray(query.packageIds ?? query.packageId);
+  const styleIds = toStringArray(query.styleIds ?? query.styleId);
+  const finishIds = toStringArray(query.finishIds ?? query.finishId);
+  const colourIds = toStringArray(query.colourIds ?? query.colourId);
+  const sizeIds = toStringArray(query.sizeIds ?? query.sizeId);
+  const styleValues = toStringArray(query.styles ?? query.style);
+  const finishValues = toStringArray(query.finishes ?? query.finish);
 
   const where: Prisma.ProductWhereInput = {
     category: query.category,
-    packageId: query.packageId,
-    styleId: query.styleId,
-    finishId: query.finishId,
   };
 
-  if (query.style) {
+  // ── Multi-value: packageId ──
+  if (packageIds.length === 1) {
+    where.packageId = packageIds[0];
+  } else if (packageIds.length > 1) {
+    where.packageId = { in: packageIds };
+  }
+
+  // ── Multi-value: styleId ──
+  if (styleIds.length === 1) {
+    where.styleId = styleIds[0];
+  } else if (styleIds.length > 1) {
+    where.styleId = { in: styleIds };
+  }
+
+  // ── Multi-value: finishId ──
+  if (finishIds.length === 1) {
+    where.finishId = finishIds[0];
+  } else if (finishIds.length > 1) {
+    where.finishId = { in: finishIds };
+  }
+
+  // ── Multi-value: style (name / enum) ──
+  if (styleValues.length > 0) {
+    const styleEnums = styleValues
+      .map(normalizeLegacyStyleFilter)
+      .filter((v): v is ProductStyle => v !== undefined);
+
+    const orConditions: Prisma.ProductWhereInput[] = styleValues.map((s) => ({
+      styleRef: { name: { equals: s, mode: "insensitive" as const } },
+    }));
+
+    if (styleEnums.length > 0) {
+      orConditions.push({ style: { in: styleEnums } });
+    }
+
+    andFilters.push({ OR: orConditions });
+  }
+
+  // ── Multi-value: finish (name / enum) ──
+  if (finishValues.length > 0) {
+    const finishEnums = finishValues
+      .map(normalizeFinish)
+      .filter((v): v is ProductFinish => v !== undefined);
+
+    const orConditions: Prisma.ProductWhereInput[] = finishValues.map((f) => ({
+      finishRef: { name: { equals: f, mode: "insensitive" as const } },
+    }));
+
+    if (finishEnums.length > 0) {
+      orConditions.push({ finish: { in: finishEnums } });
+    }
+
+    andFilters.push({ OR: orConditions });
+  }
+
+  // ── Multi-value: colourId (join table) ──
+  if (colourIds.length > 0) {
     andFilters.push({
-      OR: [
-        { styleRef: { name: { contains: query.style, mode: "insensitive" } } },
-        ...(styleEnum ? [{ style: styleEnum }] : []),
-      ],
+      colours: { some: { colourId: { in: colourIds } } },
     });
   }
 
-  if (query.finish) {
+  // ── Multi-value: sizeId (join table) ──
+  if (sizeIds.length > 0) {
     andFilters.push({
-      OR: [
-        { finishRef: { name: { contains: query.finish, mode: "insensitive" } } },
-        ...(finishEnum ? [{ finish: finishEnum }] : []),
-      ],
+      sizes: { some: { sizeId: { in: sizeIds } } },
     });
   }
 
+  // ── Boolean filters ──
   const published = parseBoolean(query.isPublished);
   if (published !== undefined) {
     where.isPublished = published;
@@ -196,12 +281,13 @@ export async function listProducts(rawQuery: Record<string, unknown>) {
     where.isPopular = popular;
   }
 
+  // ── Text search ──
   if (query.search) {
     andFilters.push({
       OR: [
-      { title: { contains: query.search, mode: "insensitive" } },
-      { description: { contains: query.search, mode: "insensitive" } },
-      { rangeName: { contains: query.search, mode: "insensitive" } },
+        { title: { contains: query.search, mode: "insensitive" } },
+        { description: { contains: query.search, mode: "insensitive" } },
+        { rangeName: { contains: query.search, mode: "insensitive" } },
       ],
     });
   }

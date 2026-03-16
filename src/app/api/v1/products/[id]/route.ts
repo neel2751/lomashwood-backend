@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getProductById } from "@servers/products.actions";
 import { listProductOptions } from "@servers/product-options.actions";
-import { parseZodError } from "@servers/_shared";
+import { parseZodError, searchParamsToQuery } from "@servers/_shared";
 import prisma from "@/lib/prisma";
 
 async function getPublicColours(req: NextRequest) {
@@ -71,16 +71,21 @@ async function getPublicSizes(req: NextRequest) {
 
 async function getPublicFinishes(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const query = Object.fromEntries(searchParams);
+  const query = searchParamsToQuery(searchParams);
   const data = await listProductOptions("finish", { ...query, isActive: "true" });
 
   return NextResponse.json(data, { status: 200 });
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+async function getPublicStyles(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const query = searchParamsToQuery(searchParams);
+  const data = await listProductOptions("style", { ...query, isActive: "true" });
+
+  return NextResponse.json(data, { status: 200 });
+}
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   if (params.id === "colours") {
     return getPublicColours(req);
   }
@@ -91,6 +96,10 @@ export async function GET(
 
   if (params.id === "finish") {
     return getPublicFinishes(req);
+  }
+
+  if (params.id === "style") {
+    return getPublicStyles(req);
   }
 
   try {
