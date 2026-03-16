@@ -117,6 +117,7 @@ export const ColourScalarFieldEnum = {
   id: 'id',
   name: 'name',
   hexCode: 'hexCode',
+  isFeatured: 'isFeatured',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

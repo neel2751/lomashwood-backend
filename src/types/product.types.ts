@@ -30,6 +30,7 @@ export type Colour = {
   id: string;
   name: string;
   hexCode: string;
+  isFeatured: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -192,6 +193,7 @@ export type UpdatePackagePayload = Partial<CreatePackagePayload>;
 export type CreateColourPayload = {
   name: string;
   hexCode: string;
+  isFeatured?: boolean;
 };
 
 export type CreateSizePayload = {

@@ -1,12 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { parseBoolean } from "@servers/_shared";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search")?.trim();
     const productId = searchParams.get("productId")?.trim();
+    const featured = parseBoolean(searchParams.get("featured"));
 
     const where = {
       ...(search
@@ -25,6 +27,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
+      ...(featured === true ? { isFeatured: true } : {}),
     };
 
     const data = await prisma.colour.findMany({

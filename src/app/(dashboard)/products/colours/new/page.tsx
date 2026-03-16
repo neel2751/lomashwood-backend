@@ -1,88 +1,94 @@
-"use client"
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition } from "react";
 
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { PageHeader } from '@/components/layout/PageHeader'
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const PRESET_PALETTES = [
-  { name: 'Arctic White', hex: '#F8F8F6' },
-  { name: 'Cashmere', hex: '#D4C5B0' },
-  { name: 'Warm Oak', hex: '#C8A87A' },
-  { name: 'Sage Green', hex: '#7B9E87' },
-  { name: 'Navy Blue', hex: '#1B2A4A' },
-  { name: 'Graphite Grey', hex: '#5A5A5A' },
-  { name: 'Midnight Black', hex: '#1A1A18' },
-  { name: 'Dusky Pink', hex: '#D4A5A0' },
-  { name: 'Slate Blue', hex: '#4A6B8A' },
-  { name: 'Moss', hex: '#5C7A5A' },
-  { name: 'Linen', hex: '#E8DDD0' },
-  { name: 'Charcoal', hex: '#3A3A38' },
-]
+  { name: "Arctic White", hex: "#F8F8F6" },
+  { name: "Cashmere", hex: "#D4C5B0" },
+  { name: "Warm Oak", hex: "#C8A87A" },
+  { name: "Sage Green", hex: "#7B9E87" },
+  { name: "Navy Blue", hex: "#1B2A4A" },
+  { name: "Graphite Grey", hex: "#5A5A5A" },
+  { name: "Midnight Black", hex: "#1A1A18" },
+  { name: "Dusky Pink", hex: "#D4A5A0" },
+  { name: "Slate Blue", hex: "#4A6B8A" },
+  { name: "Moss", hex: "#5C7A5A" },
+  { name: "Linen", hex: "#E8DDD0" },
+  { name: "Charcoal", hex: "#3A3A38" },
+];
 
 function isLight(hex: string): boolean {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return (r * 299 + g * 587 + b * 114) / 1000 > 128
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 128;
 }
 
 function isValidHex(hex: string): boolean {
-  return /^#[0-9A-Fa-f]{6}$/.test(hex)
+  return /^#[0-9A-Fa-f]{6}$/.test(hex);
 }
 
 export default function NewColourPage() {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [name, setName] = useState('')
-  const [hex, setHex] = useState('#C8A87A')
-  const [hexInput, setHexInput] = useState('#C8A87A')
-  const [category, setCategory] = useState<'both' | 'kitchen' | 'bedroom'>('both')
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [name, setName] = useState("");
+  const [hex, setHex] = useState("#C8A87A");
+  const [hexInput, setHexInput] = useState("#C8A87A");
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [category, setCategory] = useState<"both" | "kitchen" | "bedroom">("both");
+  const [error, setError] = useState<string | null>(null);
 
   function applyHexInput(value: string) {
-    const normalized = value.startsWith('#') ? value : `#${value}`
-    setHexInput(normalized)
+    const normalized = value.startsWith("#") ? value : `#${value}`;
+    setHexInput(normalized);
     if (isValidHex(normalized)) {
-      setHex(normalized)
+      setHex(normalized);
     }
   }
 
   function selectPreset(preset: { name: string; hex: string }) {
-    setHex(preset.hex)
-    setHexInput(preset.hex)
-    if (!name) setName(preset.name)
+    setHex(preset.hex);
+    setHexInput(preset.hex);
+    if (!name) setName(preset.name);
   }
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    if (!name.trim()) { setError('Colour name is required.'); return }
-    if (!isValidHex(hex)) { setError('Please enter a valid 6-digit hex colour.'); return }
+    e.preventDefault();
+    setError(null);
+    if (!name.trim()) {
+      setError("Colour name is required.");
+      return;
+    }
+    if (!isValidHex(hex)) {
+      setError("Please enter a valid 6-digit hex colour.");
+      return;
+    }
 
     startTransition(async () => {
       try {
-        const res = await fetch('/api/products/colours', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.trim(), hex, category }),
-        })
+        const res = await fetch("/api/products/colours", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name.trim(), hexCode: hex, isFeatured }),
+        });
         if (!res.ok) {
-          const data = await res.json()
-          setError(data.message ?? 'Failed to create colour.')
-          return
+          const data = await res.json();
+          setError(data.message ?? "Failed to create colour.");
+          return;
         }
-        router.push('/products/colours')
+        router.push("/products/colours");
       } catch {
-        setError('Something went wrong. Please try again.')
+        setError("Something went wrong. Please try again.");
       }
-    })
+    });
   }
 
-  const textColor = isLight(hex) ? '#1A1A18' : '#F5F0E8'
+  const textColor = isLight(hex) ? "#1A1A18" : "#F5F0E8";
 
   return (
     <div className="new-colour-page">
@@ -98,9 +104,14 @@ export default function NewColourPage() {
           {error && (
             <div className="form-error" role="alert">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7.25" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M8 4.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="8" cy="11" r="0.75" fill="currentColor"/>
+                <circle cx="8" cy="8" r="7.25" stroke="currentColor" strokeWidth="1.5" />
+                <path
+                  d="M8 4.5V8.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="8" cy="11" r="0.75" fill="currentColor" />
               </svg>
               {error}
             </div>
@@ -110,12 +121,14 @@ export default function NewColourPage() {
             <h2 className="form-card__title">Colour details</h2>
 
             <div className="field">
-              <label htmlFor="colour-name">Name <span className="req">*</span></label>
+              <label htmlFor="colour-name">
+                Name <span className="req">*</span>
+              </label>
               <input
                 id="colour-name"
                 type="text"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Arctic White"
                 maxLength={60}
               />
@@ -125,19 +138,19 @@ export default function NewColourPage() {
               <label>Category</label>
               <div className="cat-options">
                 {[
-                  { value: 'both', label: 'Both', desc: 'Kitchen & Bedroom' },
-                  { value: 'kitchen', label: 'Kitchen only', desc: '' },
-                  { value: 'bedroom', label: 'Bedroom only', desc: '' },
-                ].map(opt => (
+                  { value: "both", label: "Both", desc: "Kitchen & Bedroom" },
+                  { value: "kitchen", label: "Kitchen only", desc: "" },
+                  { value: "bedroom", label: "Bedroom only", desc: "" },
+                ].map((opt) => (
                   <label
                     key={opt.value}
-                    className={`cat-option${category === opt.value ? ' cat-option--active' : ''}`}
+                    className={`cat-option${category === opt.value ? "cat-option--active" : ""}`}
                   >
                     <input
                       type="radio"
                       name="category"
                       value={opt.value}
-                      checked={category === opt.value as typeof category}
+                      checked={category === (opt.value as typeof category)}
                       onChange={() => setCategory(opt.value as typeof category)}
                     />
                     <span className="cat-option__label">{opt.label}</span>
@@ -148,21 +161,39 @@ export default function NewColourPage() {
             </div>
 
             <div className="field">
-              <label>Hex code <span className="req">*</span></label>
+              <label htmlFor="colour-featured">Featured colour</label>
+              <label className="cat-option" htmlFor="colour-featured">
+                <input
+                  id="colour-featured"
+                  type="checkbox"
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                />
+                <span className="cat-option__label">Show in featured colours</span>
+              </label>
+            </div>
+
+            <div className="field">
+              <label>
+                Hex code <span className="req">*</span>
+              </label>
               <div className="hex-input-row">
                 <div className="hex-preview" style={{ background: hex }} aria-hidden="true" />
                 <input
                   type="text"
                   value={hexInput}
-                  onChange={e => applyHexInput(e.target.value)}
+                  onChange={(e) => applyHexInput(e.target.value)}
                   placeholder="#C8A87A"
                   maxLength={7}
-                  className={`hex-text-input${!isValidHex(hexInput) && hexInput.length > 1 ? ' hex-text-input--error' : ''}`}
+                  className={`hex-text-input${!isValidHex(hexInput) && hexInput.length > 1 ? "hex-text-input--error" : ""}`}
                 />
                 <input
                   type="color"
-                  value={isValidHex(hex) ? hex : '#C8A87A'}
-                  onChange={e => { setHex(e.target.value); setHexInput(e.target.value) }}
+                  value={isValidHex(hex) ? hex : "#C8A87A"}
+                  onChange={(e) => {
+                    setHex(e.target.value);
+                    setHexInput(e.target.value);
+                  }}
                   className="colour-picker-native"
                   title="Open colour picker"
                 />
@@ -177,18 +208,25 @@ export default function NewColourPage() {
             <h2 className="form-card__title">Preset palettes</h2>
             <p className="form-card__sub">Click a swatch to use it as a starting point.</p>
             <div className="preset-grid">
-              {PRESET_PALETTES.map(preset => (
+              {PRESET_PALETTES.map((preset) => (
                 <button
                   key={preset.hex}
                   type="button"
-                  className={`preset-swatch${hex === preset.hex ? ' preset-swatch--active' : ''}`}
+                  className={`preset-swatch${hex === preset.hex ? "preset-swatch--active" : ""}`}
                   style={{ background: preset.hex }}
                   onClick={() => selectPreset(preset)}
                   title={preset.name}
                 >
                   {hex === preset.hex && (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={textColor} strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12"/>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={textColor}
+                      strokeWidth="3"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
                   )}
                 </button>
@@ -197,10 +235,12 @@ export default function NewColourPage() {
           </div>
 
           <div className="form-actions">
-            <Link href="/products/colours" className="btn-ghost">Cancel</Link>
+            <Link href="/products/colours" className="btn-ghost">
+              Cancel
+            </Link>
             <button type="submit" className="btn-primary" disabled={isPending}>
               {isPending && <span className="btn-spinner" aria-hidden="true" />}
-              {isPending ? 'Saving…' : 'Save Colour'}
+              {isPending ? "Saving…" : "Save Colour"}
             </button>
           </div>
         </form>
@@ -210,7 +250,7 @@ export default function NewColourPage() {
             <h3 className="preview-card__title">Preview</h3>
             <div className="preview-swatch" style={{ background: hex }}>
               <div className="preview-swatch__info" style={{ color: textColor }}>
-                <span className="preview-swatch__name">{name || 'Colour Name'}</span>
+                <span className="preview-swatch__name">{name || "Colour Name"}</span>
                 <span className="preview-swatch__hex">{hex}</span>
               </div>
             </div>
@@ -218,7 +258,11 @@ export default function NewColourPage() {
               <div className="preview-meta__row">
                 <span className="preview-meta__key">Category</span>
                 <span className="preview-meta__val">
-                  {category === 'both' ? 'Kitchen & Bedroom' : category === 'kitchen' ? 'Kitchen' : 'Bedroom'}
+                  {category === "both"
+                    ? "Kitchen & Bedroom"
+                    : category === "kitchen"
+                      ? "Kitchen"
+                      : "Bedroom"}
                 </span>
               </div>
               <div className="preview-meta__row">
@@ -227,7 +271,11 @@ export default function NewColourPage() {
               </div>
               <div className="preview-meta__row">
                 <span className="preview-meta__key">Tone</span>
-                <span className="preview-meta__val">{isLight(hex) ? 'Light' : 'Dark'}</span>
+                <span className="preview-meta__val">{isLight(hex) ? "Light" : "Dark"}</span>
+              </div>
+              <div className="preview-meta__row">
+                <span className="preview-meta__key">Featured</span>
+                <span className="preview-meta__val">{isFeatured ? "Yes" : "No"}</span>
               </div>
             </div>
           </div>
@@ -617,7 +665,7 @@ export default function NewColourPage() {
         }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

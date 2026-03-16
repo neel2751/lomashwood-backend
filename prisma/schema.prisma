@@ -104,10 +104,13 @@ model Colour {
   id        String         @id @default(cuid())
   name      String
   hexCode   String
+  isFeatured Boolean       @default(false)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
   products ProductColour[]
+
+  @@index([isFeatured])
 }
 
 model Size {

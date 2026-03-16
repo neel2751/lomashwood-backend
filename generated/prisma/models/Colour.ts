@@ -28,6 +28,7 @@ export type ColourMinAggregateOutputType = {
   id: string | null
   name: string | null
   hexCode: string | null
+  isFeatured: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +37,7 @@ export type ColourMaxAggregateOutputType = {
   id: string | null
   name: string | null
   hexCode: string | null
+  isFeatured: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,7 @@ export type ColourCountAggregateOutputType = {
   id: number
   name: number
   hexCode: number
+  isFeatured: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +57,7 @@ export type ColourMinAggregateInputType = {
   id?: true
   name?: true
   hexCode?: true
+  isFeatured?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +66,7 @@ export type ColourMaxAggregateInputType = {
   id?: true
   name?: true
   hexCode?: true
+  isFeatured?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +75,7 @@ export type ColourCountAggregateInputType = {
   id?: true
   name?: true
   hexCode?: true
+  isFeatured?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +157,7 @@ export type ColourGroupByOutputType = {
   id: string
   name: string
   hexCode: string
+  isFeatured: boolean
   createdAt: Date
   updatedAt: Date
   _count: ColourCountAggregateOutputType | null
@@ -180,6 +187,7 @@ export type ColourWhereInput = {
   id?: Prisma.StringFilter<"Colour"> | string
   name?: Prisma.StringFilter<"Colour"> | string
   hexCode?: Prisma.StringFilter<"Colour"> | string
+  isFeatured?: Prisma.BoolFilter<"Colour"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Colour"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Colour"> | Date | string
   products?: Prisma.ProductColourListRelationFilter
@@ -189,6 +197,7 @@ export type ColourOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   hexCode?: Prisma.SortOrder
+  isFeatured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   products?: Prisma.ProductColourOrderByRelationAggregateInput
@@ -201,6 +210,7 @@ export type ColourWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ColourWhereInput | Prisma.ColourWhereInput[]
   name?: Prisma.StringFilter<"Colour"> | string
   hexCode?: Prisma.StringFilter<"Colour"> | string
+  isFeatured?: Prisma.BoolFilter<"Colour"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Colour"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Colour"> | Date | string
   products?: Prisma.ProductColourListRelationFilter
@@ -210,6 +220,7 @@ export type ColourOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   hexCode?: Prisma.SortOrder
+  isFeatured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ColourCountOrderByAggregateInput
@@ -224,6 +235,7 @@ export type ColourScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Colour"> | string
   name?: Prisma.StringWithAggregatesFilter<"Colour"> | string
   hexCode?: Prisma.StringWithAggregatesFilter<"Colour"> | string
+  isFeatured?: Prisma.BoolWithAggregatesFilter<"Colour"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Colour"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Colour"> | Date | string
 }
@@ -232,6 +244,7 @@ export type ColourCreateInput = {
   id?: string
   name: string
   hexCode: string
+  isFeatured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductColourCreateNestedManyWithoutColourInput
@@ -241,6 +254,7 @@ export type ColourUncheckedCreateInput = {
   id?: string
   name: string
   hexCode: string
+  isFeatured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductColourUncheckedCreateNestedManyWithoutColourInput
@@ -250,6 +264,7 @@ export type ColourUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   hexCode?: Prisma.StringFieldUpdateOperationsInput | string
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductColourUpdateManyWithoutColourNestedInput
@@ -259,6 +274,7 @@ export type ColourUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   hexCode?: Prisma.StringFieldUpdateOperationsInput | string
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductColourUncheckedUpdateManyWithoutColourNestedInput
@@ -268,6 +284,7 @@ export type ColourCreateManyInput = {
   id?: string
   name: string
   hexCode: string
+  isFeatured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -276,6 +293,7 @@ export type ColourUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   hexCode?: Prisma.StringFieldUpdateOperationsInput | string
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -284,6 +302,7 @@ export type ColourUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   hexCode?: Prisma.StringFieldUpdateOperationsInput | string
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -292,6 +311,7 @@ export type ColourCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   hexCode?: Prisma.SortOrder
+  isFeatured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -300,6 +320,7 @@ export type ColourMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   hexCode?: Prisma.SortOrder
+  isFeatured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -308,6 +329,7 @@ export type ColourMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   hexCode?: Prisma.SortOrder
+  isFeatured?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -335,6 +357,7 @@ export type ColourCreateWithoutProductsInput = {
   id?: string
   name: string
   hexCode: string
+  isFeatured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -343,6 +366,7 @@ export type ColourUncheckedCreateWithoutProductsInput = {
   id?: string
   name: string
   hexCode: string
+  isFeatured?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -367,6 +391,7 @@ export type ColourUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   hexCode?: Prisma.StringFieldUpdateOperationsInput | string
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -375,6 +400,7 @@ export type ColourUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   hexCode?: Prisma.StringFieldUpdateOperationsInput | string
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -414,6 +440,7 @@ export type ColourSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   id?: boolean
   name?: boolean
   hexCode?: boolean
+  isFeatured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   products?: boolean | Prisma.Colour$productsArgs<ExtArgs>
@@ -424,6 +451,7 @@ export type ColourSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   name?: boolean
   hexCode?: boolean
+  isFeatured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["colour"]>
@@ -432,6 +460,7 @@ export type ColourSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   name?: boolean
   hexCode?: boolean
+  isFeatured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["colour"]>
@@ -440,11 +469,12 @@ export type ColourSelectScalar = {
   id?: boolean
   name?: boolean
   hexCode?: boolean
+  isFeatured?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ColourOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "hexCode" | "createdAt" | "updatedAt", ExtArgs["result"]["colour"]>
+export type ColourOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "hexCode" | "isFeatured" | "createdAt" | "updatedAt", ExtArgs["result"]["colour"]>
 export type ColourInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.Colour$productsArgs<ExtArgs>
   _count?: boolean | Prisma.ColourCountOutputTypeDefaultArgs<ExtArgs>
@@ -461,6 +491,7 @@ export type $ColourPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     id: string
     name: string
     hexCode: string
+    isFeatured: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["colour"]>
@@ -890,6 +921,7 @@ export interface ColourFieldRefs {
   readonly id: Prisma.FieldRef<"Colour", 'String'>
   readonly name: Prisma.FieldRef<"Colour", 'String'>
   readonly hexCode: Prisma.FieldRef<"Colour", 'String'>
+  readonly isFeatured: Prisma.FieldRef<"Colour", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Colour", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Colour", 'DateTime'>
 }

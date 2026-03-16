@@ -4,23 +4,19 @@ type Colour = {
   id: string;
   name: string;
   hexCode?: string;
+  isFeatured?: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
 
 export const colourService = {
-  getAll: (params?: Record<string, unknown>) =>
-    apiClient.colors.getAll(params),
+  getAll: (params?: Record<string, unknown>) => apiClient.colors.getAll(params),
 
-  getById: (id: string) =>
-    apiClient.colors.getById(id),
+  getById: (id: string) => apiClient.colors.getById(id),
 
-  create: (payload: Partial<Colour>) =>
-    apiClient.colors.create(payload),
+  create: (payload: Partial<Colour>) => apiClient.colors.create(payload),
 
-  update: (id: string, payload: Partial<Colour>) =>
-    apiClient.colors.update(id, payload),
+  update: (id: string, payload: Partial<Colour>) => apiClient.colors.update(id, payload),
 
-  remove: (id: string) =>
-    apiClient.colors.delete(id),
+  remove: (id: string) => apiClient.colors.delete(id),
 };
