@@ -4,7 +4,7 @@ FROM base AS deps
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm install --no-frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
