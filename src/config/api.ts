@@ -1,11 +1,14 @@
 export const apiConfig = {
-  baseUrl: (process.env.NEXT_PUBLIC_API_BASE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+  baseUrl:
+    (process.env.NEXT_PUBLIC_API_BASE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
   timeoutMs: 15_000,
   version: "v1",
 
   services: {
     auth: {
-      baseUrl: (process.env.NEXT_PUBLIC_AUTH_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_AUTH_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         login: "/auth/login",
         logout: "/auth/logout",
@@ -17,7 +20,9 @@ export const apiConfig = {
       },
     },
     product: {
-      baseUrl: (process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         products: "/products",
         categories: "/products/categories",
@@ -28,7 +33,9 @@ export const apiConfig = {
       },
     },
     order: {
-      baseUrl: (process.env.NEXT_PUBLIC_ORDER_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_ORDER_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         orders: "/orders",
         payments: "/orders/payments",
@@ -37,7 +44,9 @@ export const apiConfig = {
       },
     },
     appointment: {
-      baseUrl: (process.env.NEXT_PUBLIC_APPOINTMENT_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_APPOINTMENT_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         appointments: "/appointments",
         availability: "/appointments/availability",
@@ -47,7 +56,9 @@ export const apiConfig = {
       },
     },
     customer: {
-      baseUrl: (process.env.NEXT_PUBLIC_CUSTOMER_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_CUSTOMER_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         customers: "/customers",
         reviews: "/customers/reviews",
@@ -56,9 +67,12 @@ export const apiConfig = {
       },
     },
     content: {
-      baseUrl: (process.env.NEXT_PUBLIC_CONTENT_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_CONTENT_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         blogs: "/content/blogs",
+        brochures: "/brochures",
         mediaWall: "/content/media-wall",
         cms: "/content/cms",
         seo: "/content/seo",
@@ -66,7 +80,9 @@ export const apiConfig = {
       },
     },
     notification: {
-      baseUrl: (process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         notifications: "/notifications",
         email: "/notifications/email",
@@ -77,7 +93,9 @@ export const apiConfig = {
       },
     },
     analytics: {
-      baseUrl: (process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_URL as string | undefined) ?? "https://api.lomashwood.com/v1",
+      baseUrl:
+        (process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_URL as string | undefined) ??
+        "https://api.lomashwood.com/v1",
       paths: {
         overview: "/analytics",
         tracking: "/analytics/tracking",
@@ -178,16 +196,11 @@ export const apiConfig = {
   },
 } as const;
 
-export function getServiceBaseUrl(
-  service: keyof typeof apiConfig.services,
-): string {
+export function getServiceBaseUrl(service: keyof typeof apiConfig.services): string {
   return apiConfig.services[service].baseUrl;
 }
 
-export function getServicePath(
-  service: keyof typeof apiConfig.services,
-  path: string,
-): string {
+export function getServicePath(service: keyof typeof apiConfig.services, path: string): string {
   return `${getServiceBaseUrl(service)}${path}`;
 }
 

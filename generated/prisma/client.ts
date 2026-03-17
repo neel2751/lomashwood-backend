@@ -132,6 +132,16 @@ export type Showroom = Prisma.ShowroomModel
  */
 export type Media = Prisma.MediaModel
 /**
+ * Model Brochure
+ * 
+ */
+export type Brochure = Prisma.BrochureModel
+/**
+ * Model BrochureRequest
+ * 
+ */
+export type BrochureRequest = Prisma.BrochureRequestModel
+/**
  * Model ShowroomDisplayProduct
  * 
  */

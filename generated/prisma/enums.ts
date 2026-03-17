@@ -95,6 +95,14 @@ export const MediaStatus = {
 export type MediaStatus = (typeof MediaStatus)[keyof typeof MediaStatus]
 
 
+export const BrochureDeliveryMethod = {
+  download: 'download',
+  post: 'post'
+} as const
+
+export type BrochureDeliveryMethod = (typeof BrochureDeliveryMethod)[keyof typeof BrochureDeliveryMethod]
+
+
 export const HeroSlideType = {
   image: 'image',
   video: 'video'

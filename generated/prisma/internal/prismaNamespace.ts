@@ -402,6 +402,8 @@ export const ModelName = {
   AvailabilityWeeklyPattern: 'AvailabilityWeeklyPattern',
   Showroom: 'Showroom',
   Media: 'Media',
+  Brochure: 'Brochure',
+  BrochureRequest: 'BrochureRequest',
   ShowroomDisplayProduct: 'ShowroomDisplayProduct',
   AdminUser: 'AdminUser',
   HeroSlide: 'HeroSlide'
@@ -420,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "product" | "colour" | "size" | "style" | "finish" | "package" | "productColour" | "productSize" | "customer" | "order" | "orderItem" | "appointment" | "consultant" | "reminder" | "availability" | "availabilityWeeklyPattern" | "showroom" | "media" | "showroomDisplayProduct" | "adminUser" | "heroSlide"
+    modelProps: "product" | "colour" | "size" | "style" | "finish" | "package" | "productColour" | "productSize" | "customer" | "order" | "orderItem" | "appointment" | "consultant" | "reminder" | "availability" | "availabilityWeeklyPattern" | "showroom" | "media" | "brochure" | "brochureRequest" | "showroomDisplayProduct" | "adminUser" | "heroSlide"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1756,6 +1758,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Brochure: {
+      payload: Prisma.$BrochurePayload<ExtArgs>
+      fields: Prisma.BrochureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BrochureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BrochureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>
+        }
+        findFirst: {
+          args: Prisma.BrochureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BrochureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>
+        }
+        findMany: {
+          args: Prisma.BrochureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>[]
+        }
+        create: {
+          args: Prisma.BrochureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>
+        }
+        createMany: {
+          args: Prisma.BrochureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BrochureCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>[]
+        }
+        delete: {
+          args: Prisma.BrochureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>
+        }
+        update: {
+          args: Prisma.BrochureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>
+        }
+        deleteMany: {
+          args: Prisma.BrochureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BrochureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BrochureUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>[]
+        }
+        upsert: {
+          args: Prisma.BrochureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochurePayload>
+        }
+        aggregate: {
+          args: Prisma.BrochureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBrochure>
+        }
+        groupBy: {
+          args: Prisma.BrochureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BrochureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BrochureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BrochureCountAggregateOutputType> | number
+        }
+      }
+    }
+    BrochureRequest: {
+      payload: Prisma.$BrochureRequestPayload<ExtArgs>
+      fields: Prisma.BrochureRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BrochureRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BrochureRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.BrochureRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BrochureRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>
+        }
+        findMany: {
+          args: Prisma.BrochureRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>[]
+        }
+        create: {
+          args: Prisma.BrochureRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>
+        }
+        createMany: {
+          args: Prisma.BrochureRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BrochureRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.BrochureRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>
+        }
+        update: {
+          args: Prisma.BrochureRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.BrochureRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BrochureRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BrochureRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.BrochureRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrochureRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.BrochureRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBrochureRequest>
+        }
+        groupBy: {
+          args: Prisma.BrochureRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BrochureRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BrochureRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BrochureRequestCountAggregateOutputType> | number
+        }
+      }
+    }
     ShowroomDisplayProduct: {
       payload: Prisma.$ShowroomDisplayProductPayload<ExtArgs>
       fields: Prisma.ShowroomDisplayProductFieldRefs
@@ -2309,6 +2459,49 @@ export const MediaScalarFieldEnum = {
 export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
 
 
+export const BrochureScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  coverImage: 'coverImage',
+  pdfUrl: 'pdfUrl',
+  category: 'category',
+  tags: 'tags',
+  pages: 'pages',
+  sizeMb: 'sizeMb',
+  year: 'year',
+  downloads: 'downloads',
+  isFeatured: 'isFeatured',
+  isPublished: 'isPublished',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BrochureScalarFieldEnum = (typeof BrochureScalarFieldEnum)[keyof typeof BrochureScalarFieldEnum]
+
+
+export const BrochureRequestScalarFieldEnum = {
+  id: 'id',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
+  phone: 'phone',
+  postcode: 'postcode',
+  address: 'address',
+  deliveryMethod: 'deliveryMethod',
+  marketingOptIn: 'marketingOptIn',
+  brochureIds: 'brochureIds',
+  brochureTitles: 'brochureTitles',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BrochureRequestScalarFieldEnum = (typeof BrochureRequestScalarFieldEnum)[keyof typeof BrochureRequestScalarFieldEnum]
+
+
 export const ShowroomDisplayProductScalarFieldEnum = {
   id: 'id',
   showroomId: 'showroomId',
@@ -2595,6 +2788,20 @@ export type ListEnumMediaStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'BrochureDeliveryMethod'
+ */
+export type EnumBrochureDeliveryMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BrochureDeliveryMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'BrochureDeliveryMethod[]'
+ */
+export type ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BrochureDeliveryMethod[]'>
+    
+
+
+/**
  * Reference to a field of type 'HeroSlideType'
  */
 export type EnumHeroSlideTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HeroSlideType'>
@@ -2720,6 +2927,8 @@ export type GlobalOmitConfig = {
   availabilityWeeklyPattern?: Prisma.AvailabilityWeeklyPatternOmit
   showroom?: Prisma.ShowroomOmit
   media?: Prisma.MediaOmit
+  brochure?: Prisma.BrochureOmit
+  brochureRequest?: Prisma.BrochureRequestOmit
   showroomDisplayProduct?: Prisma.ShowroomDisplayProductOmit
   adminUser?: Prisma.AdminUserOmit
   heroSlide?: Prisma.HeroSlideOmit

@@ -183,3 +183,77 @@ export type LandingPageFilterParams = PaginationParams & {
   search?: string;
   isPublished?: boolean;
 };
+
+export type Brochure = {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string | null;
+  coverImage?: string | null;
+  pdfUrl: string;
+  category?: string | null;
+  tags: string[];
+  pages?: number | null;
+  sizeMb?: number | null;
+  year?: number | null;
+  downloads: number;
+  isFeatured: boolean;
+  isPublished: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateBrochurePayload = {
+  title: string;
+  slug: string;
+  description?: string;
+  coverImage?: string;
+  pdfUrl: string;
+  category?: string;
+  tags?: string[];
+  pages?: number;
+  sizeMb?: number;
+  year?: number;
+  isFeatured?: boolean;
+  isPublished?: boolean;
+  sortOrder?: number;
+};
+
+export type UpdateBrochurePayload = Partial<CreateBrochurePayload>;
+
+export type BrochureFilterParams = PaginationParams & {
+  search?: string;
+  category?: string;
+  featured?: boolean;
+  isPublished?: boolean;
+};
+
+export type BrochureFormRequest = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  postcode: string;
+  address: string;
+  deliveryMethod: "download" | "post";
+  marketingOptIn: boolean;
+  brochureIds: string[];
+  brochureTitles: string[];
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  brochures?: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    coverImage?: string | null;
+    pdfUrl: string;
+  }>;
+};
+
+export type BrochureRequestFilterParams = PaginationParams & {
+  search?: string;
+  deliveryMethod?: "download" | "post";
+};

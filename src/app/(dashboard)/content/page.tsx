@@ -7,9 +7,9 @@ export default function ContentPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Content"
-        description="Manage blogs, media wall, CMS pages, SEO, and landing pages."
+        description="Manage blogs, brochures, media wall, CMS pages, SEO, and landing pages."
       />
     </div>
   );
 }
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

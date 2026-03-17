@@ -68,6 +68,11 @@ enum MediaStatus {
   untouched
 }
 
+enum BrochureDeliveryMethod {
+  download
+  post
+}
+
 model Product {
   id          String          @id @default(cuid())
   title       String
@@ -384,6 +389,55 @@ model Media {
   showrooms Showroom[]
 
   @@index([status])
+}
+
+model Brochure {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  coverImage  String?
+  pdfUrl      String
+  category    String?
+  tags        String[] @default([])
+  pages       Int?
+  sizeMb      Float?
+  year        Int?
+  downloads   Int      @default(0)
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requests BrochureRequest[]
+
+  @@index([isFeatured])
+  @@index([isPublished])
+  @@index([sortOrder])
+  @@index([category])
+}
+
+model BrochureRequest {
+  id              String                 @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  postcode        String
+  address         String
+  deliveryMethod  BrochureDeliveryMethod
+  marketingOptIn  Boolean                @default(false)
+  brochureIds     String[]               @default([])
+  brochureTitles  String[]               @default([])
+  notes           String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  brochures Brochure[]
+
+  @@index([email])
+  @@index([deliveryMethod])
 }
 
 model ShowroomDisplayProduct {

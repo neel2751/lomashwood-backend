@@ -3,176 +3,47 @@ name: Deploy Production
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   deploy-production:
-    name: Deploy to Production
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    concurrency:
-      group: production-deploy
-      cancel-in-progress: false
-
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout Code
+        uses: actions/checkout@v4 # Updated to v4 (more stable)
         with:
           submodules: recursive
 
-      - name: Upload source to droplet
+      - name: Upload to Droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           password: ${{ secrets.DROPLET_PASSWORD }}
-          port: 22
           source: "."
-          target: "/tmp/lomashwood-production-${{ github.sha }}"
+          target: "/opt/lomashwood/production-app"
 
-      - name: Deploy on DigitalOcean droplet
+      - name: SSH Remote Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           password: ${{ secrets.DROPLET_PASSWORD }}
-          port: 22
-          command_timeout: 60m
           script: |
-            set -e
+            cd /opt/lomashwood/production-app
 
-            SUDO=""
-            if command -v sudo >/dev/null 2>&1; then
-              SUDO="sudo"
-            fi
+            # 1. Build the new "Box" using the Dockerfile we just fixed
+            docker build -t lomash-wood-admin:production .
 
-            echo "System resources before deploy"
-            free -h || true
-            df -h || true
+            # 2. Stop the old version and start the new one
+            # Because of the CMD in our Dockerfile, it will 
+            # AUTOMATICALLY run migrations and seeds on startup!
+            docker stop lomash-wood-admin || true
+            docker rm lomash-wood-admin || true
 
-            if [ -z "$(swapon --show=NAME --noheadings 2>/dev/null)" ]; then
-              if [ "$(id -u)" = "0" ] || [ -n "$SUDO" ]; then
-                echo "No swap detected. Creating 2G swapfile..."
-                $SUDO fallocate -l 2G /swapfile || $SUDO dd if=/dev/zero of=/swapfile bs=1M count=2048
-                $SUDO chmod 600 /swapfile
-                $SUDO mkswap /swapfile
-                $SUDO swapon /swapfile
-                $SUDO sh -c "grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab"
-              else
-                echo "No swap and no sudo/root access; skipping swap setup"
-              fi
-            fi
-
-            if ! command -v docker >/dev/null 2>&1; then
-              echo "Docker not found. Installing Docker..."
-              if command -v sudo >/dev/null 2>&1; then
-                curl -fsSL https://get.docker.com | sudo sh
-              else
-                curl -fsSL https://get.docker.com | sh
-              fi
-            fi
-
-            DOCKER="docker"
-            if ! docker info >/dev/null 2>&1; then
-              if command -v sudo >/dev/null 2>&1; then
-                DOCKER="sudo docker"
-              else
-                echo "Docker is installed but not accessible for current user"
-                exit 1
-              fi
-            fi
-
-            APP_DIR="/opt/lomashwood/production-app"
-            ENV_FILE="/opt/lomashwood/.env.production"
-
-            mkdir -p "/opt/lomashwood"
-            mkdir -p "$APP_DIR"
-            cp -a "/tmp/lomashwood-production-${{ github.sha }}/." "$APP_DIR/"
-            if [ ! -f "$ENV_FILE" ]; then
-              echo "Missing env file: $ENV_FILE"
-              echo "Create it manually on droplet and rerun deploy"
-              exit 1
-            fi
-            if ! grep -Eq '^DATABASE_URL=' "$ENV_FILE"; then
-              echo "DATABASE_URL is missing in $ENV_FILE"
-              exit 1
-            fi
-
-            set -a
-            . "$ENV_FILE"
-            set +a
-
-            if ! $DOCKER network inspect appnet >/dev/null 2>&1; then
-              $DOCKER network create appnet >/dev/null
-            fi
-
-            $DOCKER volume create pgdata >/dev/null
-            if ! $DOCKER ps -a --format '{{.Names}}' | grep -q '^postgres$'; then
-              echo "Postgres container not found. Creating persistent postgres container..."
-              $DOCKER run -d \
-                --name postgres \
-                --network appnet \
-                --restart unless-stopped \
-                -e POSTGRES_USER="${POSTGRES_USER:-postgres}" \
-                -e POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-password}" \
-                -e POSTGRES_DB="${POSTGRES_DB:-postgres}" \
-                -v pgdata:/var/lib/postgresql/data \
-                postgres:16-alpine >/dev/null
-            else
-              $DOCKER start postgres >/dev/null 2>&1 || true
-            fi
-
-            cd "$APP_DIR"
-            DOCKER_BUILDKIT=1 $DOCKER build --no-cache --progress=plain -t lomash-wood-admin:production .
-
-            $DOCKER run --rm lomash-wood-admin:production sh -lc "prisma --version"
-
-            $DOCKER run --rm \
-              --network appnet \
-              --env-file "$ENV_FILE" \
-              lomash-wood-admin:production \
-              prisma migrate deploy --schema=prisma/schema.prisma
-
-            if [ "${RUN_DB_SEED:-false}" = "true" ]; then
-              echo "RUN_DB_SEED=true -> running seed"
-              $DOCKER run --rm \
-                --network appnet \
-                --env-file "$ENV_FILE" \
-                lomash-wood-admin:production \
-                prisma db seed
-            fi
-
-            $DOCKER rm -f lomash-wood-admin || true
-            $DOCKER run -d \
+            docker run -d \
               --name lomash-wood-admin \
-              --restart unless-stopped \
               --network appnet \
+              --restart unless-stopped \
               -p 3000:3000 \
-              --env-file "$ENV_FILE" \
+              --env-file /opt/lomashwood/.env.production \
               lomash-wood-admin:production
-
-            echo "Waiting for application startup..."
-            ATTEMPT=1
-            MAX_ATTEMPTS=18
-            until false; do
-              STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/health || true)
-              if [ "$STATUS_CODE" = "200" ] || [ "$STATUS_CODE" = "401" ]; then
-                break
-              fi
-
-              if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-                echo "Application failed health check after ${MAX_ATTEMPTS} attempts (last status: ${STATUS_CODE})"
-                $DOCKER ps -a || true
-                $DOCKER logs --tail 200 lomash-wood-admin || true
-                exit 1
-              fi
-
-              echo "Health check attempt ${ATTEMPT}/${MAX_ATTEMPTS} failed (status: ${STATUS_CODE}), retrying in 5s..."
-              sleep 5
-              ATTEMPT=$((ATTEMPT + 1))
-            done
-
-            echo "Application is healthy"

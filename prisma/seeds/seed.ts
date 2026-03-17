@@ -101,24 +101,30 @@ async function seedCatalog() {
   const packages = await Promise.all([
     upsertPackageByTitle({
       title: "Complete Kitchen Package",
-      description: "A comprehensive kitchen package including cabinets, countertops, and appliances. Perfect for a full kitchen renovation.",
-      image: "https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?q=80&w=3174&auto=format&fit=crop",
+      description:
+        "A comprehensive kitchen package including cabinets, countertops, and appliances. Perfect for a full kitchen renovation.",
+      image:
+        "https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?q=80&w=3174&auto=format&fit=crop",
       category: "kitchen",
       price: 9999,
       features: ["Cabinets", "Countertops", "Appliances"],
     }),
     upsertPackageByTitle({
       title: "Bedroom Makeover Bundle",
-      description: "Transform your bedroom with our makeover bundle. Includes bed frame, wardrobe, and bedside tables.",
-      image: "https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?q=80&w=3174&auto=format&fit=crop",
+      description:
+        "Transform your bedroom with our makeover bundle. Includes bed frame, wardrobe, and bedside tables.",
+      image:
+        "https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?q=80&w=3174&auto=format&fit=crop",
       category: "bedroom",
       price: 4999,
       features: ["Bed Frame", "Wardrobe", "Bedside Tables"],
     }),
     upsertPackageByTitle({
       title: "Small Space Kitchen Solution",
-      description: "Ideal for apartments and small homes, this package includes space-saving kitchen essentials.",
-      image: "https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?q=80&w=3174&auto=format&fit=crop",
+      description:
+        "Ideal for apartments and small homes, this package includes space-saving kitchen essentials.",
+      image:
+        "https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?q=80&w=3174&auto=format&fit=crop",
       category: "kitchen",
       price: 5999,
       features: ["Space-Saving Design", "Essential Appliances"],
@@ -1080,7 +1086,9 @@ async function seedCustomersOrdersAppointments() {
   ];
 
   for (const item of availabilityRows) {
-    const dateOnly = new Date(Date.UTC(item.date.getFullYear(), item.date.getMonth(), item.date.getDate()));
+    const dateOnly = new Date(
+      Date.UTC(item.date.getFullYear(), item.date.getMonth(), item.date.getDate()),
+    );
     await prisma.availability.upsert({
       where: {
         consultantId_date: {
@@ -1108,6 +1116,143 @@ async function seedCustomersOrdersAppointments() {
   }
 }
 
+async function seedBrochures() {
+  const brochureSeeds = [
+    {
+      title: "Lomashwood Kitchen Collection 2026",
+      slug: "kitchen-collection-2026",
+      description: "Explore modern and classic kitchen ranges, finishes, and design inspiration.",
+      coverImage:
+        "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1400&q=80",
+      pdfUrl: "https://example-brochures.s3.amazonaws.com/kitchen-collection-2026.pdf",
+      category: "kitchen",
+      tags: ["kitchen", "modern", "handleless"],
+      pages: 64,
+      sizeMb: 18.4,
+      year: 2026,
+      isFeatured: true,
+      isPublished: true,
+      sortOrder: 1,
+    },
+    {
+      title: "Lomashwood Bedroom Collection 2026",
+      slug: "bedroom-collection-2026",
+      description: "Wardrobes, fitted storage, and elegant bedroom styles for every home.",
+      coverImage:
+        "https://images.unsplash.com/photo-1616594039964-3d132b6c1fbc?auto=format&fit=crop&w=1400&q=80",
+      pdfUrl: "https://example-brochures.s3.amazonaws.com/bedroom-collection-2026.pdf",
+      category: "bedroom",
+      tags: ["bedroom", "wardrobe", "storage"],
+      pages: 52,
+      sizeMb: 15.9,
+      year: 2026,
+      isFeatured: true,
+      isPublished: true,
+      sortOrder: 2,
+    },
+    {
+      title: "Design & Finishes Guide",
+      slug: "design-finishes-guide",
+      description: "A practical guide to colours, materials, and finishes across our full range.",
+      coverImage:
+        "https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?auto=format&fit=crop&w=1400&q=80",
+      pdfUrl: "https://example-brochures.s3.amazonaws.com/design-finishes-guide.pdf",
+      category: "inspiration",
+      tags: ["finishes", "materials", "inspiration"],
+      pages: 36,
+      sizeMb: 10.2,
+      year: 2025,
+      isFeatured: false,
+      isPublished: true,
+      sortOrder: 3,
+    },
+  ];
+
+  const seededBrochures = [] as Array<{ id: string; title: string }>;
+  for (const brochure of brochureSeeds) {
+    const saved = await prisma.brochure.upsert({
+      where: { slug: brochure.slug },
+      update: brochure,
+      create: brochure,
+    });
+    seededBrochures.push({ id: saved.id, title: saved.title });
+  }
+
+  await prisma.brochureRequest.upsert({
+    where: { id: "seed-brochure-request-1" },
+    update: {
+      firstName: "Oliver",
+      lastName: "Grant",
+      email: "oliver.grant@email.com",
+      phone: "+44 7700 200001",
+      postcode: "SW1A 1AA",
+      address: "14 Buckingham Gate, London",
+      deliveryMethod: "download",
+      marketingOptIn: true,
+      brochureIds: seededBrochures.slice(0, 2).map((item) => item.id),
+      brochureTitles: seededBrochures.slice(0, 2).map((item) => item.title),
+      notes: "Interested in a full kitchen and bedroom renovation.",
+      brochures: {
+        set: seededBrochures.slice(0, 2).map((item) => ({ id: item.id })),
+      },
+    },
+    create: {
+      id: "seed-brochure-request-1",
+      firstName: "Oliver",
+      lastName: "Grant",
+      email: "oliver.grant@email.com",
+      phone: "+44 7700 200001",
+      postcode: "SW1A 1AA",
+      address: "14 Buckingham Gate, London",
+      deliveryMethod: "download",
+      marketingOptIn: true,
+      brochureIds: seededBrochures.slice(0, 2).map((item) => item.id),
+      brochureTitles: seededBrochures.slice(0, 2).map((item) => item.title),
+      notes: "Interested in a full kitchen and bedroom renovation.",
+      brochures: {
+        connect: seededBrochures.slice(0, 2).map((item) => ({ id: item.id })),
+      },
+    },
+  });
+
+  await prisma.brochureRequest.upsert({
+    where: { id: "seed-brochure-request-2" },
+    update: {
+      firstName: "Sophie",
+      lastName: "Bennett",
+      email: "sophie.bennett@email.com",
+      phone: "+44 7700 200002",
+      postcode: "M2 5DB",
+      address: "22 King Street, Manchester",
+      deliveryMethod: "post",
+      marketingOptIn: false,
+      brochureIds: seededBrochures.slice(1).map((item) => item.id),
+      brochureTitles: seededBrochures.slice(1).map((item) => item.title),
+      notes: "Please post printed brochures to my home address.",
+      brochures: {
+        set: seededBrochures.slice(1).map((item) => ({ id: item.id })),
+      },
+    },
+    create: {
+      id: "seed-brochure-request-2",
+      firstName: "Sophie",
+      lastName: "Bennett",
+      email: "sophie.bennett@email.com",
+      phone: "+44 7700 200002",
+      postcode: "M2 5DB",
+      address: "22 King Street, Manchester",
+      deliveryMethod: "post",
+      marketingOptIn: false,
+      brochureIds: seededBrochures.slice(1).map((item) => item.id),
+      brochureTitles: seededBrochures.slice(1).map((item) => item.title),
+      notes: "Please post printed brochures to my home address.",
+      brochures: {
+        connect: seededBrochures.slice(1).map((item) => ({ id: item.id })),
+      },
+    },
+  });
+}
+
 async function main() {
   console.log("Seeding started...");
 
@@ -1116,6 +1261,7 @@ async function main() {
   await seedProductOptions();
   await seedShowrooms();
   await seedCustomersOrdersAppointments();
+  await seedBrochures();
 
   console.log("Seeding completed successfully.");
   console.log("Admin login: admin@lomashwood.com / admin12345");

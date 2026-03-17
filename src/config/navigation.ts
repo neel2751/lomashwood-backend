@@ -38,12 +38,12 @@ import {
   Sliders,
   Plug,
   ClipboardList,
-} from "lucide-react"
+} from "lucide-react";
 
-import { PERMISSIONS } from "@/lib/constants"
+import { PERMISSIONS } from "@/lib/constants";
 
-import type { PermissionKey } from "@/lib/constants"
-import type { LucideIcon } from "lucide-react"
+import type { PermissionKey } from "@/lib/constants";
+import type { LucideIcon } from "lucide-react";
 
 export type NavItem = {
   label: string;
@@ -285,6 +285,18 @@ export const navigationConfig: NavSection[] = [
             permission: PERMISSIONS.CONTENT_VIEW,
           },
           {
+            label: "Brochures",
+            href: "/content/brochures",
+            icon: FileText,
+            permission: PERMISSIONS.CONTENT_VIEW,
+          },
+          {
+            label: "Brochure Requests",
+            href: "/content/brochures/requests",
+            icon: ClipboardList,
+            permission: PERMISSIONS.CONTENT_VIEW,
+          },
+          {
             label: "Media Wall",
             href: "/content/media-wall",
             icon: Image,
@@ -427,6 +439,12 @@ export const quickNavItems: NavItem[] = [
     label: "New Blog Post",
     href: "/content/blogs/new",
     icon: FileEdit,
+    permission: PERMISSIONS.CONTENT_CREATE,
+  },
+  {
+    label: "New Brochure",
+    href: "/content/brochures/new",
+    icon: FileText,
     permission: PERMISSIONS.CONTENT_CREATE,
   },
   {

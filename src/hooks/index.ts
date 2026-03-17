@@ -11,6 +11,15 @@ export { useAuditLogs } from "./useAuditLogs";
 export { useAuth } from "./useAuth";
 export { useAvailability } from "./useAvailability";
 export { useBlogs } from "./useBlogs";
+export {
+  useBrochures,
+  useBrochure,
+  useCreateBrochure,
+  useUpdateBrochure,
+  useDeleteBrochure,
+  useBrochureRequests,
+  useBrochureRequest,
+} from "./useBrochures";
 export { useCategories } from "./useCategories";
 export { useCmsPages } from "./useCmsPages";
 export { useColours } from "./useColours";

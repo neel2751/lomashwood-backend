@@ -56,32 +56,25 @@ type QueryParams = Record<string, unknown>;
 
 function makeService(basePath: string) {
   return {
-    getAll: (params?: QueryParams) =>
-      axios.get(basePath, { params }).then((r) => r.data),
+    getAll: (params?: QueryParams) => axios.get(basePath, { params }).then((r) => r.data),
 
-    getById: (id: string) =>
-      axios.get(`${basePath}/${id}`).then((r) => r.data),
+    getById: (id: string) => axios.get(`${basePath}/${id}`).then((r) => r.data),
 
-    create: (payload: unknown) =>
-      axios.post(basePath, payload).then((r) => r.data),
+    create: (payload: unknown) => axios.post(basePath, payload).then((r) => r.data),
 
     update: (id: string, payload: unknown) =>
       axios.patch(`${basePath}/${id}`, payload).then((r) => r.data),
 
-    delete: (id: string) =>
-      axios.delete(`${basePath}/${id}`).then((r) => r.data),
+    delete: (id: string) => axios.delete(`${basePath}/${id}`).then((r) => r.data),
   };
 }
 
 export function createApiClient() {
   return {
     auth: {
-      login: (payload: unknown) =>
-        axios.post("/auth/login", payload).then((r) => r.data),
-      logout: () =>
-        axios.post("/auth/logout").then((r) => r.data),
-      me: () =>
-        axios.get("/auth/me").then((r) => r.data),
+      login: (payload: unknown) => axios.post("/auth/login", payload).then((r) => r.data),
+      logout: () => axios.post("/auth/logout").then((r) => r.data),
+      me: () => axios.get("/auth/me").then((r) => r.data),
     },
 
     products: makeService("/products"),
@@ -113,10 +106,10 @@ export function createApiClient() {
 
     content: makeService("/content"),
     blogs: makeService("/blogs"),
+    brochures: makeService("/brochures"),
     media: {
       ...makeService("/media"),
-      upload: (payload: unknown) =>
-        axios.post("/media/upload", payload).then((r) => r.data),
+      upload: (payload: unknown) => axios.post("/media/upload", payload).then((r) => r.data),
     },
     cmsPages: makeService("/cms-pages"),
     seo: makeService("/seo"),
@@ -130,8 +123,7 @@ export function createApiClient() {
     templates: makeService("/templates"),
 
     analytics: {
-      get: (params?: QueryParams) =>
-        axios.get("/analytics", { params }).then((r) => r.data),
+      get: (params?: QueryParams) => axios.get("/analytics", { params }).then((r) => r.data),
       getOverview: (params?: QueryParams): Promise<ApiResponse<AnalyticsOverview>> =>
         axios.get("/analytics/overview", { params }).then((r) => r.data),
       getTracking: (params?: QueryParams): Promise<PaginatedResponse<TrackingEvent>> =>
@@ -148,18 +140,15 @@ export function createApiClient() {
     funnels: makeService("/funnels"),
     dashboards: makeService("/dashboards"),
     exports: {
-      getAll: (params?: QueryParams) =>
-        axios.get("/exports", { params }).then((r) => r.data),
-      create: (payload: unknown) =>
-        axios.post("/exports", payload).then((r) => r.data),
+      getAll: (params?: QueryParams) => axios.get("/exports", { params }).then((r) => r.data),
+      create: (payload: unknown) => axios.post("/exports", payload).then((r) => r.data),
     },
 
     roles: makeService("/roles"),
     users: makeService("/users"),
     sessions: {
       ...makeService("/sessions"),
-      revoke: (id: string) =>
-        axios.post(`/sessions/${id}/revoke`).then((r) => r.data),
+      revoke: (id: string) => axios.post(`/sessions/${id}/revoke`).then((r) => r.data),
       revokeAll: (userId: string) =>
         axios.post(`/sessions/revoke-all`, { userId }).then((r) => r.data),
     },

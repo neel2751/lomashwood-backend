@@ -69,6 +69,8 @@ export const ModelName = {
   AvailabilityWeeklyPattern: 'AvailabilityWeeklyPattern',
   Showroom: 'Showroom',
   Media: 'Media',
+  Brochure: 'Brochure',
+  BrochureRequest: 'BrochureRequest',
   ShowroomDisplayProduct: 'ShowroomDisplayProduct',
   AdminUser: 'AdminUser',
   HeroSlide: 'HeroSlide'
@@ -380,6 +382,49 @@ export const MediaScalarFieldEnum = {
 } as const
 
 export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
+
+
+export const BrochureScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  coverImage: 'coverImage',
+  pdfUrl: 'pdfUrl',
+  category: 'category',
+  tags: 'tags',
+  pages: 'pages',
+  sizeMb: 'sizeMb',
+  year: 'year',
+  downloads: 'downloads',
+  isFeatured: 'isFeatured',
+  isPublished: 'isPublished',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BrochureScalarFieldEnum = (typeof BrochureScalarFieldEnum)[keyof typeof BrochureScalarFieldEnum]
+
+
+export const BrochureRequestScalarFieldEnum = {
+  id: 'id',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
+  phone: 'phone',
+  postcode: 'postcode',
+  address: 'address',
+  deliveryMethod: 'deliveryMethod',
+  marketingOptIn: 'marketingOptIn',
+  brochureIds: 'brochureIds',
+  brochureTitles: 'brochureTitles',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BrochureRequestScalarFieldEnum = (typeof BrochureRequestScalarFieldEnum)[keyof typeof BrochureRequestScalarFieldEnum]
 
 
 export const ShowroomDisplayProductScalarFieldEnum = {

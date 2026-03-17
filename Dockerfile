@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 
 FROM base AS deps
 WORKDIR /app
@@ -11,19 +11,27 @@ WORKDIR /app
 RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx prisma generate
 RUN pnpm build
 
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
-RUN npm install -g prisma@7.4.2
+ENV RUN_DB_SEED=true
+
+RUN npm install -g prisma@7.4.2 tsx
+
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+# Copy the standalone build
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder /app/prisma.config.ts ./
+
 USER nextjs
 EXPOSE 3000
-CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
+
+CMD ["sh", "-c", "prisma migrate deploy && prisma db seed && node server.js"]

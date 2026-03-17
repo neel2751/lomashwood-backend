@@ -81,6 +81,11 @@ export const ROUTES = {
     blogs: "/content/blogs",
     blogNew: "/content/blogs/new",
     blogDetail: (id: string) => `/content/blogs/${id}`,
+    brochures: "/content/brochures",
+    brochureNew: "/content/brochures/new",
+    brochureDetail: (id: string) => `/content/brochures/${id}`,
+    brochureRequests: "/content/brochures/requests",
+    brochureRequestDetail: (id: string) => `/content/brochures/requests/${id}`,
     mediaWall: "/content/media-wall",
     mediaWallDetail: (id: string) => `/content/media-wall/${id}`,
     cms: "/content/cms",
@@ -183,10 +188,7 @@ export function getParentRoute(pathname: string): string {
 export function isDetailRoute(pathname: string): boolean {
   const segments = pathname.split("/").filter(Boolean) as string[];
   const lastSegment = segments[segments.length - 1] as string;
-  return (
-    /^[0-9a-f-]{36}$/.test(lastSegment) ||
-    /^\d+$/.test(lastSegment)
-  );
+  return /^[0-9a-f-]{36}$/.test(lastSegment) || /^\d+$/.test(lastSegment);
 }
 
 export function extractIdFromPath(pathname: string): string | null {

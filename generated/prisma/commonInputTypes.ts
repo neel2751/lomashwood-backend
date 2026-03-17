@@ -443,6 +443,23 @@ export type EnumMediaStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumMediaStatusFilter<$PrismaModel>
 }
 
+export type EnumBrochureDeliveryMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrochureDeliveryMethod | Prisma.EnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrochureDeliveryMethodFilter<$PrismaModel> | $Enums.BrochureDeliveryMethod
+}
+
+export type EnumBrochureDeliveryMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrochureDeliveryMethod | Prisma.EnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrochureDeliveryMethodWithAggregatesFilter<$PrismaModel> | $Enums.BrochureDeliveryMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBrochureDeliveryMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBrochureDeliveryMethodFilter<$PrismaModel>
+}
+
 export type EnumHeroSlideTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.HeroSlideType | Prisma.EnumHeroSlideTypeFieldRefInput<$PrismaModel>
   in?: $Enums.HeroSlideType[] | Prisma.ListEnumHeroSlideTypeFieldRefInput<$PrismaModel>
@@ -851,6 +868,23 @@ export type NestedEnumMediaStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumMediaStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumMediaStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumBrochureDeliveryMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrochureDeliveryMethod | Prisma.EnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrochureDeliveryMethodFilter<$PrismaModel> | $Enums.BrochureDeliveryMethod
+}
+
+export type NestedEnumBrochureDeliveryMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrochureDeliveryMethod | Prisma.EnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrochureDeliveryMethod[] | Prisma.ListEnumBrochureDeliveryMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrochureDeliveryMethodWithAggregatesFilter<$PrismaModel> | $Enums.BrochureDeliveryMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBrochureDeliveryMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBrochureDeliveryMethodFilter<$PrismaModel>
 }
 
 export type NestedEnumHeroSlideTypeFilter<$PrismaModel = never> = {
