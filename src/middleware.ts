@@ -8,6 +8,7 @@ const API_PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/auth/register",
   "/api/showrooms",
+  "/api/appointments",
   "/api/v1/products",
   "/api/v1/showrooms",
   "/api/v1/appointments",
