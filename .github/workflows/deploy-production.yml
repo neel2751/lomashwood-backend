@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # Updated to v4 (more stable)
+        uses: actions/checkout@v5 # Updated to v5 (more stable)
         with:
           submodules: recursive
 
@@ -29,29 +29,15 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           password: ${{ secrets.DROPLET_PASSWORD }}
           script: |
-            # 1. Ensure the network and volumes exist
-            docker network create appnet || true
-            docker volume create pgdata || true
-
-            # 2. Start/Restart the Postgres Database
-            # We use these exact envs to match your DATABASE_URL
-            if ! docker ps -a --format '{{.Names}}' | grep -q '^postgres$'; then
-              docker run -d \
-                --name postgres \
-                --network appnet \
-                --restart unless-stopped \
-                -e POSTGRES_USER=postgres \
-                -e POSTGRES_PASSWORD=postgres \
-                -e POSTGRES_DB=postgres \
-                -v pgdata:/var/lib/postgresql/data \
-                postgres:16-alpine
-            fi
-
-            # 3. Go to app folder and build
             cd /opt/lomashwood/production-app
+
+            # Ensure network exists
+            docker network create appnet || true
+
+            # Build the new image
             docker build -t lomash-wood-admin:production .
 
-            # 4. Refresh the App Container
+            # Stop and restart the app
             docker stop lomash-wood-admin || true
             docker rm lomash-wood-admin || true
 
@@ -60,5 +46,6 @@ jobs:
               --network appnet \
               --restart unless-stopped \
               -p 3000:3000 \
+              -e RUN_DB_SEED="false" \
               --env-file /opt/lomashwood/.env.production \
               lomash-wood-admin:production
