@@ -20,13 +20,14 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV RUN_DB_SEED=true
 
-RUN npm install -g prisma@7.4.2 tsx
+RUN npm install -g prisma@7.4.2 tsx dotenv
 
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/public ./public
 # Copy the standalone build
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
@@ -34,4 +35,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 3000
 
-CMD ["sh", "-c", "prisma migrate deploy && prisma db seed && node server.js"]
+# We tell Prisma: "Ignore the config file, here is the schema, and here is the seed command"
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=./prisma/schema.prisma && npx prisma db seed && node server.js"]
