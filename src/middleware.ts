@@ -21,6 +21,7 @@ const DEFAULT_CORS_ALLOWED_ORIGINS = [
   "http://localhost:3001",
   "https://lomashwood.co.uk",
   "https://www.lomashwood.co.uk",
+  "https://lomashwood-frontend.vercel.app",
 ];
 
 const STATIC_EXTENSIONS = /\.(ico|svg|png|jpg|jpeg|webp|gif|woff|woff2|ttf|otf|css|js|map)$/;
