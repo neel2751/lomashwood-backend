@@ -26,6 +26,10 @@ const DEFAULT_CORS_ALLOWED_ORIGINS = [
 
 const STATIC_EXTENSIONS = /\.(ico|svg|png|jpg|jpeg|webp|gif|woff|woff2|ttf|otf|css|js|map)$/;
 
+function normalizeOrigin(value: string): string {
+  return value.trim().replace(/\/$/, "");
+}
+
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path + "/"));
 }
@@ -45,21 +49,27 @@ function isApiRoute(pathname: string): boolean {
 function getAllowedCorsOrigins(): Set<string> {
   const configured = (process.env.CORS_ALLOWED_ORIGINS ?? "")
     .split(",")
-    .map((value) => value.trim())
+    .map((value) => normalizeOrigin(value))
     .filter(Boolean);
 
   const fallback = process.env.NEXT_PUBLIC_URL?.trim();
   const all = [...DEFAULT_CORS_ALLOWED_ORIGINS, ...(fallback ? [fallback] : []), ...configured];
 
-  return new Set(all);
+  return new Set(all.map((value) => normalizeOrigin(value)).filter(Boolean));
 }
 
 function addApiCorsHeaders(request: NextRequest, response: NextResponse): NextResponse {
-  const origin = request.headers.get("origin");
+  const rawOrigin = request.headers.get("origin");
+  const origin = rawOrigin ? normalizeOrigin(rawOrigin) : null;
+  const requestedHeaders = request.headers.get("access-control-request-headers");
   const allowedOrigins = getAllowedCorsOrigins();
 
   response.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  response.headers.set(
+    "Access-Control-Allow-Headers",
+    requestedHeaders || "Content-Type, Authorization, Accept, Origin, X-Requested-With",
+  );
+  response.headers.set("Access-Control-Max-Age", "86400");
   response.headers.set("Vary", "Origin");
 
   if (origin && allowedOrigins.has(origin)) {
