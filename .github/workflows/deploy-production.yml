@@ -29,14 +29,29 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           password: ${{ secrets.DROPLET_PASSWORD }}
           script: |
-            cd /opt/lomashwood/production-app
+            # 1. Ensure the network and volumes exist
+            docker network create appnet || true
+            docker volume create pgdata || true
 
-            # 1. Build the new "Box" using the Dockerfile we just fixed
+            # 2. Start/Restart the Postgres Database
+            # We use these exact envs to match your DATABASE_URL
+            if ! docker ps -a --format '{{.Names}}' | grep -q '^postgres$'; then
+              docker run -d \
+                --name postgres \
+                --network appnet \
+                --restart unless-stopped \
+                -e POSTGRES_USER=postgres \
+                -e POSTGRES_PASSWORD=postgres \
+                -e POSTGRES_DB=postgres \
+                -v pgdata:/var/lib/postgresql/data \
+                postgres:16-alpine
+            fi
+
+            # 3. Go to app folder and build
+            cd /opt/lomashwood/production-app
             docker build -t lomash-wood-admin:production .
 
-            # 2. Stop the old version and start the new one
-            # Because of the CMD in our Dockerfile, it will 
-            # AUTOMATICALLY run migrations and seeds on startup!
+            # 4. Refresh the App Container
             docker stop lomash-wood-admin || true
             docker rm lomash-wood-admin || true
 
