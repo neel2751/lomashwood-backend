@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search")?.trim();
     const productId = searchParams.get("productId")?.trim();
-    const featured = parseBoolean(searchParams.get("featured"));
+    const featured = parseBoolean(searchParams.get("featured") ?? searchParams.get("isFeatured"));
 
     const where = {
       ...(search
@@ -19,15 +19,19 @@ export async function GET(req: NextRequest) {
             ],
           }
         : {}),
-      products: {
-        some: {
-          ...(productId ? { productId } : {}),
-          product: {
-            isPublished: true,
-          },
-        },
-      },
-      ...(featured === true ? { isFeatured: true } : {}),
+      ...(productId
+        ? {
+            products: {
+              some: {
+                productId,
+                product: {
+                  isPublished: true,
+                },
+              },
+            },
+          }
+        : {}),
+      ...(featured !== undefined ? { isFeatured: featured } : {}),
     };
 
     const data = await prisma.colour.findMany({

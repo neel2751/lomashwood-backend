@@ -1,60 +1,20 @@
-import { Suspense } from 'react'
+import { Suspense } from "react";
 
-import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
-import { AppointmentsChart } from '@/components/dashboard/AppointmentsChart'
-import { OrdersChart } from '@/components/dashboard/OrdersChart'
-import { RecentCustomers } from '@/components/dashboard/RecentCustomers'
-import { RecentOrders } from '@/components/dashboard/RecentOrders'
-import { RevenueChart } from '@/components/dashboard/RevenueChart'
-import { StatsCard } from '@/components/dashboard/StatsCard'
-import { TopProducts } from '@/components/dashboard/TopProducts'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { AppointmentsChart } from "@/components/dashboard/AppointmentsChart";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { OrdersChart } from "@/components/dashboard/OrdersChart";
+import { RecentCustomers } from "@/components/dashboard/RecentCustomers";
+import { RecentOrders } from "@/components/dashboard/RecentOrders";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { TopProducts } from "@/components/dashboard/TopProducts";
+import { PageHeader } from "@/components/layout/PageHeader";
 
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Overview',
-}
-
-const stats = [
-  {
-    title: 'Total Revenue',
-    value: '284,320',
-    prefix: '£',
-    change: 12.4,
-    changeLabel: 'vs last month',
-    iconName: 'PoundSterling' as const,
-    iconColor: 'text-[#C8924A]',
-    iconBg: 'bg-[#C8924A]/15',
-  },
-  {
-    title: 'Orders',
-    value: '1,284',
-    change: 8.1,
-    changeLabel: 'vs last month',
-    iconName: 'ShoppingCart' as const,
-    iconColor: 'text-emerald-400',
-    iconBg: 'bg-emerald-400/10',
-  },
-  {
-    title: 'Appointments',
-    value: '342',
-    change: -3.2,
-    changeLabel: 'vs last month',
-    iconName: 'CalendarCheck' as const,
-    iconColor: 'text-[#6B8A9A]',
-    iconBg: 'bg-[#6B8A9A]/15',
-  },
-  {
-    title: 'New Customers',
-    value: '891',
-    change: 18.7,
-    changeLabel: 'vs last month',
-    iconName: 'Users' as const,
-    iconColor: 'text-violet-400',
-    iconBg: 'bg-violet-400/10',
-  },
-]
+  title: "Overview",
+};
 
 export default function DashboardOverviewPage() {
   return (
@@ -65,11 +25,7 @@ export default function DashboardOverviewPage() {
       />
 
       <section className="overview__stats">
-        {stats.map((stat) => (
-          <Suspense key={stat.title} fallback={<div className="stat-skeleton" />}>
-            <StatsCard {...stat} />
-          </Suspense>
-        ))}
+        <DashboardStats />
       </section>
 
       <section className="overview__charts">
@@ -185,7 +141,7 @@ export default function DashboardOverviewPage() {
         }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

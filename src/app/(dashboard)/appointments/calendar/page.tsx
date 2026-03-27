@@ -1,37 +1,36 @@
-import { Suspense } from 'react'
+import { Suspense } from "react";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { AppointmentCalendarView } from '@/components/appointments/AppointmentCalendarView'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { AppointmentCalendarView } from "@/components/appointments/AppointmentCalendarView";
+import { PageHeader } from "@/components/layout/PageHeader";
 
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: 'Appointments Calendar' }
+export const metadata: Metadata = { title: "Appointments Calendar" };
 
 const APPT_SUBNAV = [
-  { href: '/appointments', label: 'All Appointments' },
-  { href: '/appointments/calendar', label: 'Calendar' },
-  { href: '/appointments/availability', label: 'Availability' },
-  { href: '/appointments/consultants', label: 'Consultants' },
-  { href: '/appointments/showrooms', label: 'Showrooms' },
-  { href: '/appointments/reminders', label: 'Reminders' },
-]
+  { href: "/appointments", label: "All Appointments" },
+  { href: "/appointments/calendar", label: "Calendar" },
+  { href: "/appointments/availability", label: "Availability" },
+  { href: "/appointments/consultants", label: "Consultants" },
+  { href: "/appointments/reminders", label: "Reminders" },
+];
 
 export default function AppointmentsCalendarPage() {
   return (
     <div className="appts-page">
       <div className="appts-page__topbar">
-        <PageHeader
-          title="Appointments"
-          description="View all appointments in calendar format."
-        />
+        <PageHeader title="Appointments" description="View all appointments in calendar format." />
       </div>
 
       <nav className="subnav">
         {APPT_SUBNAV.map((item) => (
-          <Link key={item.href} href={item.href}
-            className={`subnav__item${item.href === '/appointments/calendar' ? ' subnav__item--active' : ''}`}>
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`subnav__item${item.href === "/appointments/calendar" ? "subnav__item--active" : ""}`}
+          >
             {item.label}
           </Link>
         ))}
@@ -55,7 +54,7 @@ export default function AppointmentsCalendarPage() {
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

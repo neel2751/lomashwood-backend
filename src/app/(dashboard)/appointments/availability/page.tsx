@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from "react";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { PageHeader } from '@/components/layout/PageHeader'
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   useAvailableSlots,
   useAvailability,
@@ -12,118 +12,131 @@ import {
   useUpdateAvailability,
   useUpdateWeeklyAvailabilityPattern,
   useWeeklyAvailabilityPattern,
-} from '@/hooks/useAvailability'
-import { useToast } from '@/hooks/use-toast'
+} from "@/hooks/useAvailability";
+import { useToast } from "@/hooks/use-toast";
 
 const APPT_SUBNAV = [
-  { href: '/appointments', label: 'All Appointments' },
-  { href: '/appointments/availability', label: 'Availability' },
-  { href: '/appointments/consultants', label: 'Consultants' },
-  { href: '/appointments/reminders', label: 'Reminders' },
-]
+  { href: "/appointments", label: "All Appointments" },
+  { href: "/appointments/calendar", label: "Calendar" },
+  { href: "/appointments/availability", label: "Availability" },
+  { href: "/appointments/consultants", label: "Consultants" },
+  { href: "/appointments/reminders", label: "Reminders" },
+];
 
-const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const WEEKDAY_LABELS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 
-const DEFAULT_SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00']
+const DEFAULT_SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
 
 type AvailabilityItem = {
-  id: string
-  consultantId?: string
-  date: string
-  slots: string[]
-  isBlocked: boolean
-  createdAt: string
-  updatedAt: string
-}
+  id: string;
+  consultantId?: string;
+  date: string;
+  slots: string[];
+  isBlocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 type WeeklyPatternItem = {
-  weekday: number
-  consultantId?: string
-  isEnabled: boolean
-  startTime: string
-  endTime: string
-  slotDuration: number
-}
+  weekday: number;
+  consultantId?: string;
+  isEnabled: boolean;
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+};
 
 function buildDefaultWeeklyPattern(): WeeklyPatternItem[] {
   return [
-    { weekday: 0, isEnabled: false, startTime: '10:00', endTime: '14:00', slotDuration: 90 },
-    { weekday: 1, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
-    { weekday: 2, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
-    { weekday: 3, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
-    { weekday: 4, isEnabled: true, startTime: '09:00', endTime: '17:00', slotDuration: 60 },
-    { weekday: 5, isEnabled: true, startTime: '09:00', endTime: '16:00', slotDuration: 60 },
-    { weekday: 6, isEnabled: true, startTime: '10:00', endTime: '16:00', slotDuration: 90 },
-  ]
+    { weekday: 0, isEnabled: false, startTime: "10:00", endTime: "14:00", slotDuration: 90 },
+    { weekday: 1, isEnabled: true, startTime: "09:00", endTime: "17:00", slotDuration: 60 },
+    { weekday: 2, isEnabled: true, startTime: "09:00", endTime: "17:00", slotDuration: 60 },
+    { weekday: 3, isEnabled: true, startTime: "09:00", endTime: "17:00", slotDuration: 60 },
+    { weekday: 4, isEnabled: true, startTime: "09:00", endTime: "17:00", slotDuration: 60 },
+    { weekday: 5, isEnabled: true, startTime: "09:00", endTime: "16:00", slotDuration: 60 },
+    { weekday: 6, isEnabled: true, startTime: "10:00", endTime: "16:00", slotDuration: 90 },
+  ];
 }
 
 function normalizeWeeklyPattern(items: WeeklyPatternItem[]): WeeklyPatternItem[] {
-  const byWeekday = new Map(items.map((item) => [item.weekday, item]))
+  const byWeekday = new Map(items.map((item) => [item.weekday, item]));
   return buildDefaultWeeklyPattern().map((fallback) => ({
     ...fallback,
     ...(byWeekday.get(fallback.weekday) ?? {}),
-  }))
+  }));
 }
 
 function todayKey() {
-  return new Date().toISOString().slice(0, 10)
+  return new Date().toISOString().slice(0, 10);
 }
 
 export default function AvailabilityPage() {
-  const toast = useToast()
-  const [activeTab, setActiveTab] = useState<'weekly' | 'blocked' | 'slots'>('slots')
-  const [selectedDate, setSelectedDate] = useState(todayKey())
-  const [blockedDateInput, setBlockedDateInput] = useState(todayKey())
-  const [selectedSlots, setSelectedSlots] = useState<string[]>([])
-  const [isBlocked, setIsBlocked] = useState(false)
+  const toast = useToast();
+  const [activeTab, setActiveTab] = useState<"weekly" | "blocked" | "slots">("slots");
+  const [selectedDate, setSelectedDate] = useState(todayKey());
+  const [blockedDateInput, setBlockedDateInput] = useState(todayKey());
+  const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
 
-  const availabilityQuery = useAvailability()
-  const slotQuery = useAvailableSlots(selectedDate)
-  const saveAvailability = useUpdateAvailability()
-  const deleteAvailability = useDeleteAvailability()
-  const weeklyPatternQuery = useWeeklyAvailabilityPattern()
-  const saveWeeklyPattern = useUpdateWeeklyAvailabilityPattern()
-  const [weeklyPattern, setWeeklyPattern] = useState<WeeklyPatternItem[]>(buildDefaultWeeklyPattern())
+  const availabilityQuery = useAvailability();
+  const slotQuery = useAvailableSlots(selectedDate);
+  const saveAvailability = useUpdateAvailability();
+  const deleteAvailability = useDeleteAvailability();
+  const weeklyPatternQuery = useWeeklyAvailabilityPattern();
+  const saveWeeklyPattern = useUpdateWeeklyAvailabilityPattern();
+  const [weeklyPattern, setWeeklyPattern] = useState<WeeklyPatternItem[]>(
+    buildDefaultWeeklyPattern(),
+  );
 
-  const availabilityItems = (((availabilityQuery.data as { data?: AvailabilityItem[] } | undefined)?.data) ?? []) as AvailabilityItem[]
+  const availabilityItems = ((availabilityQuery.data as { data?: AvailabilityItem[] } | undefined)
+    ?.data ?? []) as AvailabilityItem[];
 
   const blockedDates = useMemo(
     () => availabilityItems.filter((item) => item.isBlocked),
     [availabilityItems],
-  )
+  );
 
   const configuredDates = useMemo(
     () => availabilityItems.filter((item) => !item.isBlocked),
     [availabilityItems],
-  )
+  );
 
   const existingForDate = useMemo(
     () => availabilityItems.find((item) => item.date === selectedDate),
     [availabilityItems, selectedDate],
-  )
+  );
 
   useEffect(() => {
-    const data = ((weeklyPatternQuery.data as { data?: WeeklyPatternItem[] } | undefined)?.data) ?? []
-    setWeeklyPattern(normalizeWeeklyPattern(data))
-  }, [weeklyPatternQuery.data])
+    const data =
+      (weeklyPatternQuery.data as { data?: WeeklyPatternItem[] } | undefined)?.data ?? [];
+    setWeeklyPattern(normalizeWeeklyPattern(data));
+  }, [weeklyPatternQuery.data]);
 
   const slotOptions = useMemo(() => {
-    const data = slotQuery.data as Array<{ time: string; available: boolean }> | undefined
-    if (existingForDate?.slots?.length) return existingForDate.slots
-    if (data?.length) return data.map((item) => item.time)
-    return DEFAULT_SLOTS
-  }, [existingForDate?.slots, slotQuery.data])
+    const data = slotQuery.data as Array<{ time: string; available: boolean }> | undefined;
+    if (existingForDate?.slots?.length) return existingForDate.slots;
+    if (data?.length) return data.map((item) => item.time);
+    return DEFAULT_SLOTS;
+  }, [existingForDate?.slots, slotQuery.data]);
 
   useEffect(() => {
     if (!existingForDate) {
-      setSelectedSlots([])
-      setIsBlocked(false)
-      return
+      setSelectedSlots([]);
+      setIsBlocked(false);
+      return;
     }
 
-    setSelectedSlots(existingForDate.slots)
-    setIsBlocked(existingForDate.isBlocked)
-  }, [existingForDate])
+    setSelectedSlots(existingForDate.slots);
+    setIsBlocked(existingForDate.isBlocked);
+  }, [existingForDate]);
 
   async function handleSave() {
     try {
@@ -131,21 +144,22 @@ export default function AvailabilityPage() {
         date: selectedDate,
         slots: isBlocked ? [] : [...selectedSlots].sort(),
         isBlocked,
-      })
-      toast.success('Availability saved')
+      });
+      toast.success("Availability saved");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save availability'
-      toast.error('Failed to save availability', message)
+      const message = error instanceof Error ? error.message : "Failed to save availability";
+      toast.error("Failed to save availability", message);
     }
   }
 
   async function handleRemove(id: string) {
     try {
-      await deleteAvailability.mutateAsync(id)
-      toast.success('Availability override removed')
+      await deleteAvailability.mutateAsync(id);
+      toast.success("Availability override removed");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete availability override'
-      toast.error('Failed to delete availability', message)
+      const message =
+        error instanceof Error ? error.message : "Failed to delete availability override";
+      toast.error("Failed to delete availability", message);
     }
   }
 
@@ -155,57 +169,55 @@ export default function AvailabilityPage() {
         date: blockedDateInput,
         slots: [],
         isBlocked: true,
-      })
-      toast.success('Date blocked')
+      });
+      toast.success("Date blocked");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to block date'
-      toast.error('Failed to block date', message)
+      const message = error instanceof Error ? error.message : "Failed to block date";
+      toast.error("Failed to block date", message);
     }
   }
 
   async function handleUnblockDate() {
     try {
-      const blocked = blockedDates.find((item) => item.date === blockedDateInput)
+      const blocked = blockedDates.find((item) => item.date === blockedDateInput);
       if (!blocked) {
-        toast.error('Date is not blocked', 'Select a blocked date to unblock it.')
-        return
+        toast.error("Date is not blocked", "Select a blocked date to unblock it.");
+        return;
       }
 
-      await deleteAvailability.mutateAsync(blocked.id)
-      toast.success('Date unblocked')
+      await deleteAvailability.mutateAsync(blocked.id);
+      toast.success("Date unblocked");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to unblock date'
-      toast.error('Failed to unblock date', message)
+      const message = error instanceof Error ? error.message : "Failed to unblock date";
+      toast.error("Failed to unblock date", message);
     }
   }
 
   async function handleSaveWeeklyPattern() {
     try {
-      const normalized = normalizeWeeklyPattern(weeklyPattern)
+      const normalized = normalizeWeeklyPattern(weeklyPattern);
 
       await saveWeeklyPattern.mutateAsync({
         patterns: [...normalized].sort((a, b) => a.weekday - b.weekday),
-      })
+      });
 
-      toast.success('Weekly pattern saved')
+      toast.success("Weekly pattern saved");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save weekly pattern'
-      toast.error('Failed to save weekly pattern', message)
+      const message = error instanceof Error ? error.message : "Failed to save weekly pattern";
+      toast.error("Failed to save weekly pattern", message);
     }
   }
 
   function updateWeeklyItem(weekday: number, patch: Partial<WeeklyPatternItem>) {
     setWeeklyPattern((current) =>
-      current.map((item) =>
-        item.weekday === weekday ? { ...item, ...patch } : item,
-      ),
-    )
+      current.map((item) => (item.weekday === weekday ? { ...item, ...patch } : item)),
+    );
   }
 
   function toggleSlot(slot: string) {
     setSelectedSlots((current) =>
       current.includes(slot) ? current.filter((item) => item !== slot) : [...current, slot],
-    )
+    );
   }
 
   return (
@@ -217,15 +229,22 @@ export default function AvailabilityPage() {
           backHref="/appointments"
           backLabel="Appointments"
         />
-        <button className="btn-primary" onClick={() => void handleSave()} disabled={saveAvailability.isPending}>
-          {saveAvailability.isPending ? 'Saving...' : 'Save Availability'}
+        <button
+          className="btn-primary"
+          onClick={() => void handleSave()}
+          disabled={saveAvailability.isPending}
+        >
+          {saveAvailability.isPending ? "Saving..." : "Save Availability"}
         </button>
       </div>
 
       <nav className="subnav">
         {APPT_SUBNAV.map((item) => (
-          <Link key={item.href} href={item.href}
-            className={`subnav__item${item.href === '/appointments/availability' ? ' subnav__item--active' : ''}`}>
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`subnav__item${item.href === "/appointments/availability" ? "subnav__item--active" : ""}`}
+          >
             {item.label}
           </Link>
         ))}
@@ -233,13 +252,13 @@ export default function AvailabilityPage() {
 
       <div className="avail-tabs">
         {[
-          { key: 'slots', label: 'Date Slots' },
-          { key: 'blocked', label: 'Blocked Dates' },
-          { key: 'weekly', label: 'Default Weekly Pattern' },
-        ].map(tab => (
+          { key: "slots", label: "Date Slots" },
+          { key: "blocked", label: "Blocked Dates" },
+          { key: "weekly", label: "Default Weekly Pattern" },
+        ].map((tab) => (
           <button
             key={tab.key}
-            className={`avail-tab${activeTab === tab.key ? ' avail-tab--active' : ''}`}
+            className={`avail-tab${activeTab === tab.key ? "avail-tab--active" : ""}`}
             onClick={() => setActiveTab(tab.key as typeof activeTab)}
           >
             {tab.label}
@@ -247,20 +266,32 @@ export default function AvailabilityPage() {
         ))}
       </div>
 
-      {activeTab === 'slots' && (
+      {activeTab === "slots" && (
         <div className="avail-card">
           <div className="avail-card__header">
             <h2 className="card-title">Date-specific availability</h2>
-            <p className="card-sub">Select which times remain bookable on a given date. Times not selected here are treated as unavailable.</p>
+            <p className="card-sub">
+              Select which times remain bookable on a given date. Times not selected here are
+              treated as unavailable.
+            </p>
           </div>
 
           <div className="field-row">
             <div className="field">
               <label htmlFor="selected-date">Date</label>
-              <input id="selected-date" type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+              <input
+                id="selected-date"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
             </div>
             <label className="block-toggle">
-              <input type="checkbox" checked={isBlocked} onChange={(e) => setIsBlocked(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={isBlocked}
+                onChange={(e) => setIsBlocked(e.target.checked)}
+              />
               <span>Block this date completely</span>
             </label>
           </div>
@@ -271,7 +302,7 @@ export default function AvailabilityPage() {
                 key={slot}
                 type="button"
                 disabled={isBlocked}
-                className={`slot-chip${selectedSlots.includes(slot) ? ' slot-chip--selected' : ''}`}
+                className={`slot-chip${selectedSlots.includes(slot) ? "slot-chip--selected" : ""}`}
                 onClick={() => toggleSlot(slot)}
               >
                 {slot}
@@ -280,12 +311,14 @@ export default function AvailabilityPage() {
           </div>
 
           <div className="note-box">
-            Frontend booking should call <strong>/api/availability/slots?date=YYYY-MM-DD</strong>. This response now excludes blocked dates and already-booked appointment times automatically.
+            Frontend booking should call <strong>/api/availability/slots?date=YYYY-MM-DD</strong>.
+            This response now excludes blocked dates and already-booked appointment times
+            automatically.
           </div>
         </div>
       )}
 
-      {activeTab === 'blocked' && (
+      {activeTab === "blocked" && (
         <div className="avail-card">
           <div className="avail-card__header">
             <h2 className="card-title">Blocked dates</h2>
@@ -327,7 +360,11 @@ export default function AvailabilityPage() {
               blockedDates.map((item) => (
                 <div key={item.id} className="list-row">
                   <span>{item.date}</span>
-                  <button type="button" className="danger-link" onClick={() => void handleRemove(item.id)}>
+                  <button
+                    type="button"
+                    className="danger-link"
+                    onClick={() => void handleRemove(item.id)}
+                  >
                     Remove
                   </button>
                 </div>
@@ -337,15 +374,21 @@ export default function AvailabilityPage() {
         </div>
       )}
 
-      {activeTab === 'weekly' && (
+      {activeTab === "weekly" && (
         <div className="avail-card">
           <div className="avail-card__header">
             <h2 className="card-title">Default weekly pattern</h2>
-            <p className="card-sub">This fallback schedule is used whenever a date has no specific override stored.</p>
+            <p className="card-sub">
+              This fallback schedule is used whenever a date has no specific override stored.
+            </p>
           </div>
           <div className="weekly-toolbar">
-            <button className="btn-primary" onClick={() => void handleSaveWeeklyPattern()} disabled={saveWeeklyPattern.isPending || weeklyPatternQuery.isLoading}>
-              {saveWeeklyPattern.isPending ? 'Saving Pattern...' : 'Save Weekly Pattern'}
+            <button
+              className="btn-primary"
+              onClick={() => void handleSaveWeeklyPattern()}
+              disabled={saveWeeklyPattern.isPending || weeklyPatternQuery.isLoading}
+            >
+              {saveWeeklyPattern.isPending ? "Saving Pattern..." : "Save Weekly Pattern"}
             </button>
           </div>
           <div className="list-grid">
@@ -362,7 +405,9 @@ export default function AvailabilityPage() {
                       <input
                         type="checkbox"
                         checked={item.isEnabled}
-                        onChange={(e) => updateWeeklyItem(item.weekday, { isEnabled: e.target.checked })}
+                        onChange={(e) =>
+                          updateWeeklyItem(item.weekday, { isEnabled: e.target.checked })
+                        }
                       />
                       <span>Open</span>
                     </label>
@@ -372,7 +417,9 @@ export default function AvailabilityPage() {
                       type="time"
                       value={item.startTime}
                       disabled={!item.isEnabled}
-                      onChange={(e) => updateWeeklyItem(item.weekday, { startTime: e.target.value })}
+                      onChange={(e) =>
+                        updateWeeklyItem(item.weekday, { startTime: e.target.value })
+                      }
                     />
                     <span>to</span>
                     <input
@@ -384,10 +431,14 @@ export default function AvailabilityPage() {
                     <select
                       value={String(item.slotDuration)}
                       disabled={!item.isEnabled}
-                      onChange={(e) => updateWeeklyItem(item.weekday, { slotDuration: Number(e.target.value) })}
+                      onChange={(e) =>
+                        updateWeeklyItem(item.weekday, { slotDuration: Number(e.target.value) })
+                      }
                     >
                       {[30, 45, 60, 90, 120].map((minutes) => (
-                        <option key={minutes} value={minutes}>{minutes} min</option>
+                        <option key={minutes} value={minutes}>
+                          {minutes} min
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -401,7 +452,9 @@ export default function AvailabilityPage() {
       <div className="avail-card">
         <div className="avail-card__header">
           <h2 className="card-title">Saved overrides</h2>
-          <p className="card-sub">These are the date-level records currently used by the booking API.</p>
+          <p className="card-sub">
+            These are the date-level records currently used by the booking API.
+          </p>
         </div>
         <div className="list-grid">
           {configuredDates.length === 0 ? (
@@ -411,9 +464,13 @@ export default function AvailabilityPage() {
               <div key={item.id} className="list-row list-row--stacked">
                 <div>
                   <strong>{item.date}</strong>
-                  <p>{item.slots.join(', ') || 'No slots selected'}</p>
+                  <p>{item.slots.join(", ") || "No slots selected"}</p>
                 </div>
-                <button type="button" className="danger-link" onClick={() => void handleRemove(item.id)}>
+                <button
+                  type="button"
+                  className="danger-link"
+                  onClick={() => void handleRemove(item.id)}
+                >
                   Delete Override
                 </button>
               </div>
@@ -471,7 +528,7 @@ export default function AvailabilityPage() {
         @media (max-width: 720px) { .weekly-row { grid-template-columns: 1fr; } }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

@@ -1,22 +1,21 @@
-import { Suspense } from 'react'
+import { Suspense } from "react";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { AppointmentsOverview } from '@/components/appointments/AppointmentsOverview'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { AppointmentsOverview } from "@/components/appointments/AppointmentsOverview";
+import { PageHeader } from "@/components/layout/PageHeader";
 
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: 'Appointments' }
+export const metadata: Metadata = { title: "Appointments" };
 
 const APPT_SUBNAV = [
-  { href: '/appointments', label: 'All Appointments' },
-  { href: '/appointments/calendar', label: 'Calendar' },
-  { href: '/appointments/availability', label: 'Availability' },
-  { href: '/appointments/consultants', label: 'Consultants' },
-  { href: '/appointments/showrooms', label: 'Showrooms' },
-  { href: '/appointments/reminders', label: 'Reminders' },
-]
+  { href: "/appointments", label: "All Appointments" },
+  { href: "/appointments/calendar", label: "Calendar" },
+  { href: "/appointments/availability", label: "Availability" },
+  { href: "/appointments/consultants", label: "Consultants" },
+  { href: "/appointments/reminders", label: "Reminders" },
+];
 
 export default function AppointmentsPage() {
   return (
@@ -26,22 +25,20 @@ export default function AppointmentsPage() {
           title="Appointments"
           description="Manage home measurements, online consultations, and showroom visits."
         />
-        <div className="appts-page__actions">
-          <button className="btn-outline">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export
-          </button>
-        </div>
+        {/* <div className="appts-page__actions">
+          <Link href="/appointments/new" className="btn-primary">
+            + New Appointment
+          </Link>
+        </div> */}
       </div>
 
       <nav className="subnav">
         {APPT_SUBNAV.map((item) => (
-          <Link key={item.href} href={item.href}
-            className={`subnav__item${item.href === '/appointments' ? ' subnav__item--active' : ''}`}>
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`subnav__item ${item.href === "/appointments" ? "subnav__item--active" : ""}`}
+          >
             {item.label}
           </Link>
         ))}
@@ -86,7 +83,7 @@ export default function AppointmentsPage() {
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

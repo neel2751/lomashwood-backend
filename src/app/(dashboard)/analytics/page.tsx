@@ -1,74 +1,93 @@
-import { Suspense } from 'react'
+import { Suspense } from "react";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { DateRangePicker } from '@/components/analytics/DateRangePicker'
-import { MetricCard } from '@/components/analytics/MetricCard'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { ExportButton } from '@/components/shared/ExportButton'
+import { DateRangePicker } from "@/components/analytics/DateRangePicker";
+import { OverviewMetrics } from "@/components/analytics/OverviewMetrics";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ExportButton } from "@/components/shared/ExportButton";
 
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Analytics',
-}
+  title: "Analytics",
+};
 
 const quickLinks = [
   {
-    href: '/analytics/tracking',
-    label: 'Event Tracking',
-    description: 'All GTM events and custom page-view logs',
+    href: "/analytics/tracking",
+    label: "Event Tracking",
+    description: "All GTM events and custom page-view logs",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
       </svg>
     ),
   },
   {
-    href: '/analytics/funnels',
-    label: 'Funnels',
-    description: 'Conversion funnels and drop-off analysis',
+    href: "/analytics/funnels",
+    label: "Funnels",
+    description: "Conversion funnels and drop-off analysis",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
       </svg>
     ),
   },
   {
-    href: '/analytics/dashboards',
-    label: 'Custom Dashboards',
-    description: 'Build and share analytics dashboards',
+    href: "/analytics/dashboards",
+    label: "Custom Dashboards",
+    description: "Build and share analytics dashboards",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <rect x="3" y="3" width="7" height="7"/>
-        <rect x="14" y="3" width="7" height="7"/>
-        <rect x="14" y="14" width="7" height="7"/>
-        <rect x="3" y="14" width="7" height="7"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
       </svg>
     ),
   },
   {
-    href: '/analytics/exports',
-    label: 'Exports',
-    description: 'Download analytics data as CSV or Excel',
+    href: "/analytics/exports",
+    label: "Exports",
+    description: "Download analytics data as CSV or Excel",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
     ),
   },
-]
-
-const metrics = [
-  { title: 'Page Views', value: '142,830', delta: '+9.3%', trend: 'up' as const },
-  { title: 'Unique Visitors', value: '38,210', delta: '+14.1%', trend: 'up' as const },
-  { title: 'Avg. Session', value: '3m 42s', delta: '+0:18', trend: 'up' as const },
-  { title: 'Bounce Rate', value: '41.2%', delta: '-2.8%', trend: 'up' as const },
-  { title: 'Conversion Rate', value: '3.84%', delta: '+0.41%', trend: 'up' as const },
-  { title: 'Goal Completions', value: '1,468', delta: '+22.6%', trend: 'up' as const },
-]
+];
 
 export default function AnalyticsPage() {
   return (
@@ -87,11 +106,7 @@ export default function AnalyticsPage() {
       </div>
 
       <section className="analytics-overview__metrics">
-        {metrics.map((m) => (
-  <Suspense key={m.title} fallback={<div className="metric-skeleton" />}>
-    <MetricCard {...m} />
-  </Suspense>
-))}
+        <OverviewMetrics />
       </section>
 
       <section className="analytics-overview__nav">
@@ -104,8 +119,16 @@ export default function AnalyticsPage() {
                 <span className="analytics-nav-card__label">{link.label}</span>
                 <span className="analytics-nav-card__desc">{link.description}</span>
               </span>
-              <svg className="analytics-nav-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg
+                className="analytics-nav-card__arrow"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </Link>
           ))}
@@ -249,7 +272,7 @@ export default function AnalyticsPage() {
         }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

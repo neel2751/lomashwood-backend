@@ -32,12 +32,6 @@ type AppointmentRecord = {
   updatedAt: string;
 };
 
-function toDatetimeLocalValue(value: string) {
-  const date = new Date(value);
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-  return localDate.toISOString().slice(0, 16);
-}
-
 function formatInterest(item: AppointmentRecord) {
   if (item.forKitchen && item.forBedroom) return "Kitchen + Bedroom";
   if (item.forKitchen) return "Kitchen";
@@ -52,18 +46,13 @@ export default function AppointmentDetailPage({ params }: PageProps) {
   const appointment = appointmentQuery.data as AppointmentRecord | undefined;
 
   const [status, setStatus] = useState<AppointmentStatus>("pending");
-  const [slotInput, setSlotInput] = useState("");
 
   useEffect(() => {
     if (!appointment) return;
     setStatus(appointment.status);
-    setSlotInput(toDatetimeLocalValue(appointment.slot));
   }, [appointment]);
 
-  const slotDate = useMemo(
-    () => (appointment ? new Date(appointment.slot) : null),
-    [appointment],
-  );
+  const slotDate = useMemo(() => (appointment ? new Date(appointment.slot) : null), [appointment]);
 
   async function handleSaveStatus() {
     if (!appointment) return;
@@ -72,21 +61,9 @@ export default function AppointmentDetailPage({ params }: PageProps) {
       await updateAppointment.mutateAsync({ id: appointment.id, payload: { status } });
       toast.success("Appointment status updated");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to update appointment status";
+      const message =
+        error instanceof Error ? error.message : "Failed to update appointment status";
       toast.error("Failed to update status", message);
-    }
-  }
-
-  async function handleReschedule() {
-    if (!appointment || !slotInput) return;
-
-    try {
-      const isoSlot = new Date(slotInput).toISOString();
-      await updateAppointment.mutateAsync({ id: appointment.id, payload: { slot: isoSlot } });
-      toast.success("Appointment rescheduled");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to reschedule appointment";
-      toast.error("Failed to reschedule", message);
     }
   }
 
@@ -111,7 +88,9 @@ export default function AppointmentDetailPage({ params }: PageProps) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-red-600">Unable to load appointment details.</p>
-        <Link href="/appointments" className="text-sm font-medium text-[#1A1A18] underline">Back to appointments</Link>
+        <Link href="/appointments" className="text-sm font-medium text-[#1A1A18] underline">
+          Back to appointments
+        </Link>
       </div>
     );
   }
@@ -120,9 +99,13 @@ export default function AppointmentDetailPage({ params }: PageProps) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/appointments" className="text-sm text-neutral-600 underline">Back to appointments</Link>
+          <Link href="/appointments" className="text-sm text-neutral-600 underline">
+            Back to appointments
+          </Link>
           <h1 className="mt-1 text-2xl font-semibold text-[#1A1A18]">{appointment.customerName}</h1>
-          <p className="text-sm text-neutral-600">Booked on {new Date(appointment.createdAt).toLocaleString()}</p>
+          <p className="text-sm text-neutral-600">
+            Booked on {new Date(appointment.createdAt).toLocaleString()}
+          </p>
         </div>
         <button
           type="button"
@@ -137,7 +120,7 @@ export default function AppointmentDetailPage({ params }: PageProps) {
       <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4 md:grid-cols-2">
         <div>
           <p className="text-xs uppercase tracking-wide text-neutral-500">Type</p>
-          <p className="text-sm font-medium text-[#1A1A18] capitalize">{appointment.type}</p>
+          <p className="text-sm font-medium capitalize text-[#1A1A18]">{appointment.type}</p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-neutral-500">Interest</p>
@@ -149,15 +132,21 @@ export default function AppointmentDetailPage({ params }: PageProps) {
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-neutral-500">Time</p>
-          <p className="text-sm font-medium text-[#1A1A18]">{slotDate?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+          <p className="text-sm font-medium text-[#1A1A18]">
+            {slotDate?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-neutral-500">Consultant</p>
-          <p className="text-sm font-medium text-[#1A1A18]">{appointment.consultantName || "Unassigned"}</p>
+          <p className="text-sm font-medium text-[#1A1A18]">
+            {appointment.consultantName || "Unassigned"}
+          </p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-neutral-500">Showroom</p>
-          <p className="text-sm font-medium text-[#1A1A18]">{appointment.showroomName || "Not set"}</p>
+          <p className="text-sm font-medium text-[#1A1A18]">
+            {appointment.showroomName || "Not set"}
+          </p>
         </div>
       </section>
 
@@ -187,20 +176,15 @@ export default function AppointmentDetailPage({ params }: PageProps) {
 
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-[#1A1A18]">Reschedule</h2>
-          <input
-            className="h-10 w-full rounded-md border border-neutral-300 px-3 text-sm"
-            type="datetime-local"
-            value={slotInput}
-            onChange={(e) => setSlotInput(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => void handleReschedule()}
-            className="h-9 rounded-md border border-neutral-400 px-3 text-sm font-medium text-[#1A1A18]"
-            disabled={updateAppointment.isPending}
+          <p className="text-sm text-neutral-600">
+            Use the edit screen to select only currently available slots.
+          </p>
+          <Link
+            href={`/appointments/${appointment.id}/edit`}
+            className="inline-flex h-9 items-center rounded-md border border-neutral-300 px-3 text-sm font-medium text-[#1A1A18] hover:bg-neutral-50"
           >
-            Save New Date and Time
-          </button>
+            Edit Appointment
+          </Link>
         </div>
       </section>
 

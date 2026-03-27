@@ -1,24 +1,16 @@
 "use client";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { useMemo } from "react";
 
-const WEEKLY_DATA = [
-  { day: "Mon", completed: 12, pending: 5, refunded: 1 },
-  { day: "Tue", completed: 18, pending: 7, refunded: 2 },
-  { day: "Wed", completed: 9,  pending: 4, refunded: 0 },
-  { day: "Thu", completed: 21, pending: 9, refunded: 1 },
-  { day: "Fri", completed: 25, pending: 6, refunded: 3 },
-  { day: "Sat", completed: 14, pending: 3, refunded: 0 },
-  { day: "Sun", completed: 6,  pending: 2, refunded: 0 },
-];
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+import { useOrders } from "@/hooks/useOrders";
+
+type OrderRecord = {
+  id: string;
+  status?: string;
+  createdAt?: string;
+};
 
 const STATUS_COLORS: Record<string, string> = {
   completed: "#C8924A",
@@ -41,12 +33,12 @@ interface CustomTooltipProps {
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#1C1611] border border-[#3D2E1E] rounded-[10px] px-3 py-2.5 shadow-xl">
-      <p className="text-[11px] text-[#5A4232] mb-1.5 font-medium">{label}</p>
+    <div className="rounded-[10px] border border-[#3D2E1E] bg-[#1C1611] px-3 py-2.5 shadow-xl">
+      <p className="mb-1.5 text-[11px] font-medium text-[#5A4232]">{label}</p>
       {payload.map((entry) => (
         <div key={entry.dataKey} className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ background: entry.fill }} />
-          <span className="text-[12px] text-[#9A7A5A] capitalize">{entry.dataKey}:</span>
+          <span className="h-2 w-2 rounded-full" style={{ background: entry.fill }} />
+          <span className="text-[12px] capitalize text-[#9A7A5A]">{entry.dataKey}:</span>
           <span className="text-[12px] font-semibold text-[#E8D5B7]">{entry.value}</span>
         </div>
       ))}
@@ -56,24 +48,61 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 const LEGEND = [
   { key: "completed", label: "Completed" },
-  { key: "pending",   label: "Pending" },
-  { key: "refunded",  label: "Refunded" },
+  { key: "pending", label: "Pending" },
+  { key: "refunded", label: "Refunded" },
 ];
 
 export function OrdersChart() {
-  const totalOrders = WEEKLY_DATA.reduce(
-    (sum, d) => sum + d.completed + d.pending + d.refunded,
-    0
-  );
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay() + 1);
+  weekStart.setHours(0, 0, 0, 0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const ordersQuery = useOrders({ page: 1, limit: 1000 });
+  const orders = ((ordersQuery.data as { data?: OrderRecord[] } | undefined)?.data ??
+    []) as OrderRecord[];
+
+  const weeklyData = useMemo(() => {
+    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const buckets = labels.map((day) => ({ day, completed: 0, pending: 0, refunded: 0 }));
+
+    orders.forEach((order) => {
+      if (!order.createdAt) return;
+
+      const createdAt = new Date(order.createdAt);
+      if (createdAt < weekStart || createdAt > weekEnd) return;
+
+      const dayIndex = createdAt.getDay() === 0 ? 6 : createdAt.getDay() - 1;
+      const bucket = buckets[dayIndex];
+      if (!bucket) return;
+
+      const status = (order.status ?? "pending").toLowerCase();
+      if (status === "refunded" || status === "cancelled") {
+        bucket.refunded += 1;
+      } else if (status === "pending") {
+        bucket.pending += 1;
+      } else {
+        bucket.completed += 1;
+      }
+    });
+
+    return buckets;
+  }, [orders, weekEnd, weekStart]);
+
+  const totalOrders = weeklyData.reduce((sum, d) => sum + d.completed + d.pending + d.refunded, 0);
 
   return (
-    <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] p-5">
+    <div className="rounded-[16px] border border-[#2E231A] bg-[#1C1611] p-5">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="text-[14px] font-semibold text-[#E8D5B7]">Orders This Week</h3>
-          <p className="text-[12px] text-[#5A4232] mt-0.5">
-            <span className="text-[#C8924A] font-semibold">{totalOrders}</span> total orders
+          <p className="mt-0.5 text-[12px] text-[#5A4232]">
+            <span className="font-semibold text-[#C8924A]">{totalOrders}</span> total orders
           </p>
         </div>
 
@@ -81,10 +110,7 @@ export function OrdersChart() {
         <div className="flex items-center gap-3">
           {LEGEND.map(({ key, label }) => (
             <div key={key} className="flex items-center gap-1.5">
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ background: STATUS_COLORS[key] }}
-              />
+              <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLORS[key] }} />
               <span className="text-[11px] text-[#5A4232]">{label}</span>
             </div>
           ))}
@@ -92,31 +118,37 @@ export function OrdersChart() {
       </div>
 
       {/* Chart */}
-      <ResponsiveContainer width="100%" height={180}>
-        <BarChart
-          data={WEEKLY_DATA}
-          margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-          barSize={10}
-          barGap={3}
-        >
-          <CartesianGrid stroke="#2E231A" strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="day"
-            tick={{ fill: "#5A4232", fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            tick={{ fill: "#5A4232", fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "#2E231A", radius: 4 }} />
-          <Bar dataKey="completed" fill="#C8924A" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="pending"   fill="#6B8A9A" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="refunded"  fill="#7A4232" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+      {ordersQuery.isLoading ? (
+        <div className="flex h-[180px] items-center justify-center text-[13px] text-[#5A4232]">
+          Loading weekly orders...
+        </div>
+      ) : ordersQuery.isError ? (
+        <div className="flex h-[180px] items-center justify-center text-[13px] text-red-400">
+          Failed to load weekly orders.
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={180}>
+          <BarChart
+            data={weeklyData}
+            margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+            barSize={10}
+            barGap={3}
+          >
+            <CartesianGrid stroke="#2E231A" strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="day"
+              tick={{ fill: "#5A4232", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis tick={{ fill: "#5A4232", fontSize: 11 }} axisLine={false} tickLine={false} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: "#2E231A", radius: 4 }} />
+            <Bar dataKey="completed" fill="#C8924A" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="pending" fill="#6B8A9A" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="refunded" fill="#7A4232" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }
