@@ -1,37 +1,44 @@
-import { Suspense } from 'react'
+import { Suspense } from "react";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { PageHeader } from '@/components/layout/PageHeader'
-import { ProductTable } from '@/components/products/ProductTable'
-import { ExportButton } from '@/components/shared/ExportButton'
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ProductTable } from "@/components/products/ProductTable";
+import { ExportButton } from "@/components/shared/ExportButton";
+import prisma from "@/lib/prisma";
 
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Products',
-}
+  title: "Products",
+};
 
 const SUB_NAV = [
-  { href: '/products',            label: 'All Products' },
-  { href: '/products/categories', label: 'Categories' },
-  { href: '/products/colours',    label: 'Colours' },
-  { href: '/products/sizes',      label: 'Sizes' },
-  { href: '/products/style',      label: 'Style' },
-  { href: '/products/finish',     label: 'Finish' },
-  { href: '/products/package',    label: 'Packages' },
-  // { href: '/products/inventory',  label: 'Inventory' },
-  // { href: '/products/pricing',    label: 'Pricing' },
-]
+  { href: "/products", label: "All Products" },
+  { href: "/products/categories", label: "Categories" },
+  { href: "/products/colours", label: "Colours" },
+  { href: "/products/sizes", label: "Sizes" },
+  { href: "/products/style", label: "Style" },
+  { href: "/products/finish", label: "Finish" },
+  { href: "/products/projects", label: "Projects" },
+  { href: "/products/inventory", label: "Inventory" },
+  { href: "/products/pricing", label: "Pricing" },
+  { href: "/products/package", label: "Packages" },
+];
 
-const STATS = [
-  { label: 'Total Products', value: '184' },
-  { label: 'Kitchens',       value: '96'  },
-  { label: 'Bedrooms',       value: '88'  },
-  { label: 'Out of Stock',   value: '7', highlight: true },
-]
+export default async function ProductsListPage() {
+  const [totalProducts, kitchenProducts, bedroomProducts] = await Promise.all([
+    prisma.product.count(),
+    prisma.product.count({ where: { category: "kitchen" } }),
+    prisma.product.count({ where: { category: "bedroom" } }),
+  ]);
 
-export default function ProductsListPage() {
+  const stats = [
+    { label: "Total Products", value: totalProducts.toString() },
+    { label: "Kitchens", value: kitchenProducts.toString() },
+    { label: "Bedrooms", value: bedroomProducts.toString() },
+  ];
+
   return (
     <div className="products-page">
       <div className="products-page__topbar">
@@ -42,9 +49,16 @@ export default function ProductsListPage() {
         <div className="products-page__actions">
           <ExportButton label="Export" />
           <Link href="/products/new" className="btn-primary">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Add Product
           </Link>
@@ -56,7 +70,7 @@ export default function ProductsListPage() {
           <Link
             key={item.href}
             href={item.href}
-            className={`sub-nav__item${item.href === '/products' ? ' sub-nav__item--active' : ''}`}
+            className={`sub-nav__item${item.href === "/products" ? "sub-nav__item--active" : ""}`}
           >
             {item.label}
           </Link>
@@ -64,8 +78,8 @@ export default function ProductsListPage() {
       </nav>
 
       <div className="products-stats">
-        {STATS.map((s) => (
-          <div key={s.label} className={`stat-tile${s.highlight ? ' stat-tile--warn' : ''}`}>
+        {stats.map((s) => (
+          <div key={s.label} className="stat-tile">
             <span className="stat-tile__label">{s.label}</span>
             <span className="stat-tile__value">{s.value}</span>
           </div>
@@ -155,7 +169,7 @@ export default function ProductsListPage() {
 
         .products-stats {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 12px;
         }
 
@@ -173,11 +187,6 @@ export default function ProductsListPage() {
           gap: 4px;
         }
 
-        .stat-tile--warn {
-          border-color: #F5C6C6;
-          background: #FDF9F9;
-        }
-
         .stat-tile__label {
           font-size: 0.75rem;
           font-weight: 600;
@@ -186,16 +195,12 @@ export default function ProductsListPage() {
           color: #6B6B68;
         }
 
-        .stat-tile--warn .stat-tile__label { color: #C0392B; }
-
         .stat-tile__value {
           font-size: 1.75rem;
           font-weight: 700;
           color: #1A1A18;
           font-variant-numeric: tabular-nums;
         }
-
-        .stat-tile--warn .stat-tile__value { color: #C0392B; }
 
         .products-page__filters {
           display: flex;
@@ -293,7 +298,7 @@ export default function ProductsListPage() {
         }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

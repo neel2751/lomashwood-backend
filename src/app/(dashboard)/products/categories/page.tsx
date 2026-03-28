@@ -1,34 +1,53 @@
-import { Suspense } from 'react'
+import { Suspense } from "react";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { PageHeader } from '@/components/layout/PageHeader'
-import { CategoryTable } from '@/components/products/CategoryTable'
+import { PageHeader } from "@/components/layout/PageHeader";
+import { CategoryTable } from "@/components/products/CategoryTable";
+import prisma from "@/lib/prisma";
 
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Categories | Products',
-}
+  title: "Categories | Products",
+};
 
 const SUB_NAV = [
-  { href: '/products',            label: 'All Products' },
-  { href: '/products/categories', label: 'Categories' },
-  { href: '/products/colours',    label: 'Colours' },
-  { href: '/products/sizes',      label: 'Sizes' },
-  { href: '/products/style',      label: 'Style' },
-  { href: '/products/finish',     label: 'Finish' },
-  { href: '/products/package',    label: 'Packages' },
-  // { href: '/products/inventory',  label: 'Inventory' },
-  // { href: '/products/pricing',    label: 'Pricing' },
-]
+  { href: "/products", label: "All Products" },
+  { href: "/products/categories", label: "Categories" },
+  { href: "/products/colours", label: "Colours" },
+  { href: "/products/sizes", label: "Sizes" },
+  { href: "/products/style", label: "Style" },
+  { href: "/products/finish", label: "Finish" },
+  { href: "/products/projects", label: "Projects" },
+  { href: "/products/inventory", label: "Inventory" },
+  { href: "/products/pricing", label: "Pricing" },
+  { href: "/products/package", label: "Packages" },
+];
 
-const CATEGORIES = [
-  { id: 'kitchen', label: 'Kitchen', count: 96, icon: '🍳', desc: 'Full kitchen ranges, units, and accessories' },
-  { id: 'bedroom', label: 'Bedroom', count: 88, icon: '🛏', desc: 'Fitted wardrobes, storage, and bedroom furniture' },
-]
+export default async function CategoriesListPage() {
+  const [kitchenCount, bedroomCount] = await Promise.all([
+    prisma.product.count({ where: { category: "kitchen" } }),
+    prisma.product.count({ where: { category: "bedroom" } }),
+  ]);
 
-export default function CategoriesListPage() {
+  const categories = [
+    {
+      id: "kitchen",
+      label: "Kitchen",
+      count: kitchenCount,
+      icon: "🍳",
+      desc: "Full kitchen ranges, units, and accessories",
+    },
+    {
+      id: "bedroom",
+      label: "Bedroom",
+      count: bedroomCount,
+      icon: "🛏",
+      desc: "Fitted wardrobes, storage, and bedroom furniture",
+    },
+  ];
+
   return (
     <div className="categories-page">
       <div className="categories-page__topbar">
@@ -45,7 +64,7 @@ export default function CategoriesListPage() {
           <Link
             key={item.href}
             href={item.href}
-            className={`sub-nav__item${item.href === '/products/categories' ? ' sub-nav__item--active' : ''}`}
+            className={`sub-nav__item${item.href === "/products/categories" ? "sub-nav__item--active" : ""}`}
           >
             {item.label}
           </Link>
@@ -53,12 +72,8 @@ export default function CategoriesListPage() {
       </nav>
 
       <div className="categories-overview">
-        {CATEGORIES.map((cat) => (
-          <Link
-            key={cat.id}
-            href={`/products/categories/${cat.id}`}
-            className="cat-overview-card"
-          >
+        {categories.map((cat) => (
+          <Link key={cat.id} href={`/products/categories/${cat.id}`} className="cat-overview-card">
             <span className="cat-overview-card__icon">{cat.icon}</span>
             <div className="cat-overview-card__body">
               <span className="cat-overview-card__name">{cat.label}</span>
@@ -68,19 +83,23 @@ export default function CategoriesListPage() {
               <span className="cat-overview-card__count-value">{cat.count}</span>
               <span className="cat-overview-card__count-label">products</span>
             </div>
-            <svg className="cat-overview-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="9 18 15 12 9 6"/>
+            <svg
+              className="cat-overview-card__arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
             </svg>
           </Link>
         ))}
       </div>
 
       <div className="categories-page__filters">
-        <input
-          type="search"
-          className="filter-search"
-          placeholder="Search categories…"
-        />
+        <input type="search" className="filter-search" placeholder="Search categories…" />
       </div>
 
       <Suspense fallback={<div className="table-skeleton" />}>
@@ -266,7 +285,7 @@ export default function CategoriesListPage() {
         }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

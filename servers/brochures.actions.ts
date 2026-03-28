@@ -1,5 +1,6 @@
 "use server";
 
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { BrochureDeliveryMethod, Prisma } from "@generated/prisma/client";
 import { z } from "zod";
 
@@ -11,6 +12,66 @@ import {
   paginationQuerySchema,
   parseBoolean,
 } from "@servers/_shared";
+
+function getOptionalStorageClient(): { client: S3Client; bucket: string } | null {
+  const region = process.env.STORAGE_REGION;
+  const bucket = process.env.STORAGE_BUCKET;
+  const accessKeyId = process.env.STORAGE_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.STORAGE_SECRET_ACCESS_KEY;
+
+  if (!region || !bucket || !accessKeyId || !secretAccessKey) {
+    return null;
+  }
+
+  const client = new S3Client({
+    region,
+    credentials: { accessKeyId, secretAccessKey },
+  });
+
+  return { client, bucket };
+}
+
+function extractStorageKeyFromUrl(url?: string | null): string | null {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    const rawPath = decodeURIComponent(parsed.pathname || "").replace(/^\/+/, "");
+    if (!rawPath) return null;
+
+    if (rawPath.startsWith("public/")) {
+      return rawPath;
+    }
+
+    const publicIndex = rawPath.indexOf("public/");
+    if (publicIndex >= 0) {
+      return rawPath.slice(publicIndex);
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteStorageObjectByUrl(url?: string | null): Promise<void> {
+  const key = extractStorageKeyFromUrl(url);
+  if (!key) return;
+
+  const storage = getOptionalStorageClient();
+  if (!storage) return;
+
+  try {
+    await storage.client.send(
+      new DeleteObjectCommand({
+        Bucket: storage.bucket,
+        Key: key,
+      }),
+    );
+  } catch {
+    // best-effort cleanup only
+  }
+}
 
 const brochureCreateSchema = z.object({
   title: z.string().trim().min(1),
@@ -172,7 +233,10 @@ export async function createBrochure(payload: unknown) {
 
 export async function updateBrochure(id: string, payload: unknown) {
   const data = brochureUpdateSchema.parse(payload);
-  const existing = await prisma.brochure.findUnique({ where: { id }, select: { id: true } });
+  const existing = await prisma.brochure.findUnique({
+    where: { id },
+    select: { id: true, coverImage: true, pdfUrl: true },
+  });
 
   if (!existing) {
     throw new ActionError("Brochure not found", 404);
@@ -189,16 +253,38 @@ export async function updateBrochure(id: string, payload: unknown) {
     }
   }
 
-  return prisma.brochure.update({ where: { id }, data });
+  const updated = await prisma.brochure.update({ where: { id }, data });
+
+  const coverChanged =
+    typeof data.coverImage === "string" &&
+    existing.coverImage &&
+    existing.coverImage !== updated.coverImage;
+  const pdfChanged =
+    typeof data.pdfUrl === "string" && existing.pdfUrl && existing.pdfUrl !== updated.pdfUrl;
+
+  if (coverChanged) {
+    await deleteStorageObjectByUrl(existing.coverImage);
+  }
+
+  if (pdfChanged) {
+    await deleteStorageObjectByUrl(existing.pdfUrl);
+  }
+
+  return updated;
 }
 
 export async function deleteBrochure(id: string) {
-  const existing = await prisma.brochure.findUnique({ where: { id }, select: { id: true } });
+  const existing = await prisma.brochure.findUnique({
+    where: { id },
+    select: { id: true, coverImage: true, pdfUrl: true },
+  });
   if (!existing) {
     throw new ActionError("Brochure not found", 404);
   }
 
   await prisma.brochure.delete({ where: { id } });
+  await deleteStorageObjectByUrl(existing.coverImage);
+  await deleteStorageObjectByUrl(existing.pdfUrl);
   return { message: "Brochure deleted" };
 }
 

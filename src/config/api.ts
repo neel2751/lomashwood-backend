@@ -28,6 +28,7 @@ export const apiConfig = {
         categories: "/products/categories",
         colours: "/products/colours",
         sizes: "/products/sizes",
+        projects: "/projects",
         inventory: "/products/inventory",
         pricing: "/products/pricing",
       },

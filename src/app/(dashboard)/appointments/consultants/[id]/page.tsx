@@ -1,206 +1,173 @@
-"use client"
-'use client'
+"use client";
 
-import { useState } from 'react'
+import Link from "next/link";
 
-const ALL_SHOWROOMS = ['London Mayfair', 'Manchester', 'Birmingham']
-const ALL_ROLES     = ['Junior Consultant', 'Design Consultant', 'Senior Consultant']
+import { Loader2, Mail, Phone, Clock, Calendar, Pencil, CheckCircle2, XCircle } from "lucide-react";
 
-const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  home:     { label: 'Home Measurement', color: '#8B6914', bg: '#FFF8E6' },
-  online:   { label: 'Online',           color: '#2980B9', bg: '#EBF4FB' },
-  showroom: { label: 'Showroom',         color: '#27AE60', bg: '#EAF7EF' },
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { useConsultant } from "@/hooks/useConsultants";
+
+function getInitials(name?: string) {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((item) => item[0])
+    .join("")
+    .toUpperCase();
 }
 
-export type ConsultantFormProps = {
-  consultantId: string
-  defaultValues: {
-    name:      string
-    email:     string
-    phone:     string
-    role:      string
-    showrooms: string[]
-    types:     string[]
-    bio:       string
-  }
+function formatDate(dateStr?: string) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-export function ConsultantForm({ consultantId: _consultantId, defaultValues }: ConsultantFormProps) {
-  const [values, setValues] = useState(defaultValues)
-  const [saved, setSaved]   = useState(false)
-
-  function setField<K extends keyof typeof values>(key: K, val: typeof values[K]) {
-    setValues(prev => ({ ...prev, [key]: val }))
-    setSaved(false)
-  }
-
-  function toggleArray(key: 'showrooms' | 'types', item: string) {
-    setValues(prev => {
-      const arr = prev[key] as string[]
-      return {
-        ...prev,
-        [key]: arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item],
-      }
-    })
-    setSaved(false)
-  }
-
-  function handleSave(e: React.FormEvent) {
-    e.preventDefault()
-    
-    setSaved(true)
-  }
+export default function ConsultantDetailPage({ params }: { params: { id: string } }) {
+  const { data, isLoading, isError } = useConsultant(params.id);
+  const consultant = data as any;
 
   return (
-    <form className="cf" onSubmit={handleSave}>
-      <div className="cf__grid">
-        <div className="cf__field">
-          <label className="cf__label" htmlFor="cf-name">Full Name</label>
-          <input
-            id="cf-name"
-            className="cf__input"
-            type="text"
-            value={values.name}
-            onChange={e => setField('name', e.target.value)}
-            required
-          />
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Consultant Details"
+        description="View consultant profile and recent appointment activity."
+        backHref="/appointments/consultants"
+      />
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+          <span className="ml-2 text-sm text-gray-500">Loading consultant…</span>
         </div>
+      ) : isError || !consultant ? (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4 text-sm text-red-600">Failed to load consultant.</CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle>Profile</CardTitle>
+              <Button asChild size="sm">
+                <Link href={`/appointments/consultants/${consultant.id}/edit`}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={consultant.avatar} />
+                  <AvatarFallback>{getInitials(consultant.name)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-base font-semibold text-gray-900">{consultant.name}</p>
+                  <p className="text-xs text-gray-500">Since {formatDate(consultant.createdAt)}</p>
+                </div>
+              </div>
 
-        <div className="cf__field">
-          <label className="cf__label" htmlFor="cf-role">Role</label>
-          <select
-            id="cf-role"
-            className="cf__input cf__select"
-            value={values.role}
-            onChange={e => setField('role', e.target.value)}
-          >
-            {ALL_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border bg-white p-3">
+                  <p className="mb-1 text-xs uppercase tracking-wide text-gray-500">Email</p>
+                  <p className="flex items-center gap-1.5 text-sm text-gray-800">
+                    <Mail className="h-3.5 w-3.5 text-gray-400" />
+                    {consultant.email}
+                  </p>
+                </div>
+                <div className="rounded-lg border bg-white p-3">
+                  <p className="mb-1 text-xs uppercase tracking-wide text-gray-500">Phone</p>
+                  <p className="flex items-center gap-1.5 text-sm text-gray-800">
+                    <Phone className="h-3.5 w-3.5 text-gray-400" />
+                    {consultant.phone || "—"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Speciality</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(consultant.speciality ?? []).map((item: string) => (
+                    <Badge key={item} variant="outline" className="bg-gray-50 text-gray-700">
+                      {item}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Notes</p>
+                <p className="rounded-lg border bg-gray-50 p-3 text-sm text-gray-700">
+                  {consultant.notes || "No notes added."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-5">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {consultant.status === "active" ? (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-200 bg-emerald-50 text-emerald-700"
+                  >
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
+                    Active
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-gray-200 bg-gray-50 text-gray-600">
+                    <XCircle className="mr-1 h-3 w-3" />
+                    Inactive
+                  </Badge>
+                )}
+
+                <p className="flex items-center gap-1.5 text-sm text-gray-700">
+                  <Clock className="h-3.5 w-3.5 text-gray-400" />
+                  {consultant.availability || "Availability not set"}
+                </p>
+
+                <p className="flex items-center gap-1.5 text-sm text-gray-700">
+                  <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                  Updated {formatDate(consultant.updatedAt)}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Recent Appointments</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(consultant.appointments ?? []).length === 0 ? (
+                  <p className="text-sm text-gray-500">No appointments yet.</p>
+                ) : (
+                  consultant.appointments.map((item: any) => (
+                    <div key={item.id} className="rounded-lg border bg-gray-50 p-2.5">
+                      <p className="text-sm font-medium text-gray-800">{item.customerName}</p>
+                      <p className="text-xs text-gray-500">
+                        {item.type} · {item.status}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-
-        <div className="cf__field">
-          <label className="cf__label" htmlFor="cf-email">Email</label>
-          <input
-            id="cf-email"
-            className="cf__input"
-            type="email"
-            value={values.email}
-            onChange={e => setField('email', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="cf__field">
-          <label className="cf__label" htmlFor="cf-phone">Phone</label>
-          <input
-            id="cf-phone"
-            className="cf__input"
-            type="tel"
-            value={values.phone}
-            onChange={e => setField('phone', e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="cf__field cf__field--full">
-        <label className="cf__label" htmlFor="cf-bio">Bio</label>
-        <textarea
-          id="cf-bio"
-          className="cf__input cf__textarea"
-          value={values.bio}
-          rows={3}
-          onChange={e => setField('bio', e.target.value)}
-        />
-      </div>
-
-      <div className="cf__field cf__field--full">
-        <span className="cf__label">Showrooms</span>
-        <div className="cf__toggle-group">
-          {ALL_SHOWROOMS.map(s => (
-            <button
-              key={s}
-              type="button"
-              className={`cf__toggle${values.showrooms.includes(s) ? ' cf__toggle--on' : ''}`}
-              onClick={() => toggleArray('showrooms', s)}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="cf__field cf__field--full">
-        <span className="cf__label">Appointment Types</span>
-        <div className="cf__toggle-group">
-          {Object.entries(TYPE_CONFIG).map(([key, conf]) => {
-            const on = values.types.includes(key)
-            return (
-              <button
-                key={key}
-                type="button"
-                className="cf__toggle cf__toggle--typed"
-                style={on ? { background: conf.bg, color: conf.color, borderColor: conf.color } : undefined}
-                onClick={() => toggleArray('types', key)}
-              >
-                {conf.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="cf__footer">
-        {saved && <span className="cf__saved">✓ Changes saved</span>}
-        <button type="submit" className="cf__submit">Save Changes</button>
-      </div>
-
-      <style>{`
-        .cf { display: flex; flex-direction: column; gap: 16px; }
-
-        .cf__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        @media (max-width: 600px) { .cf__grid { grid-template-columns: 1fr; } }
-
-        .cf__field { display: flex; flex-direction: column; gap: 6px; }
-        .cf__field--full { grid-column: 1 / -1; }
-
-        .cf__label { font-size: 0.8125rem; font-weight: 600; color: #6B6B68; }
-
-        .cf__input {
-          height: 40px; padding: 0 12px;
-          border: 1.5px solid #E8E6E1; border-radius: 8px;
-          background: #FAFAF8; color: #1A1A18;
-          font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem;
-          outline: none; transition: border-color 0.15s;
-          width: 100%; box-sizing: border-box;
-        }
-        .cf__input:focus { border-color: #8B6914; background: #FFFFFF; }
-        .cf__select { cursor: pointer; }
-        .cf__textarea { height: auto; padding: 10px 12px; resize: vertical; }
-
-        .cf__toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .cf__toggle {
-          height: 34px; padding: 0 14px;
-          border: 1.5px solid #E8E6E1; border-radius: 8px;
-          background: #FAFAF8; color: #6B6B68;
-          font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500;
-          cursor: pointer; transition: all 0.15s;
-        }
-        .cf__toggle--on { background: #1A1A18; color: #F5F0E8; border-color: #1A1A18; }
-        .cf__toggle--typed { }
-        .cf__toggle:hover:not(.cf__toggle--on) { border-color: #B8B5AE; }
-
-        .cf__footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 4px; }
-        .cf__saved { font-size: 0.875rem; color: #27AE60; font-weight: 500; }
-        .cf__submit {
-          height: 38px; padding: 0 20px;
-          background: #1A1A18; color: #F5F0E8;
-          border: none; border-radius: 8px;
-          font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 600;
-          cursor: pointer; transition: background 0.15s;
-        }
-        .cf__submit:hover { background: #2E2E2A; }
-      `}</style>
-    </form>
-  )
+      )}
+    </div>
+  );
 }
-export const dynamic = 'force-dynamic'
+
+export const dynamic = "force-dynamic";

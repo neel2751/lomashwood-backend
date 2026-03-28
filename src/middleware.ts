@@ -15,6 +15,7 @@ const API_PUBLIC_PATHS = [
   "/api/v1/hero",
   "/api/v1/brochure",
   "/api/v1/brochures",
+  "/api/v1/projects",
 ];
 
 const DEFAULT_CORS_ALLOWED_ORIGINS = [

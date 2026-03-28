@@ -12,16 +12,17 @@ import {
 } from "@/hooks/useProductStyles";
 
 const SUB_NAV = [
-  { href: '/products',            label: 'All Products' },
-  { href: '/products/categories', label: 'Categories' },
-  { href: '/products/colours',    label: 'Colours' },
-  { href: '/products/sizes',      label: 'Sizes' },
-  { href: '/products/style',      label: 'Style' },
-  { href: '/products/finish',     label: 'Finish' },
-  { href: '/products/package',    label: 'Packages' },
-  // { href: '/products/inventory',  label: 'Inventory' },
-  // { href: '/products/pricing',    label: 'Pricing' },
-]
+  { href: "/products", label: "All Products" },
+  { href: "/products/categories", label: "Categories" },
+  { href: "/products/colours", label: "Colours" },
+  { href: "/products/sizes", label: "Sizes" },
+  { href: "/products/style", label: "Style" },
+  { href: "/products/finish", label: "Finish" },
+  { href: "/products/projects", label: "Projects" },
+  { href: "/products/inventory", label: "Inventory" },
+  { href: "/products/pricing", label: "Pricing" },
+  { href: "/products/package", label: "Packages" },
+];
 
 export default function ProductStylePage() {
   const query = useProductStyles({ page: 1, limit: 200 });
@@ -36,14 +37,14 @@ export default function ProductStylePage() {
         description="Manage product styles from database with active/inactive status."
       />
 
-      <nav className="flex gap-2 border-b border-[#E8E6E1] overflow-x-auto">
+      <nav className="flex gap-2 overflow-x-auto border-b border-[#E8E6E1]">
         {SUB_NAV.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`h-9 px-3 inline-flex items-center whitespace-nowrap text-sm ${
+            className={`inline-flex h-9 items-center whitespace-nowrap px-3 text-sm ${
               item.href === "/products/style"
-                ? "border-b-2 border-[#1A1A18] text-[#1A1A18] font-semibold"
+                ? "border-b-2 border-[#1A1A18] font-semibold text-[#1A1A18]"
                 : "text-[#6B6B68]"
             }`}
           >

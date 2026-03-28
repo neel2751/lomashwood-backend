@@ -48,6 +48,11 @@ export type Finish = Prisma.FinishModel
  */
 export type Package = Prisma.PackageModel
 /**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
  * Model ProductColour
  * 
  */

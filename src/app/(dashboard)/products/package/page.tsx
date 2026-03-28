@@ -15,6 +15,9 @@ const SUB_NAV = [
   { href: "/products/sizes", label: "Sizes" },
   { href: "/products/style", label: "Style" },
   { href: "/products/finish", label: "Finish" },
+  { href: "/products/projects", label: "Projects" },
+  { href: "/products/inventory", label: "Inventory" },
+  { href: "/products/pricing", label: "Pricing" },
   { href: "/products/package", label: "Packages" },
 ];
 
@@ -39,7 +42,8 @@ export default function PackagePage() {
   const packagesQuery = usePackages({ page: 1, limit: 200 });
   const deletePackage = useDeletePackage();
 
-  const packages = ((packagesQuery.data as { data?: Package[] } | undefined)?.data ?? []) as Package[];
+  const packages = ((packagesQuery.data as { data?: Package[] } | undefined)?.data ??
+    []) as Package[];
 
   const stats = [
     { label: "Total Packages", value: packages.length },
@@ -88,8 +92,13 @@ export default function PackagePage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-2xl border border-[#E8E6E1] bg-white px-5 py-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#8A877F]">{stat.label}</p>
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-[#E8E6E1] bg-white px-5 py-4 shadow-sm"
+          >
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#8A877F]">
+              {stat.label}
+            </p>
             <p className="mt-2 text-2xl font-semibold text-[#1A1A18]">{stat.value}</p>
           </div>
         ))}
@@ -111,16 +120,23 @@ export default function PackagePage() {
         packages.length > 0 ? (
           <div className="grid gap-5 xl:grid-cols-2">
             {packages.map((item) => (
-              <article key={item.id} className="overflow-hidden rounded-3xl border border-[#E8E6E1] bg-white shadow-sm">
+              <article
+                key={item.id}
+                className="overflow-hidden rounded-3xl border border-[#E8E6E1] bg-white shadow-sm"
+              >
                 <div className="flex items-start justify-between gap-4 border-b border-[#F0EDE7] px-6 py-5">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-lg font-semibold text-[#1A1A18]">{item.title}</h2>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${item.isActive ? "bg-[#EEF6EA] text-[#2E6B3C]" : "bg-[#F3F1EC] text-[#7A756C]"}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${item.isActive ? "bg-[#EEF6EA] text-[#2E6B3C]" : "bg-[#F3F1EC] text-[#7A756C]"}`}
+                      >
                         {item.isActive ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <p className="text-sm text-[#6B6B68]">{item.description || "No package description added yet."}</p>
+                    <p className="text-sm text-[#6B6B68]">
+                      {item.description || "No package description added yet."}
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -145,15 +161,21 @@ export default function PackagePage() {
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div className="rounded-2xl bg-[#FAF8F4] px-4 py-3">
                       <p className="text-xs uppercase tracking-[0.12em] text-[#8A877F]">Category</p>
-                      <p className="mt-2 text-sm font-semibold text-[#1A1A18]">{capitalize(item.category)}</p>
+                      <p className="mt-2 text-sm font-semibold text-[#1A1A18]">
+                        {capitalize(item.category)}
+                      </p>
                     </div>
                     <div className="rounded-2xl bg-[#FAF8F4] px-4 py-3">
                       <p className="text-xs uppercase tracking-[0.12em] text-[#8A877F]">Price</p>
-                      <p className="mt-2 text-sm font-semibold text-[#1A1A18]">{formatCurrency(item.price)}</p>
+                      <p className="mt-2 text-sm font-semibold text-[#1A1A18]">
+                        {formatCurrency(item.price)}
+                      </p>
                     </div>
                     <div className="rounded-2xl bg-[#FAF8F4] px-4 py-3">
                       <p className="text-xs uppercase tracking-[0.12em] text-[#8A877F]">Products</p>
-                      <p className="mt-2 text-sm font-semibold text-[#1A1A18]">{item.productsCount ?? item.products?.length ?? 0}</p>
+                      <p className="mt-2 text-sm font-semibold text-[#1A1A18]">
+                        {item.productsCount ?? item.products?.length ?? 0}
+                      </p>
                     </div>
                   </div>
 
@@ -162,7 +184,10 @@ export default function PackagePage() {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {(item.features ?? []).length > 0 ? (
                         item.features.map((feature) => (
-                          <span key={feature} className="rounded-full bg-[#F7F5F0] px-3 py-1 text-xs font-medium text-[#4A4945]">
+                          <span
+                            key={feature}
+                            className="rounded-full bg-[#F7F5F0] px-3 py-1 text-xs font-medium text-[#4A4945]"
+                          >
                             {feature}
                           </span>
                         ))
@@ -173,11 +198,16 @@ export default function PackagePage() {
                   </div>
 
                   <div>
-                    <p className="text-xs uppercase tracking-[0.12em] text-[#8A877F]">Assigned Products</p>
+                    <p className="text-xs uppercase tracking-[0.12em] text-[#8A877F]">
+                      Assigned Products
+                    </p>
                     <div className="mt-3 space-y-2">
                       {(item.products ?? []).length > 0 ? (
                         item.products?.slice(0, 4).map((product) => (
-                          <div key={product.id} className="flex items-center justify-between rounded-xl border border-[#EEE9DF] px-4 py-3 text-sm">
+                          <div
+                            key={product.id}
+                            className="flex items-center justify-between rounded-xl border border-[#EEE9DF] px-4 py-3 text-sm"
+                          >
                             <span className="font-medium text-[#1A1A18]">{product.title}</span>
                             <span className="text-[#6B6B68]">{capitalize(product.category)}</span>
                           </div>
@@ -196,7 +226,9 @@ export default function PackagePage() {
         ) : (
           <div className="rounded-2xl border border-dashed border-[#D8D3C6] bg-[#FCFBF9] p-10 text-center shadow-sm">
             <h2 className="text-lg font-semibold text-[#1A1A18]">No packages yet</h2>
-            <p className="mt-2 text-sm text-[#6B6B68]">Create your first package to group products in the catalogue.</p>
+            <p className="mt-2 text-sm text-[#6B6B68]">
+              Create your first package to group products in the catalogue.
+            </p>
             <Link
               href="/products/package/new"
               className="mt-5 inline-flex h-11 items-center justify-center rounded-xl bg-[#1A1A18] px-5 text-sm font-semibold text-[#F5F0E8]"

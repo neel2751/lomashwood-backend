@@ -11,6 +11,12 @@ enum ProductCategory {
   bedroom
 }
 
+enum ProjectCategory {
+  kitchen
+  bedroom
+  media_wall
+}
+
 enum ProductFinish {
   gloss
   matt
@@ -169,6 +175,30 @@ model Package {
 
   @@index([category])
   @@index([isActive])
+}
+
+model Project {
+  id          String          @id @default(cuid())
+  title       String
+  slug        String          @unique @default(cuid())
+  category    ProjectCategory
+  location    String
+  completedAt DateTime
+  description String
+  images      String[]
+  style       String?
+  finish      String?
+  layout      String?
+  duration    String?
+  details     Json?
+  isPublished Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([category])
+  @@index([slug])
+  @@index([completedAt])
+  @@index([isPublished])
 }
 
 model ProductColour {

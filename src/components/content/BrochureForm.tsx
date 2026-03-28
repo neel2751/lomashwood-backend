@@ -70,6 +70,15 @@ export function BrochureForm({
     }
   }, [normalizedPdfUrl]);
 
+  const textInputCls =
+    "h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px] !bg-white !text-[#1A1A18] placeholder:text-[#8A877F] focus:outline-none focus:ring-2 focus:ring-[#C8924A]/20";
+  const textAreaCls =
+    "rounded-[10px] border border-[#E8E6E1] px-3 py-2 text-[13px] !bg-white !text-[#1A1A18] placeholder:text-[#8A877F] focus:outline-none focus:ring-2 focus:ring-[#C8924A]/20";
+  const uploadButtonCls =
+    "inline-flex h-9 cursor-pointer items-center gap-2 rounded-[9px] border border-[#D8D3C9] bg-white px-3 text-[12px] text-[#1A1A18] hover:bg-[#F8F6F1]";
+  const checkboxCls =
+    "h-4 w-4 rounded border-[#CFCAC0] bg-white text-[#1A1A18] accent-[#1A1A18] focus:ring-2 focus:ring-[#C8924A]/30 focus:ring-offset-0";
+
   function handleTitleChange(value: string) {
     setTitle(value);
     if (!isEdit && !slug.trim()) {
@@ -198,7 +207,7 @@ export function BrochureForm({
           <input
             value={title}
             onChange={(event) => handleTitleChange(event.target.value)}
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="Kitchen Collection 2026"
           />
         </label>
@@ -208,7 +217,7 @@ export function BrochureForm({
           <input
             value={slug}
             onChange={(event) => setSlug(event.target.value)}
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="kitchen-collection-2026"
           />
         </label>
@@ -219,7 +228,7 @@ export function BrochureForm({
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={3}
-            className="rounded-[10px] border border-[#E8E6E1] px-3 py-2 text-[13px]"
+            className={textAreaCls}
             placeholder="Short brochure summary"
           />
         </label>
@@ -230,10 +239,10 @@ export function BrochureForm({
             <input
               value={coverImage}
               onChange={(event) => setCoverImage(event.target.value)}
-              className="h-10 w-full rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+              className={`${textInputCls} w-full`}
               placeholder="https://..."
             />
-            <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-[9px] border border-[#E8E6E1] px-3 text-[12px] text-[#1A1A18]">
+            <label className={uploadButtonCls}>
               {uploadingCover ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
@@ -271,10 +280,10 @@ export function BrochureForm({
             <input
               value={pdfUrl}
               onChange={(event) => setPdfUrl(event.target.value)}
-              className="h-10 w-full rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+              className={`${textInputCls} w-full`}
               placeholder="https://..."
             />
-            <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-[9px] border border-[#E8E6E1] px-3 text-[12px] text-[#1A1A18]">
+            <label className={uploadButtonCls}>
               {uploadingPdf ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
               {uploadingPdf ? "Uploading PDF..." : "Upload PDF"}
               <input
@@ -314,7 +323,7 @@ export function BrochureForm({
           <input
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="kitchen"
           />
         </label>
@@ -324,7 +333,7 @@ export function BrochureForm({
           <input
             value={tags}
             onChange={(event) => setTags(event.target.value)}
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="kitchen, modern"
           />
         </label>
@@ -336,7 +345,7 @@ export function BrochureForm({
             onChange={(event) => setPages(event.target.value)}
             type="number"
             min={1}
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="64"
           />
         </label>
@@ -349,7 +358,7 @@ export function BrochureForm({
             type="number"
             min={0}
             step="0.1"
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="18.4"
           />
         </label>
@@ -361,7 +370,7 @@ export function BrochureForm({
             onChange={(event) => setYear(event.target.value)}
             type="number"
             min={2000}
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="2026"
           />
         </label>
@@ -372,7 +381,7 @@ export function BrochureForm({
             value={sortOrder}
             onChange={(event) => setSortOrder(event.target.value)}
             type="number"
-            className="h-10 rounded-[10px] border border-[#E8E6E1] px-3 text-[13px]"
+            className={textInputCls}
             placeholder="0"
           />
         </label>
@@ -382,7 +391,7 @@ export function BrochureForm({
             type="checkbox"
             checked={isFeatured}
             onChange={(event) => setIsFeatured(event.target.checked)}
-            className="h-4 w-4 rounded border-[#CFCAC0]"
+            className={checkboxCls}
           />
           Featured brochure
         </label>
@@ -392,7 +401,7 @@ export function BrochureForm({
             type="checkbox"
             checked={isPublished}
             onChange={(event) => setIsPublished(event.target.checked)}
-            className="h-4 w-4 rounded border-[#CFCAC0]"
+            className={checkboxCls}
           />
           Published
         </label>

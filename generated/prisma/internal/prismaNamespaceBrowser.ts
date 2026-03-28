@@ -57,6 +57,7 @@ export const ModelName = {
   Style: 'Style',
   Finish: 'Finish',
   Package: 'Package',
+  Project: 'Project',
   ProductColour: 'ProductColour',
   ProductSize: 'ProductSize',
   Customer: 'Customer',
@@ -179,6 +180,28 @@ export const PackageScalarFieldEnum = {
 } as const
 
 export type PackageScalarFieldEnum = (typeof PackageScalarFieldEnum)[keyof typeof PackageScalarFieldEnum]
+
+
+export const ProjectScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  category: 'category',
+  location: 'location',
+  completedAt: 'completedAt',
+  description: 'description',
+  images: 'images',
+  style: 'style',
+  finish: 'finish',
+  layout: 'layout',
+  duration: 'duration',
+  details: 'details',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
 
 
 export const ProductColourScalarFieldEnum = {

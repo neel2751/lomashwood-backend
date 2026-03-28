@@ -78,6 +78,7 @@ export function createApiClient() {
     },
 
     products: makeService("/products"),
+    projects: makeService("/projects"),
     packages: makeService("/products/packages"),
     categories: makeService("/products/categories"),
     colors: makeService("/products/colours"),

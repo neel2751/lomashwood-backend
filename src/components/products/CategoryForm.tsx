@@ -24,6 +24,8 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
   const [description, setDescription] = useState(initialData?.description ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const controlClass =
+    "w-full rounded-[9px] border border-[#D8D2C8] bg-[#FCFBF9] px-3 py-2.5 text-[13px] text-[#1A1A18] placeholder:text-[#8B8A86] focus:outline-none focus:border-[#C8924A]/60 transition-colors resize-none";
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -35,21 +37,23 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
   };
 
   return (
-    <div className="rounded-[16px] bg-[#1C1611] border border-[#2E231A] overflow-hidden max-w-lg">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#2E231A]">
+    <div className="max-w-lg overflow-hidden rounded-[16px] border border-[#2E231A] bg-[#1C1611]">
+      <div className="flex items-center justify-between border-b border-[#2E231A] px-6 py-4">
         <div>
           <h2 className="text-[15px] font-semibold text-[#E8D5B7]">
             {isEdit ? "Edit Category" : "New Category"}
           </h2>
-          <p className="text-[12px] text-[#5A4232] mt-0.5">Kitchen or Bedroom product grouping</p>
+          <p className="mt-0.5 text-[12px] text-[#5A4232]">Kitchen or Bedroom product grouping</p>
         </div>
         <button
           onClick={handleSubmit}
           disabled={saving}
           className={cn(
-            "flex items-center gap-2 h-9 px-4 rounded-[9px] text-[12.5px] font-medium transition-all",
-            saved ? "bg-emerald-500/20 text-emerald-400" : "bg-[#C8924A] text-white hover:bg-[#B87E3E]",
-            "disabled:opacity-50 disabled:pointer-events-none"
+            "flex h-9 items-center gap-2 rounded-[9px] px-4 text-[12.5px] font-medium transition-all",
+            saved
+              ? "bg-emerald-500/20 text-emerald-400"
+              : "bg-[#C8924A] text-white hover:bg-[#B87E3E]",
+            "disabled:pointer-events-none disabled:opacity-50",
           )}
         >
           {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
@@ -57,10 +61,10 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
         </button>
       </div>
 
-      <div className="p-6 flex flex-col gap-5">
+      <div className="flex flex-col gap-5 p-6">
         {/* Category name toggle */}
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-2">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8F7B65]">
             Category <span className="text-[#C8924A]">*</span>
           </p>
           <div className="flex gap-2">
@@ -69,12 +73,12 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
                 key={cat}
                 onClick={() => setName(cat)}
                 className={cn(
-                  "flex-1 h-11 rounded-[10px] text-[13px] font-medium border transition-all",
+                  "h-11 flex-1 rounded-[10px] border text-[13px] font-medium transition-all",
                   name === cat
                     ? cat === "Kitchen"
-                      ? "bg-[#C8924A]/15 border-[#C8924A]/50 text-[#C8924A]"
-                      : "bg-[#6B8A9A]/15 border-[#6B8A9A]/50 text-[#6B8A9A]"
-                    : "bg-[#2E231A] border-[#3D2E1E] text-[#5A4232] hover:border-[#C8924A]/30 hover:text-[#C8924A]"
+                      ? "border-[#C8924A]/50 bg-[#C8924A]/15 text-[#C8924A]"
+                      : "border-[#6B8A9A]/50 bg-[#6B8A9A]/15 text-[#6B8A9A]"
+                    : "border-[#3D2E1E] bg-[#2E231A] text-[#5A4232] hover:border-[#C8924A]/30 hover:text-[#C8924A]",
                 )}
               >
                 {cat}
@@ -85,18 +89,21 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
 
         {/* Slug preview */}
         <div>
-          <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8F7B65]">
             URL Slug (auto-generated)
           </p>
-          <div className="flex items-center h-10 px-3 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E]">
-            <span className="text-[#5A4232] text-[13px]">/products/</span>
-            <span className="text-[#C8924A] text-[13px] font-mono">{name.toLowerCase()}</span>
+          <div className="flex h-10 items-center rounded-[9px] border border-[#D8D2C8] bg-[#FCFBF9] px-3">
+            <span className="text-[13px] text-[#6B6B68]">/products/</span>
+            <span className="font-mono text-[13px] text-[#8B6914]">{name.toLowerCase()}</span>
           </div>
         </div>
 
         {/* Description */}
         <div>
-          <label htmlFor="category-description" className="block text-[10px] font-semibold tracking-[0.12em] uppercase text-[#3D2E1E] mb-1.5">
+          <label
+            htmlFor="category-description"
+            className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8F7B65]"
+          >
             Description
           </label>
           <textarea
@@ -105,7 +112,7 @@ export function CategoryForm({ initialData, onSave, isEdit = false }: CategoryFo
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="Brief description of this category…"
-            className="w-full px-3 py-2.5 rounded-[9px] bg-[#2E231A] border border-[#3D2E1E] text-[13px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:outline-none focus:border-[#C8924A]/50 transition-colors resize-none"
+            className={controlClass}
           />
         </div>
       </div>

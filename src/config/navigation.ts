@@ -163,6 +163,24 @@ export const navigationConfig: NavSection[] = [
             permission: PERMISSIONS.PRODUCTS_VIEW,
           },
           {
+            label: "Style",
+            href: "/products/style",
+            icon: Sliders,
+            permission: PERMISSIONS.PRODUCTS_VIEW,
+          },
+          {
+            label: "Finish",
+            href: "/products/finish",
+            icon: Palette,
+            permission: PERMISSIONS.PRODUCTS_VIEW,
+          },
+          {
+            label: "Projects",
+            href: "/products/projects",
+            icon: ClipboardList,
+            permission: PERMISSIONS.PRODUCTS_VIEW,
+          },
+          {
             label: "Inventory",
             href: "/products/inventory",
             icon: Boxes,

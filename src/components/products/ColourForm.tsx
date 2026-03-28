@@ -71,6 +71,8 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
   };
 
   const light = isLight(hex);
+  const controlClass =
+    "h-10 w-full rounded-[9px] border border-[#D8D2C8] bg-[#FCFBF9] px-3 text-[13px] text-[#1A1A18] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/60 focus:outline-none";
 
   return (
     <div className="max-w-md overflow-hidden rounded-[16px] border border-[#2E231A] bg-[#1C1611]">
@@ -134,7 +136,7 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
         <div>
           <label
             htmlFor="colour-name"
-            className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3D2E1E]"
+            className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8F7B65]"
           >
             Colour Name <span className="text-[#C8924A]">*</span>
           </label>
@@ -144,7 +146,7 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Natural Oak, Pure White…"
-            className="h-10 w-full rounded-[9px] border border-[#3D2E1E] bg-[#2E231A] px-3 text-[13px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+            className={controlClass}
           />
         </div>
 
@@ -165,7 +167,7 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
         <div>
           <label
             htmlFor="colour-hex"
-            className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3D2E1E]"
+            className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8F7B65]"
           >
             Hex Code <span className="text-[#C8924A]">*</span>
           </label>
@@ -181,14 +183,14 @@ export function ColourForm({ initialData, onSave, isEdit = false }: ColourFormPr
               onChange={(e) => handleHexInput(e.target.value)}
               placeholder="#C8924A"
               maxLength={7}
-              className="h-10 flex-1 rounded-[9px] border border-[#3D2E1E] bg-[#2E231A] px-3 font-mono text-[13px] uppercase text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+              className={`${controlClass} flex-1 font-mono uppercase`}
             />
           </div>
         </div>
 
         {/* Preset swatches */}
         <div>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3D2E1E]">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8F7B65]">
             Presets
           </p>
           <div className="grid grid-cols-8 gap-2">

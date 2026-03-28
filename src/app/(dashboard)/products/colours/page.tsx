@@ -1,40 +1,89 @@
-import { Suspense } from 'react'
+import Link from "next/link";
 
-import Link from 'next/link'
+import { PageHeader } from "@/components/layout/PageHeader";
+import prisma from "@/lib/prisma";
 
-import { PageHeader } from '@/components/layout/PageHeader'
-import { ColourTable } from '@/components/products/ColourTable'
-
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Colours | Products',
-}
+  title: "Colours | Products",
+};
 
 const SUB_NAV = [
-  { href: '/products',            label: 'All Products' },
-  { href: '/products/categories', label: 'Categories' },
-  { href: '/products/colours',    label: 'Colours' },
-  { href: '/products/sizes',      label: 'Sizes' },
-  { href: '/products/style',      label: 'Style' },
-  { href: '/products/finish',     label: 'Finish' },
-  { href: '/products/package',    label: 'Packages' },
-  // { href: '/products/inventory',  label: 'Inventory' },
-  // { href: '/products/pricing',    label: 'Pricing' },
-]
+  { href: "/products", label: "All Products" },
+  { href: "/products/categories", label: "Categories" },
+  { href: "/products/colours", label: "Colours" },
+  { href: "/products/sizes", label: "Sizes" },
+  { href: "/products/style", label: "Style" },
+  { href: "/products/finish", label: "Finish" },
+  { href: "/products/projects", label: "Projects" },
+  { href: "/products/inventory", label: "Inventory" },
+  { href: "/products/pricing", label: "Pricing" },
+  { href: "/products/package", label: "Packages" },
+];
 
-const SAMPLE_COLOURS = [
-  { id: 'arctic-white', name: 'Arctic White', hex: '#F8F8F6', category: 'Both', productCount: 34, updatedAt: '2 days ago' },
-  { id: 'graphite-grey', name: 'Graphite Grey', hex: '#5A5A5A', category: 'Kitchen', productCount: 28, updatedAt: '1 week ago' },
-  { id: 'navy-blue', name: 'Navy Blue', hex: '#1B2A4A', category: 'Bedroom', productCount: 19, updatedAt: '3 days ago' },
-  { id: 'sage-green', name: 'Sage Green', hex: '#7B9E87', category: 'Kitchen', productCount: 22, updatedAt: '5 days ago' },
-  { id: 'cashmere', name: 'Cashmere', hex: '#D4C5B0', category: 'Both', productCount: 41, updatedAt: 'Today' },
-  { id: 'midnight-black', name: 'Midnight Black', hex: '#1A1A18', category: 'Both', productCount: 38, updatedAt: '4 days ago' },
-  { id: 'warm-oak', name: 'Warm Oak', hex: '#C8A87A', category: 'Bedroom', productCount: 15, updatedAt: '1 week ago' },
-  { id: 'dusky-pink', name: 'Dusky Pink', hex: '#D4A5A0', category: 'Bedroom', productCount: 11, updatedAt: '2 weeks ago' },
-]
+type ColourCategory = "Kitchen" | "Bedroom" | "Both";
 
-export default function ColoursListPage() {
+function formatUpdatedAt(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+export default async function ColoursListPage() {
+  const rawColours = await prisma.colour.findMany({
+    include: {
+      products: {
+        include: {
+          product: {
+            select: {
+              category: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ name: "asc" }],
+  });
+
+  const colours = rawColours.map((colour) => {
+    const categories = new Set(colour.products.map((entry) => entry.product.category));
+    const hasKitchen = categories.has("kitchen");
+    const hasBedroom = categories.has("bedroom");
+
+    let category: ColourCategory = "Both";
+    if (hasKitchen && !hasBedroom) {
+      category = "Kitchen";
+    } else if (!hasKitchen && hasBedroom) {
+      category = "Bedroom";
+    }
+
+    return {
+      id: colour.id,
+      name: colour.name,
+      hex: colour.hexCode,
+      category,
+      productCount: colour.products.length,
+      updatedAt: formatUpdatedAt(colour.updatedAt),
+      isFeatured: colour.isFeatured,
+    };
+  });
+
+  const kitchenCount = colours.filter(
+    (colour) => colour.category === "Kitchen" || colour.category === "Both",
+  ).length;
+  const bedroomCount = colours.filter(
+    (colour) => colour.category === "Bedroom" || colour.category === "Both",
+  ).length;
+  const mostUsedColour = colours.reduce<(typeof colours)[number] | null>((top, current) => {
+    if (!top || current.productCount > top.productCount) {
+      return current;
+    }
+    return top;
+  }, null);
+
   return (
     <div className="colours-page">
       <div className="colours-page__topbar">
@@ -43,9 +92,16 @@ export default function ColoursListPage() {
           description="Manage your kitchen and bedroom product catalogue."
         />
         <Link href="/products/colours/new" className="btn-primary">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           Add Colour
         </Link>
@@ -56,7 +112,7 @@ export default function ColoursListPage() {
           <Link
             key={item.href}
             href={item.href}
-            className={`subnav__item${item.href === '/products/colours' ? ' subnav__item--active' : ''}`}
+            className={`subnav__item${item.href === "/products/colours" ? "subnav__item--active" : ""}`}
           >
             {item.label}
           </Link>
@@ -65,10 +121,10 @@ export default function ColoursListPage() {
 
       <div className="colours-page__summary">
         {[
-          { label: 'Total Colours', value: SAMPLE_COLOURS.length.toString() },
-          { label: 'Kitchen', value: SAMPLE_COLOURS.filter(c => c.category === 'Kitchen' || c.category === 'Both').length.toString() },
-          { label: 'Bedroom', value: SAMPLE_COLOURS.filter(c => c.category === 'Bedroom' || c.category === 'Both').length.toString() },
-          { label: 'Most Used', value: 'Cashmere' },
+          { label: "Total Colours", value: colours.length.toString() },
+          { label: "Kitchen", value: kitchenCount.toString() },
+          { label: "Bedroom", value: bedroomCount.toString() },
+          { label: "Most Used", value: mostUsedColour?.name ?? "-" },
         ].map(({ label, value }) => (
           <div key={label} className="summary-tile">
             <span className="summary-tile__label">{label}</span>
@@ -77,38 +133,31 @@ export default function ColoursListPage() {
         ))}
       </div>
 
-      <div className="colours-page__filters">
-        <input type="search" className="filter-search" placeholder="Search colours…" />
-        <select className="filter-select" defaultValue="">
-          <option value="" disabled>Category</option>
-          <option value="kitchen">Kitchen</option>
-          <option value="bedroom">Bedroom</option>
-          <option value="both">Both</option>
-        </select>
-        <select className="filter-select" defaultValue="name-asc">
-          <option value="name-asc">Name A–Z</option>
-          <option value="name-desc">Name Z–A</option>
-          <option value="products-desc">Most Products</option>
-          <option value="updated">Recently Updated</option>
-        </select>
-      </div>
-
       <div className="colours-swatch-grid">
-        {SAMPLE_COLOURS.map((colour) => (
+        {colours.map((colour) => (
           <Link key={colour.id} href={`/products/colours/${colour.id}`} className="swatch-card">
             <div className="swatch-card__colour" style={{ background: colour.hex }}>
               <span className="swatch-card__hex">{colour.hex}</span>
             </div>
             <div className="swatch-card__body">
               <div className="swatch-card__row">
-                <span className="swatch-card__name">{colour.name}</span>
-                <span className={`swatch-card__cat swatch-card__cat--${colour.category.toLowerCase().replace(' ', '-')}`}>
+                <div className="swatch-card__title">
+                  <span className="swatch-card__name">{colour.name}</span>
+                  {colour.isFeatured ? (
+                    <span className="swatch-card__featured">Featured</span>
+                  ) : null}
+                </div>
+                <span
+                  className={`swatch-card__cat swatch-card__cat--${colour.category.toLowerCase().replace(" ", "-")}`}
+                >
                   {colour.category}
                 </span>
               </div>
               <div className="swatch-card__meta">
                 <span>{colour.productCount} products</span>
-                <span className="swatch-card__dot" aria-hidden="true">·</span>
+                <span className="swatch-card__dot" aria-hidden="true">
+                  ·
+                </span>
                 <span>{colour.updatedAt}</span>
               </div>
             </div>
@@ -117,20 +166,20 @@ export default function ColoursListPage() {
 
         <Link href="/products/colours/new" className="swatch-card swatch-card--new">
           <div className="swatch-card__new-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </div>
           <span className="swatch-card__new-label">Add colour</span>
         </Link>
-      </div>
-
-      <div className="colours-page__table-section">
-        <h2 className="section-label">All colours</h2>
-        <Suspense fallback={<div className="table-skeleton" />}>
-          <ColourTable />
-        </Suspense>
       </div>
 
       <style>{`
@@ -234,53 +283,6 @@ export default function ColoursListPage() {
           font-variant-numeric: tabular-nums;
         }
 
-        .colours-page__filters {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-        }
-
-        .filter-search {
-          height: 38px;
-          padding: 0 14px;
-          border: 1.5px solid #E8E6E1;
-          border-radius: 8px;
-          background: #FFFFFF;
-          font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem;
-          color: #1A1A18;
-          outline: none;
-          transition: border-color 0.15s;
-          min-width: 220px;
-        }
-
-        .filter-search:focus {
-          border-color: #8B6914;
-          box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.1);
-        }
-
-        .filter-search::placeholder { color: #B8B5AE; }
-
-        .filter-select {
-          height: 38px;
-          padding: 0 34px 0 12px;
-          border: 1.5px solid #E8E6E1;
-          border-radius: 8px;
-          background: #FFFFFF;
-          font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.875rem;
-          color: #1A1A18;
-          cursor: pointer;
-          outline: none;
-          transition: border-color 0.15s;
-          appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236B6B68' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-          background-repeat: no-repeat;
-          background-position: right 12px center;
-        }
-
-        .filter-select:focus { border-color: #8B6914; }
-
         .colours-swatch-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -347,6 +349,26 @@ export default function ColoursListPage() {
           color: #1A1A18;
         }
 
+        .swatch-card__title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+        }
+
+        .swatch-card__featured {
+          font-size: 0.625rem;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: #8B6914;
+          background: #FFF3D4;
+          border: 1px solid #E8D9B8;
+          border-radius: 20px;
+          padding: 2px 6px;
+          flex-shrink: 0;
+        }
+
         .swatch-card__cat {
           font-size: 0.6875rem;
           font-weight: 600;
@@ -408,30 +430,9 @@ export default function ColoursListPage() {
           font-weight: 500;
         }
 
-        .section-label {
-          font-size: 0.8125rem;
-          font-weight: 600;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          color: #6B6B68;
-          margin-bottom: 12px;
-        }
-
-        .table-skeleton {
-          height: 320px;
-          border-radius: 12px;
-          background: linear-gradient(90deg, #EEECE8 25%, #F5F3EF 50%, #EEECE8 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.4s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
       `}</style>
     </div>
-  )
+  );
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";

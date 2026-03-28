@@ -17,6 +17,15 @@ export const ProductCategory = {
 export type ProductCategory = (typeof ProductCategory)[keyof typeof ProductCategory]
 
 
+export const ProjectCategory = {
+  kitchen: 'kitchen',
+  bedroom: 'bedroom',
+  media_wall: 'media_wall'
+} as const
+
+export type ProjectCategory = (typeof ProjectCategory)[keyof typeof ProjectCategory]
+
+
 export const ProductFinish = {
   gloss: 'gloss',
   matt: 'matt',

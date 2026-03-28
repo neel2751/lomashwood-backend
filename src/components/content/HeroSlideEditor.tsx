@@ -160,15 +160,15 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[16px] border border-[#2E231A] bg-[#1C1611] shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[16px] border border-[#E8E6E1] bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#2E231A] px-6 py-4">
-          <h2 className="text-[16px] font-semibold text-[#E8D5B7]">
+        <div className="flex items-center justify-between border-b border-[#E8E6E1] px-6 py-4">
+          <h2 className="text-[16px] font-semibold text-[#1A1A18]">
             {isEditing ? "Edit Slide" : "New Slide"}
           </h2>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[#5A4232] transition-all hover:bg-[#2E231A] hover:text-[#E8D5B7]"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[#8B8A86] transition-all hover:bg-[#F5F3EF] hover:text-[#1A1A18]"
           >
             <X size={18} />
           </button>
@@ -177,7 +177,7 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6">
           {/* Media Upload */}
           <div>
-            <label className="mb-3 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#5A4232]">
+            <label className="mb-3 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#7A776F]">
               <Upload size={12} /> Media
             </label>
 
@@ -226,7 +226,7 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
                   "flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-[12px] border-2 border-dashed transition-all",
                   uploading
                     ? "cursor-wait border-[#C8924A] bg-[#C8924A]/10"
-                    : "cursor-pointer border-[#3D2E1E] hover:border-[#C8924A]/40 hover:bg-[#221A12]",
+                    : "cursor-pointer border-[#D9D5CD] hover:border-[#C8924A]/50 hover:bg-[#FCFBF9]",
                 )}
               >
                 {uploading ? (
@@ -242,14 +242,14 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
                   </>
                 ) : (
                   <>
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#2E231A]">
-                      <Upload size={22} className="text-[#5A4232]" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F5F3EF]">
+                      <Upload size={22} className="text-[#8B8A86]" />
                     </div>
                     <div className="text-center">
-                      <p className="text-[13px] font-semibold text-[#E8D5B7]">
+                      <p className="text-[13px] font-semibold text-[#1A1A18]">
                         Drop image or video here
                       </p>
-                      <p className="mt-0.5 text-[11px] text-[#5A4232]">
+                      <p className="mt-0.5 text-[11px] text-[#8B8A86]">
                         or click to browse · JPG, PNG, WebP, MP4, MOV · Max 50MB
                       </p>
                     </div>
@@ -271,7 +271,7 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
 
           {/* Text Content */}
           <div className="grid gap-4">
-            <label className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#5A4232]">
+            <label className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#7A776F]">
               <Type size={12} /> Content
             </label>
 
@@ -279,14 +279,14 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
               value={form.title}
               onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
               placeholder="Title *"
-              className="h-11 rounded-[10px] border border-[#3D2E1E] bg-[#2E231A] px-4 text-[13px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+              className="h-11 rounded-[10px] border border-[#D9D5CD] bg-white px-4 text-[13px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
             />
 
             <input
               value={form.subtitle}
               onChange={(e) => setForm((p) => ({ ...p, subtitle: e.target.value }))}
               placeholder="Subtitle"
-              className="h-11 rounded-[10px] border border-[#3D2E1E] bg-[#2E231A] px-4 text-[13px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+              className="h-11 rounded-[10px] border border-[#D9D5CD] bg-white px-4 text-[13px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
             />
 
             <textarea
@@ -294,13 +294,13 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
               placeholder="Description"
               rows={2}
-              className="resize-none rounded-[10px] border border-[#3D2E1E] bg-[#2E231A] px-4 py-3 text-[13px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+              className="resize-none rounded-[10px] border border-[#D9D5CD] bg-white px-4 py-3 text-[13px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
             />
           </div>
 
           {/* CTAs */}
           <div className="grid gap-4">
-            <label className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#5A4232]">
+            <label className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#7A776F]">
               <LinkIcon size={12} /> Call to Actions
             </label>
 
@@ -309,13 +309,13 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
                 value={form.ctaText}
                 onChange={(e) => setForm((p) => ({ ...p, ctaText: e.target.value }))}
                 placeholder="Primary CTA Text"
-                className="h-10 rounded-[8px] border border-[#3D2E1E] bg-[#2E231A] px-3 text-[12px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+                className="h-10 rounded-[8px] border border-[#D9D5CD] bg-white px-3 text-[12px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
               />
               <input
                 value={form.ctaLink}
                 onChange={(e) => setForm((p) => ({ ...p, ctaLink: e.target.value }))}
                 placeholder="Primary CTA Link"
-                className="h-10 rounded-[8px] border border-[#3D2E1E] bg-[#2E231A] px-3 text-[12px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+                className="h-10 rounded-[8px] border border-[#D9D5CD] bg-white px-3 text-[12px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
               />
             </div>
 
@@ -324,26 +324,26 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
                 value={form.secondaryCtaText}
                 onChange={(e) => setForm((p) => ({ ...p, secondaryCtaText: e.target.value }))}
                 placeholder="Secondary CTA Text"
-                className="h-10 rounded-[8px] border border-[#3D2E1E] bg-[#2E231A] px-3 text-[12px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+                className="h-10 rounded-[8px] border border-[#D9D5CD] bg-white px-3 text-[12px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
               />
               <input
                 value={form.secondaryCtaLink}
                 onChange={(e) => setForm((p) => ({ ...p, secondaryCtaLink: e.target.value }))}
                 placeholder="Secondary CTA Link"
-                className="h-10 rounded-[8px] border border-[#3D2E1E] bg-[#2E231A] px-3 text-[12px] text-[#E8D5B7] transition-colors placeholder:text-[#3D2E1E] focus:border-[#C8924A]/50 focus:outline-none"
+                className="h-10 rounded-[8px] border border-[#D9D5CD] bg-white px-3 text-[12px] text-[#2B2A28] transition-colors placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Settings */}
           <div className="grid gap-4">
-            <label className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#5A4232]">
+            <label className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider text-[#7A776F]">
               <Sliders size={12} /> Settings
             </label>
 
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <label className="mb-1.5 block text-[11px] text-[#5A4232]">
+                <label className="mb-1.5 block text-[11px] text-[#6B6B68]">
                   Overlay Opacity: {Math.round(form.overlayOpacity * 100)}%
                 </label>
                 <input
@@ -355,7 +355,7 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
                   onChange={(e) =>
                     setForm((p) => ({ ...p, overlayOpacity: parseFloat(e.target.value) }))
                   }
-                  className="h-2 w-full appearance-none rounded-full bg-[#2E231A] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#C8924A]"
+                  className="h-2 w-full appearance-none rounded-full bg-[#ECE9E2] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#C8924A]"
                 />
               </div>
 
@@ -366,17 +366,17 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
                   onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
                   className="peer sr-only"
                 />
-                <div className="relative h-5 w-9 rounded-full border border-[#3D2E1E] bg-[#2E231A] transition-all peer-checked:border-emerald-500/50 peer-checked:bg-emerald-500/20">
+                <div className="relative h-5 w-9 rounded-full border border-[#D9D5CD] bg-[#F5F3EF] transition-all peer-checked:border-emerald-500/50 peer-checked:bg-emerald-500/20">
                   <div
                     className={cn(
                       "absolute top-0.5 h-4 w-4 rounded-full transition-all",
                       form.isActive
                         ? "left-[calc(100%-18px)] bg-emerald-400"
-                        : "left-0.5 bg-[#5A4232]",
+                        : "left-0.5 bg-[#8B8A86]",
                     )}
                   />
                 </div>
-                <span className="text-[12px] text-[#5A4232]">Active</span>
+                <span className="text-[12px] text-[#6B6B68]">Active</span>
               </label>
             </div>
           </div>
@@ -393,7 +393,7 @@ export function HeroSlideEditor({ slide, onClose }: HeroSlideEditorProps) {
             <button
               type="button"
               onClick={onClose}
-              className="h-10 rounded-[9px] px-5 text-[13px] font-medium text-[#5A4232] transition-colors hover:bg-[#2E231A] hover:text-[#E8D5B7]"
+              className="h-10 rounded-[9px] px-5 text-[13px] font-medium text-[#6B6B68] transition-colors hover:bg-[#F5F3EF] hover:text-[#1A1A18]"
             >
               Cancel
             </button>

@@ -1,12 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getPublicBrochureData } from "@servers/brochures.actions";
+import { getFrontendBrochurePayload } from "@/lib/brochure-frontend-data";
 import { parseZodError } from "@servers/_shared";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const data = await getPublicBrochureData(Object.fromEntries(searchParams));
+    const data = getFrontendBrochurePayload();
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
     const status = error?.status ?? 500;

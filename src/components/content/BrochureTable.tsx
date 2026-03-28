@@ -101,7 +101,7 @@ export function BrochureTable() {
         <table className="w-full min-w-[860px]">
           <thead>
             <tr className="border-b border-[#E8E6E1] text-left text-[11px] text-[#7A776F]">
-              <th className="px-4 py-3 font-medium">Title</th>
+              <th className="px-4 py-3 font-medium">Brochure</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Featured</th>
               <th className="px-4 py-3 font-medium">Published</th>
@@ -118,12 +118,55 @@ export function BrochureTable() {
                 className="border-b border-[#F0EEE9] text-[13px] text-[#1A1A18]"
               >
                 <td className="px-4 py-3">
-                  <div className="font-medium">{brochure.title}</div>
-                  <div className="text-[11px] text-[#7A776F]">/{brochure.slug}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-16 overflow-hidden rounded-[8px] border border-[#E8E6E1] bg-[#F8F6F2]">
+                      {brochure.coverImage ? (
+                        <img
+                          src={brochure.coverImage}
+                          alt={brochure.title}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[10px] text-[#8A877F]">
+                          No image
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-medium">{brochure.title}</div>
+                      <div className="text-[11px] text-[#7A776F]">/{brochure.slug}</div>
+                      <a
+                        href={brochure.pdfUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-[#8B6914] hover:underline"
+                      >
+                        Open PDF
+                      </a>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3">{brochure.category || "-"}</td>
-                <td className="px-4 py-3">{brochure.isFeatured ? "Yes" : "No"}</td>
-                <td className="px-4 py-3">{brochure.isPublished ? "Yes" : "No"}</td>
+                <td className="px-4 py-3">
+                  {brochure.isFeatured ? (
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">
+                      Featured
+                    </span>
+                  ) : (
+                    <span className="text-[#7A776F]">No</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {brochure.isPublished ? (
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-700">
+                      Published
+                    </span>
+                  ) : (
+                    <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-600">
+                      Draft
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3">{brochure.downloads}</td>
                 <td className="px-4 py-3">{brochure.sortOrder}</td>
                 <td className="px-4 py-3">{new Date(brochure.updatedAt).toLocaleDateString()}</td>

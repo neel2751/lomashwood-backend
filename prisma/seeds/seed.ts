@@ -316,6 +316,102 @@ async function seedProductOptions() {
   }
 }
 
+async function seedProjects() {
+  const projectSeeds = [
+    {
+      slug: "chelsea-handleless-kitchen",
+      title: "Chelsea Handleless Kitchen Transformation",
+      category: "kitchen" as const,
+      location: "Chelsea, London",
+      completedAt: new Date("2026-01-20T10:00:00.000Z"),
+      description:
+        "A full kitchen renovation featuring a modern handleless layout, integrated appliances, and statement island lighting.",
+      images: [
+        "https://images.unsplash.com/photo-1556911220-bda9f7f7597e?auto=format&fit=crop&w=1400&q=80",
+        "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?auto=format&fit=crop&w=1400&q=80",
+        "https://images.unsplash.com/photo-1556909172-8c2adf6a7a4e?auto=format&fit=crop&w=1400&q=80",
+      ],
+      style: "Modern Handleless",
+      finish: "Cashmere Matt",
+      layout: "L-Shape with Island",
+      duration: "5 weeks",
+      details: [
+        { label: "Worktop", value: "Calacatta Quartz" },
+        { label: "Appliances", value: "Integrated AEG Suite" },
+        { label: "Storage", value: "Pull-out larder and corner carousel" },
+      ],
+      isPublished: true,
+    },
+    {
+      slug: "surrey-master-bedroom-fitout",
+      title: "Surrey Master Bedroom Fit-Out",
+      category: "bedroom" as const,
+      location: "Guildford, Surrey",
+      completedAt: new Date("2026-02-11T10:00:00.000Z"),
+      description:
+        "Bespoke fitted wardrobes and dressing area for a large master suite, designed for practical storage and calm aesthetics.",
+      images: [
+        "https://images.unsplash.com/photo-1616594039964-3d132b6c1fbc?auto=format&fit=crop&w=1400&q=80",
+        "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1400&q=80",
+      ],
+      style: "Contemporary",
+      finish: "Satin White Oak",
+      layout: "U-Shape Wardrobe Wall",
+      duration: "3 weeks",
+      details: [
+        { label: "Wardrobes", value: "Floor-to-ceiling fitted units" },
+        { label: "Lighting", value: "Warm LED strip with sensor control" },
+        { label: "Interior", value: "Soft-close drawers and shoe tower" },
+      ],
+      isPublished: true,
+    },
+    {
+      slug: "manchester-media-wall-lounge",
+      title: "Manchester Media Wall Lounge Upgrade",
+      category: "media_wall" as const,
+      location: "Manchester",
+      completedAt: new Date("2026-03-05T10:00:00.000Z"),
+      description:
+        "Custom media wall with concealed cable management, floating storage, and feature lighting for a premium living-room focal point.",
+      images: [
+        "https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?auto=format&fit=crop&w=1400&q=80",
+        "https://images.unsplash.com/photo-1616627981459-b2f4db8b3d8b?auto=format&fit=crop&w=1400&q=80",
+      ],
+      style: "Minimal Contemporary",
+      finish: "Graphite Oak",
+      layout: "Symmetrical Feature Wall",
+      duration: "2.5 weeks",
+      details: [
+        { label: "TV Size", value: "75 inch" },
+        { label: "Fireplace", value: "Built-in electric flame unit" },
+        { label: "Storage", value: "Floating drawers and hidden AV cupboard" },
+      ],
+      isPublished: true,
+    },
+  ];
+
+  for (const project of projectSeeds) {
+    await prisma.project.upsert({
+      where: { slug: project.slug },
+      update: {
+        title: project.title,
+        category: project.category,
+        location: project.location,
+        completedAt: project.completedAt,
+        description: project.description,
+        images: project.images,
+        style: project.style,
+        finish: project.finish,
+        layout: project.layout,
+        duration: project.duration,
+        details: project.details,
+        isPublished: project.isPublished,
+      },
+      create: project,
+    });
+  }
+}
+
 async function seedShowrooms() {
   const showrooms = [
     {
@@ -840,6 +936,12 @@ async function seedCustomersOrdersAppointments() {
   apptDate6.setDate(apptDate6.getDate() + 5);
   apptDate6.setHours(13, 0, 0, 0);
 
+  const consultants = await prisma.consultant.findMany({
+    where: { name: { in: ["Sarah Alderton", "Marcus Webb", "Jade Nguyen"] } },
+    select: { id: true, name: true },
+  });
+  const consultantByName = new Map(consultants.map((item) => [item.name, item.id]));
+
   const extraCustomers = await Promise.all([
     prisma.customer.upsert({
       where: { email: "priya.sharma@email.com" },
@@ -932,6 +1034,7 @@ async function seedCustomersOrdersAppointments() {
       address: customers[0].address,
       showroomId: defaultShowroom?.id,
       showroomName: defaultShowroom?.name,
+      consultantId: consultantByName.get("Sarah Alderton"),
       consultantName: "Sarah Alderton",
       slot: apptDate1,
       status: "confirmed",
@@ -949,6 +1052,7 @@ async function seedCustomersOrdersAppointments() {
       address: customers[0].address,
       showroomId: defaultShowroom?.id,
       showroomName: defaultShowroom?.name,
+      consultantId: consultantByName.get("Sarah Alderton"),
       consultantName: "Sarah Alderton",
       slot: apptDate1,
       status: "confirmed",
@@ -967,6 +1071,7 @@ async function seedCustomersOrdersAppointments() {
       customerPhone: customers[1].phone,
       postcode: customers[1].postcode,
       address: customers[1].address,
+      consultantId: consultantByName.get("Marcus Webb"),
       consultantName: "Marcus Webb",
       slot: apptDate2,
       status: "pending",
@@ -982,6 +1087,7 @@ async function seedCustomersOrdersAppointments() {
       customerPhone: customers[1].phone,
       postcode: customers[1].postcode,
       address: customers[1].address,
+      consultantId: consultantByName.get("Marcus Webb"),
       consultantName: "Marcus Webb",
       slot: apptDate2,
       status: "pending",
@@ -1041,6 +1147,8 @@ async function seedCustomersOrdersAppointments() {
   ];
 
   for (const item of seededAppointments) {
+    const consultantId = consultantByName.get(item.consultantName);
+
     await prisma.appointment.upsert({
       where: { id: item.id },
       update: {
@@ -1052,6 +1160,7 @@ async function seedCustomersOrdersAppointments() {
         address: item.customer.address,
         showroomId: item.showroomId,
         showroomName: item.showroomName,
+        consultantId,
         consultantName: item.consultantName,
         slot: item.slot,
         status: item.status,
@@ -1070,6 +1179,7 @@ async function seedCustomersOrdersAppointments() {
         address: item.customer.address,
         showroomId: item.showroomId,
         showroomName: item.showroomName,
+        consultantId,
         consultantName: item.consultantName,
         slot: item.slot,
         status: item.status,
@@ -1113,6 +1223,80 @@ async function seedCustomersOrdersAppointments() {
   for (const customer of allSeedCustomers) {
     const appointmentCount = await prisma.appointment.count({ where: { customerId: customer.id } });
     await prisma.customer.update({ where: { id: customer.id }, data: { appointmentCount } });
+  }
+}
+
+async function seedConsultants() {
+  const consultantSeeds = [
+    {
+      name: "Sarah Alderton",
+      email: "sarah.alderton@lomashwood.com",
+      phone: "+44 7700 210001",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
+      speciality: ["Kitchen", "Bedroom"],
+      status: "active",
+      availability: "Mon-Fri · 09:00-17:00",
+      notes: "Senior design consultant focused on premium kitchen projects.",
+    },
+    {
+      name: "Marcus Webb",
+      email: "marcus.webb@lomashwood.com",
+      phone: "+44 7700 210002",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+      speciality: ["Bedroom"],
+      status: "active",
+      availability: "Tue-Sat · 10:00-18:00",
+      notes: "Wardrobes and fitted bedroom specialist.",
+    },
+    {
+      name: "Jade Nguyen",
+      email: "jade.nguyen@lomashwood.com",
+      phone: "+44 7700 210003",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80",
+      speciality: ["Kitchen"],
+      status: "active",
+      availability: "Mon-Thu · 08:30-16:30",
+      notes: "Handles complex kitchen layouts and home-visit consultations.",
+    },
+    {
+      name: "Oliver Grant",
+      email: "oliver.grant@lomashwood.com",
+      phone: "+44 7700 210004",
+      avatar:
+        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+      speciality: ["Kitchen", "Bedroom"],
+      status: "inactive",
+      availability: "",
+      notes: "Currently inactive - retained for historical appointments.",
+    },
+  ] as const;
+
+  for (const item of consultantSeeds) {
+    await prisma.consultant.upsert({
+      where: { email: item.email },
+      update: {
+        name: item.name,
+        phone: item.phone,
+        avatar: item.avatar,
+        speciality: [...item.speciality],
+        status: item.status,
+        availability: item.availability,
+        notes: item.notes,
+      },
+      create: {
+        name: item.name,
+        email: item.email,
+        phone: item.phone,
+        avatar: item.avatar,
+        speciality: [...item.speciality],
+        status: item.status,
+        availability: item.availability,
+        notes: item.notes,
+      },
+    });
   }
 }
 
@@ -1259,7 +1443,9 @@ async function main() {
   await seedAdmin();
   await seedCatalog();
   await seedProductOptions();
+  await seedProjects();
   await seedShowrooms();
+  await seedConsultants();
   await seedCustomersOrdersAppointments();
   await seedBrochures();
 

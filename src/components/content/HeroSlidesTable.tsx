@@ -93,9 +93,9 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
   const inactiveCount = slides.filter((s) => !s.isActive).length;
 
   return (
-    <div className="overflow-hidden rounded-[16px] border border-[#2E231A] bg-[#1C1611]">
+    <div className="overflow-hidden rounded-[16px] border border-[#E8E6E1] bg-white">
       {/* Stats strip */}
-      <div className="grid grid-cols-3 divide-x divide-[#2E231A] border-b border-[#2E231A] bg-[#1A100C]">
+      <div className="grid grid-cols-3 divide-x divide-[#E8E6E1] border-b border-[#E8E6E1] bg-[#FCFBF9]">
         {[
           { label: "Total Slides", value: slides.length.toString(), icon: ImageIcon },
           { label: "Active", value: activeCount.toString(), icon: Eye },
@@ -104,28 +104,28 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
           <div key={label} className="flex items-center gap-3 px-5 py-3">
             <Icon size={14} className="text-[#C8924A]" />
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#3D2E1E]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#7A776F]">
                 {label}
               </p>
-              <p className="text-[15px] font-bold text-[#E8D5B7]">{value}</p>
+              <p className="text-[15px] font-bold text-[#1A1A18]">{value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-[#2E231A] px-5 py-4">
+      <div className="flex flex-wrap items-center gap-3 border-b border-[#E8E6E1] px-5 py-4">
         <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5A4232]" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8A86]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search slides…"
-            className="h-9 w-[210px] rounded-[9px] border border-[#3D2E1E] bg-[#2E231A] pl-8 pr-3 text-[12.5px] text-[#E8D5B7] placeholder:text-[#3D2E1E] focus:border-[#C8924A]/40 focus:outline-none"
+            className="h-9 w-[210px] rounded-[9px] border border-[#D9D5CD] bg-white pl-8 pr-3 text-[12.5px] text-[#2B2A28] placeholder:text-[#8B8A86] focus:border-[#C8924A]/50 focus:outline-none"
           />
         </div>
 
-        <div className="flex gap-1 rounded-[8px] bg-[#2E231A] p-0.5">
+        <div className="flex gap-1 rounded-[8px] border border-[#E8E6E1] bg-[#FCFBF9] p-0.5">
           {(["all", "active", "inactive"] as const).map((s) => (
             <button
               key={s}
@@ -134,7 +134,7 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
                 "rounded-[6px] px-3 py-1 text-[11px] font-medium capitalize transition-all",
                 statusFilter === s
                   ? "bg-[#C8924A] text-white"
-                  : "text-[#5A4232] hover:text-[#C8924A]",
+                  : "text-[#6B6B68] hover:text-[#C8924A]",
               )}
             >
               {s}
@@ -151,10 +151,10 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
       </div>
 
       {/* Slides list */}
-      <div className="divide-y divide-[#2E231A]">
+      <div className="divide-y divide-[#F0EEE9]">
         {isLoading ? (
           <div className="px-5 py-10 text-center">
-            <p className="text-[13px] text-[#5A4232]">Loading hero slides...</p>
+            <p className="text-[13px] text-[#7A776F]">Loading hero slides...</p>
           </div>
         ) : isError ? (
           <div className="px-5 py-10 text-center">
@@ -164,7 +164,7 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
           </div>
         ) : filtered.length === 0 ? (
           <div className="px-5 py-10 text-center">
-            <p className="text-[13px] text-[#5A4232]">No slides found</p>
+            <p className="text-[13px] text-[#7A776F]">No slides found</p>
           </div>
         ) : (
           filtered.map((slide) => (
@@ -175,17 +175,17 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, slide.id)}
               className={cn(
-                "group flex cursor-move items-center gap-4 px-5 py-4 transition-colors hover:bg-[#221A12]",
+                "group flex cursor-move items-center gap-4 px-5 py-4 transition-colors hover:bg-[#FCFBF9]",
                 draggedId === slide.id && "opacity-50",
               )}
             >
               {/* Drag handle */}
-              <div className="text-[#3D2E1E] transition-colors group-hover:text-[#5A4232]">
+              <div className="text-[#B2ADA3] transition-colors group-hover:text-[#7A776F]">
                 <GripVertical size={16} />
               </div>
 
               {/* Thumbnail */}
-              <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-[8px] border border-[#3D2E1E] bg-[#2E231A]">
+              <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-[8px] border border-[#E8E6E1] bg-[#FCFBF9]">
                 {slide.type === "image" ? (
                   <Image src={slide.src} alt={slide.title} fill className="object-cover" />
                 ) : (
@@ -211,7 +211,7 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
               {/* Content */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h4 className="truncate text-[13px] font-semibold text-[#C8B99A]">
+                  <h4 className="truncate text-[13px] font-semibold text-[#1A1A18]">
                     {slide.title}
                   </h4>
                   <span
@@ -219,27 +219,27 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
                       "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
                       slide.isActive
                         ? "bg-emerald-400/10 text-emerald-400"
-                        : "bg-[#3D2E1E] text-[#5A4232]",
+                        : "bg-gray-100 text-gray-700",
                     )}
                   >
                     <span
                       className={cn(
                         "h-1.5 w-1.5 rounded-full",
-                        slide.isActive ? "bg-emerald-400" : "bg-[#5A4232]",
+                        slide.isActive ? "bg-emerald-400" : "bg-gray-500",
                       )}
                     />
                     {slide.isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
                 {slide.subtitle && (
-                  <p className="mt-0.5 truncate text-[11px] text-[#5A4232]">{slide.subtitle}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-[#7A776F]">{slide.subtitle}</p>
                 )}
                 <div className="mt-1 flex items-center gap-3">
                   {slide.ctaText && (
-                    <span className="text-[10px] text-[#7A6045]">CTA: {slide.ctaText}</span>
+                    <span className="text-[10px] text-[#8A877F]">CTA: {slide.ctaText}</span>
                   )}
                   {slide.secondaryCtaText && (
-                    <span className="text-[10px] text-[#7A6045]">
+                    <span className="text-[10px] text-[#8A877F]">
                       Secondary: {slide.secondaryCtaText}
                     </span>
                   )}
@@ -247,8 +247,8 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
               </div>
 
               {/* Order badge */}
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#3D2E1E] bg-[#2E231A]">
-                <span className="text-[11px] font-bold text-[#5A4232]">{slide.order + 1}</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#E8E6E1] bg-[#FCFBF9]">
+                <span className="text-[11px] font-bold text-[#6B6B68]">{slide.order + 1}</span>
               </div>
 
               {/* Actions */}
@@ -259,7 +259,7 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
                     "flex h-7 w-7 items-center justify-center rounded-[6px] transition-all",
                     slide.isActive
                       ? "text-emerald-400 hover:bg-emerald-400/10"
-                      : "text-[#5A4232] hover:bg-[#2E231A] hover:text-emerald-400",
+                      : "text-[#8B8A86] hover:bg-[#F5F3EF] hover:text-emerald-400",
                   )}
                   title={slide.isActive ? "Deactivate" : "Activate"}
                 >
@@ -267,7 +267,7 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
                 </button>
                 <button
                   onClick={() => onEdit(slide)}
-                  className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#5A4232] transition-all hover:bg-[#2E231A] hover:text-[#C8924A]"
+                  className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#8B8A86] transition-all hover:bg-[#F5F3EF] hover:text-[#C8924A]"
                 >
                   <Pencil size={13} />
                 </button>
@@ -275,7 +275,7 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
                   href={slide.src}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#5A4232] transition-all hover:bg-[#2E231A] hover:text-[#C8924A]"
+                  className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[#8B8A86] transition-all hover:bg-[#F5F3EF] hover:text-[#C8924A]"
                 >
                   <ExternalLink size={13} />
                 </a>
@@ -292,9 +292,9 @@ export function HeroSlidesTable({ onEdit, onNew }: HeroSlidesTableProps) {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-[#2E231A] px-5 py-3">
-        <span className="text-[12px] text-[#5A4232]">{filtered.length} slides</span>
-        <span className="text-[12px] text-[#3D2E1E]">Drag to reorder · {activeCount} active</span>
+      <div className="flex items-center justify-between border-t border-[#E8E6E1] px-5 py-3">
+        <span className="text-[12px] text-[#7A776F]">{filtered.length} slides</span>
+        <span className="text-[12px] text-[#8A877F]">Drag to reorder · {activeCount} active</span>
       </div>
     </div>
   );

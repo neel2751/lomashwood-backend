@@ -2,6 +2,8 @@ import type { PaginationParams } from "./api.types";
 
 export type ProductCategory = "kitchen" | "bedroom";
 
+export type ProjectCategory = "kitchen" | "bedroom" | "media_wall";
+
 export type ProductFinish = "gloss" | "matt" | "satin" | "handleless" | "shaker" | "in-frame";
 
 export type ProductStyle = "contemporary" | "traditional" | "modern" | "classic" | "rustic";
@@ -131,6 +133,30 @@ export type Package = {
   updatedAt: string;
 };
 
+export type ProjectDetail = {
+  label: string;
+  value: string;
+};
+
+export type Project = {
+  id: string;
+  title: string;
+  slug: string;
+  category: ProjectCategory;
+  location: string;
+  completedAt: string;
+  description: string;
+  images: string[];
+  style?: string | null;
+  finish?: string | null;
+  layout?: string | null;
+  duration?: string | null;
+  details: ProjectDetail[];
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Showroom = {
   id: string;
   name: string;
@@ -189,6 +215,24 @@ export type CreatePackagePayload = {
 };
 
 export type UpdatePackagePayload = Partial<CreatePackagePayload>;
+
+export type CreateProjectPayload = {
+  title: string;
+  slug?: string;
+  category: ProjectCategory;
+  location: string;
+  completedAt: string;
+  description: string;
+  images: string[];
+  style?: string;
+  finish?: string;
+  layout?: string;
+  duration?: string;
+  details?: ProjectDetail[];
+  isPublished?: boolean;
+};
+
+export type UpdateProjectPayload = Partial<CreateProjectPayload>;
 
 export type CreateColourPayload = {
   name: string;
