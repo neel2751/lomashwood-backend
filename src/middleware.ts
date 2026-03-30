@@ -21,6 +21,8 @@ const API_PUBLIC_PATHS = [
 const DEFAULT_CORS_ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3001",
+  "https://lomashwood.com",
+  "https://www.lomashwood.com",
   "https://lomashwood.co.uk",
   "https://www.lomashwood.co.uk",
   "https://lomashwood-frontend.vercel.app",

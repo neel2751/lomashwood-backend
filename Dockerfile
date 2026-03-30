@@ -1,4 +1,4 @@
-FROM node:24-alpine AS base
+FROM node:20-alpine AS base
 
 FROM base AS deps
 WORKDIR /app
@@ -41,4 +41,4 @@ EXPOSE 3000
 # 1. Run migrations (This is safe, it never deletes data).
 # 2. IF RUN_DB_SEED is "true", run the seed.
 # 3. Start the app.
-CMD ["sh", "-c", "npx prisma migrate deploy --config prisma.config.js && ([ \"$RUN_DB_SEED\" = \"true\" ] && npx prisma db seed --config prisma.config.js || echo 'Skipping seed') && node server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
