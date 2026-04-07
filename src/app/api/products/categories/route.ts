@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { logApiRouteError } from "@servers/_api-logger";
 
 type CategoryType = "kitchen" | "bedroom";
 
@@ -20,6 +21,15 @@ const CATEGORY_DEFINITIONS = [
     description: "Fitted bedroom furniture, wardrobes, and storage.",
   },
 ];
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 
 async function buildCategory(definition: (typeof CATEGORY_DEFINITIONS)[number]) {
   const [productCount, firstProduct, lastProduct] = await Promise.all([
@@ -62,12 +72,28 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search")?.trim() ?? "";
 
-    const categories = await Promise.all(CATEGORY_DEFINITIONS.map((category) => buildCategory(category)));
-    const data = search ? categories.filter((category) => matchesSearch(category, search)) : categories;
+    const categories = await Promise.all(
+      CATEGORY_DEFINITIONS.map((category) => buildCategory(category)),
+    );
+    const data = search
+      ? categories.filter((category) => matchesSearch(category, search))
+      : categories;
 
-    return NextResponse.json({ data, total: data.length }, { status: 200 });
-  } catch {
-    return NextResponse.json({ message: "Failed to fetch categories" }, { status: 500 });
+    return NextResponse.json(
+      { data, total: data.length },
+      { status: 200, headers: NO_STORE_HEADERS },
+    );
+  } catch (error: unknown) {
+    const requestId = logApiRouteError({
+      request: req,
+      route: "/api/products/categories",
+      operation: "listCategories",
+      error,
+    });
+    return NextResponse.json(
+      { message: "Failed to fetch categories", requestId },
+      { status: 500, headers: NO_STORE_HEADERS },
+    );
   }
 }
 
@@ -79,18 +105,27 @@ export async function POST(req: NextRequest) {
     if (requestedType && CATEGORY_DEFINITIONS.some((category) => category.type === requestedType)) {
       return NextResponse.json(
         { message: "Top-level product categories already exist and cannot be created." },
-        { status: 409 },
+        { status: 409, headers: NO_STORE_HEADERS },
       );
     }
 
     return NextResponse.json(
       { message: "Top-level product categories are fixed and cannot be created." },
-      { status: 405 },
+      { status: 405, headers: NO_STORE_HEADERS },
     );
-  } catch {
+  } catch (error: unknown) {
+    const requestId = logApiRouteError({
+      request: req,
+      route: "/api/products/categories",
+      operation: "createCategory",
+      error,
+    });
     return NextResponse.json(
-      { message: "Top-level product categories are fixed and cannot be created." },
-      { status: 405 },
+      {
+        message: "Top-level product categories are fixed and cannot be created.",
+        requestId,
+      },
+      { status: 405, headers: NO_STORE_HEADERS },
     );
   }
 }

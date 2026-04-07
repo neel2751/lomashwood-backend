@@ -33,20 +33,33 @@ function formatUpdatedAt(date: Date) {
 }
 
 export default async function ColoursListPage() {
-  const rawColours = await prisma.colour.findMany({
-    include: {
-      products: {
-        include: {
-          product: {
-            select: {
-              category: true,
+  let rawColours: Array<{
+    id: string;
+    name: string;
+    hexCode: string;
+    isFeatured: boolean;
+    updatedAt: Date;
+    products: Array<{ product: { category: "kitchen" | "bedroom" } }>;
+  }> = [];
+
+  try {
+    rawColours = await prisma.colour.findMany({
+      include: {
+        products: {
+          include: {
+            product: {
+              select: {
+                category: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: [{ name: "asc" }],
-  });
+      orderBy: [{ name: "asc" }],
+    });
+  } catch {
+    // Keep the page usable even if colour queries fail intermittently in production.
+  }
 
   const colours = rawColours.map((colour) => {
     const categories = new Set(colour.products.map((entry) => entry.product.category));

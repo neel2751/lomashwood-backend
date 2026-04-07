@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import prisma from "@/lib/prisma";
+import { logApiRouteError } from "@servers/_api-logger";
 import { parseBoolean } from "@servers/_shared";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 
 const createColourSchema = z.object({
   name: z.string().trim().min(1),
@@ -33,9 +43,21 @@ export async function GET(req: NextRequest) {
       orderBy: [{ name: "asc" }],
     });
 
-    return NextResponse.json({ data, total: data.length }, { status: 200 });
-  } catch {
-    return NextResponse.json({ message: "Failed to fetch colours" }, { status: 500 });
+    return NextResponse.json(
+      { data, total: data.length },
+      { status: 200, headers: NO_STORE_HEADERS },
+    );
+  } catch (error: unknown) {
+    const requestId = logApiRouteError({
+      request: req,
+      route: "/api/products/colours",
+      operation: "listColours",
+      error,
+    });
+    return NextResponse.json(
+      { message: "Failed to fetch colours", requestId },
+      { status: 500, headers: NO_STORE_HEADERS },
+    );
   }
 }
 
@@ -52,12 +74,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json(created, { status: 201, headers: NO_STORE_HEADERS });
   } catch (error) {
+    const requestId = logApiRouteError({
+      request: req,
+      route: "/api/products/colours",
+      operation: "createColour",
+      error,
+    });
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: error.issues[0]?.message || "Invalid payload" },
-        { status: 400 },
+        { message: error.issues[0]?.message || "Invalid payload", requestId },
+        { status: 400, headers: NO_STORE_HEADERS },
       );
     }
     if (error instanceof Error && /Unknown argument `isFeatured`/i.test(error.message)) {
@@ -65,10 +93,14 @@ export async function POST(req: NextRequest) {
         {
           message:
             "Server Prisma client is out of date. Run `npm run prisma:generate` and restart the dev server.",
+          requestId,
         },
-        { status: 500 },
+        { status: 500, headers: NO_STORE_HEADERS },
       );
     }
-    return NextResponse.json({ message: "Failed to create colour" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to create colour", requestId },
+      { status: 500, headers: NO_STORE_HEADERS },
+    );
   }
 }

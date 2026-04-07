@@ -144,7 +144,17 @@ export default function ProjectsPage() {
               ) : projectsQuery.isError ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-sm text-red-600">
-                    Failed to load projects.
+                    <div className="flex flex-col items-center gap-3">
+                      <span>Failed to load projects.</span>
+                      <button
+                        type="button"
+                        onClick={() => void projectsQuery.refetch()}
+                        className="rounded-[8px] border border-[#D9D5CD] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2B2A28]"
+                        disabled={projectsQuery.isFetching}
+                      >
+                        {projectsQuery.isFetching ? "Retrying..." : "Retry"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ) : filteredProjects.length === 0 ? (

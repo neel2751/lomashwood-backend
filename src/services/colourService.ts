@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api-client";
+import { buildQueryString, fetchWithAuth } from "@/lib/fetch-client";
 
 type Colour = {
   id: string;
@@ -10,13 +10,25 @@ type Colour = {
 };
 
 export const colourService = {
-  getAll: (params?: Record<string, unknown>) => apiClient.colors.getAll(params),
+  getAll: (params?: Record<string, unknown>) =>
+    fetchWithAuth(`/api/products/colours${buildQueryString(params)}`),
 
-  getById: (id: string) => apiClient.colors.getById(id),
+  getById: (id: string) => fetchWithAuth(`/api/products/colours/${id}`),
 
-  create: (payload: Partial<Colour>) => apiClient.colors.create(payload),
+  create: (payload: Partial<Colour>) =>
+    fetchWithAuth("/api/products/colours", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
-  update: (id: string, payload: Partial<Colour>) => apiClient.colors.update(id, payload),
+  update: (id: string, payload: Partial<Colour>) =>
+    fetchWithAuth(`/api/products/colours/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
 
-  remove: (id: string) => apiClient.colors.delete(id),
+  remove: (id: string) =>
+    fetchWithAuth(`/api/products/colours/${id}`, {
+      method: "DELETE",
+    }),
 };

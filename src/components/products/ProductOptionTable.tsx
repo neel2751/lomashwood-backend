@@ -28,6 +28,8 @@ interface ProductOptionTableProps {
     data?: { data?: ProductOption[] };
     isLoading: boolean;
     isError: boolean;
+    isFetching?: boolean;
+    refetch?: () => Promise<unknown>;
   };
   createOption: {
     mutateAsync: (payload: ProductOptionPayload) => Promise<unknown>;
@@ -365,7 +367,17 @@ export function ProductOptionTable({
           ) : query.isError ? (
             <tr>
               <td colSpan={6} className="px-5 py-8 text-center text-red-400">
-                Failed to load records.
+                <div className="flex flex-col items-center gap-3">
+                  <span>Failed to load records.</span>
+                  <button
+                    type="button"
+                    onClick={() => void query.refetch?.()}
+                    className="rounded-[8px] border border-[#D9D5CD] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2B2A28]"
+                    disabled={query.isFetching}
+                  >
+                    {query.isFetching ? "Retrying..." : "Retry"}
+                  </button>
+                </div>
               </td>
             </tr>
           ) : filtered.length === 0 ? (

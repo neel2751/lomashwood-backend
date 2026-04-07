@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api-client";
+import { buildQueryString, fetchWithAuth } from "@/lib/fetch-client";
 
 type Category = {
   id: string;
@@ -11,17 +11,24 @@ type Category = {
 
 export const categoryService = {
   getAll: (params?: Record<string, unknown>) =>
-    apiClient.categories.getAll(params),
+    fetchWithAuth(`/api/products/categories${buildQueryString(params)}`),
 
-  getById: (id: string) =>
-    apiClient.categories.getById(id),
+  getById: (id: string) => fetchWithAuth(`/api/products/categories/${id}`),
 
   create: (payload: Partial<Category>) =>
-    apiClient.categories.create(payload),
+    fetchWithAuth("/api/products/categories", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   update: (id: string, payload: Partial<Category>) =>
-    apiClient.categories.update(id, payload),
+    fetchWithAuth(`/api/products/categories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
 
   remove: (id: string) =>
-    apiClient.categories.delete(id),
+    fetchWithAuth(`/api/products/categories/${id}`, {
+      method: "DELETE",
+    }),
 };

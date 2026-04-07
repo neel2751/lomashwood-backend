@@ -27,11 +27,19 @@ const SUB_NAV = [
 ];
 
 export default async function ProductsListPage() {
-  const [totalProducts, kitchenProducts, bedroomProducts] = await Promise.all([
-    prisma.product.count(),
-    prisma.product.count({ where: { category: "kitchen" } }),
-    prisma.product.count({ where: { category: "bedroom" } }),
-  ]);
+  let totalProducts = 0;
+  let kitchenProducts = 0;
+  let bedroomProducts = 0;
+
+  try {
+    [totalProducts, kitchenProducts, bedroomProducts] = await Promise.all([
+      prisma.product.count(),
+      prisma.product.count({ where: { category: "kitchen" } }),
+      prisma.product.count({ where: { category: "bedroom" } }),
+    ]);
+  } catch {
+    // Keep the page usable even if count queries fail intermittently in production.
+  }
 
   const stats = [
     { label: "Total Products", value: totalProducts.toString() },
