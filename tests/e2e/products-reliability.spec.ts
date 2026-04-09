@@ -34,4 +34,46 @@ test.describe("Products Reliability", () => {
       await expect(page.getByText(/something went wrong/i)).toHaveCount(0);
     }
   });
+
+  test("sets and persists primary project image on edit", async ({ page }) => {
+    await page.goto("/products/projects");
+
+    const editProjectLinks = page.locator('a[href^="/products/projects/"][href$="/edit"]');
+    const linkCount = await editProjectLinks.count();
+
+    if (linkCount === 0) {
+      test.skip(true, "No projects available to verify primary image behavior.");
+      return;
+    }
+
+    await editProjectLinks.first().click();
+
+    const imageCards = page.locator('[data-testid="project-image-card"]');
+    const imageCount = await imageCards.count();
+
+    if (imageCount < 2) {
+      test.skip(true, "Need at least two project images to test primary image selection.");
+      return;
+    }
+
+    const firstImageBefore = await imageCards.first().locator("img").getAttribute("src");
+
+    await page.getByTestId("project-set-primary-button").first().click();
+
+    const firstImageAfter = await imageCards.first().locator("img").getAttribute("src");
+    expect(firstImageAfter).not.toEqual(firstImageBefore);
+
+    await page.getByRole("button", { name: /save project/i }).click();
+    await page.waitForURL(/\/products\/projects$/);
+
+    await editProjectLinks.first().click();
+
+    const persistedFirstImage = await page
+      .locator('[data-testid="project-image-card"]')
+      .first()
+      .locator("img")
+      .getAttribute("src");
+
+    expect(persistedFirstImage).toEqual(firstImageAfter);
+  });
 });

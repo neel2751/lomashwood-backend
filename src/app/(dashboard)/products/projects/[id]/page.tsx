@@ -96,19 +96,26 @@ export default function ProjectDetailPage() {
         <h2 className="text-[14px] font-semibold text-[#1A1A18]">Images</h2>
         {project.images?.length ? (
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {project.images.map((url) => (
+            {project.images.map((url, index) => (
               <div
-                key={url}
+                key={`${url}-${index}`}
                 className="overflow-hidden rounded-[10px] border border-[#E8E6E1] bg-[#FCFBF9]"
               >
-                <Image
-                  src={url}
-                  alt={project.title}
-                  width={400}
-                  height={240}
-                  className="h-28 w-full object-cover"
-                  unoptimized
-                />
+                <div className="relative">
+                  <Image
+                    src={url}
+                    alt={project.title}
+                    width={400}
+                    height={240}
+                    className="h-28 w-full object-cover"
+                    unoptimized
+                  />
+                  {index === 0 ? (
+                    <span className="absolute left-1 top-1 rounded bg-[#1A1A18]/80 px-1.5 py-0.5 text-[10px] text-white">
+                      Primary
+                    </span>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>

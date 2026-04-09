@@ -25,9 +25,14 @@ export default function NewProjectPage() {
         submitLabel="Create Project"
         isSaving={createProject.isPending}
         onSubmit={async (payload) => {
-          await createProject.mutateAsync(payload);
-          toast.success("Project created successfully");
-          router.push("/products/projects");
+          try {
+            await createProject.mutateAsync(payload);
+            toast.success("Project created successfully");
+            router.push("/products/projects");
+          } catch (error: any) {
+            toast.error("Failed to create project", error?.message || "Please try again");
+            throw error;
+          }
         }}
       />
     </div>

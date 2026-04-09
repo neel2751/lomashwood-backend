@@ -199,21 +199,29 @@ export function ProjectForm({
       return;
     }
 
-    await onSubmit({
-      title: values.title.trim(),
-      slug: normalizedSlug,
-      category: values.category,
-      location: values.location.trim(),
-      completedAt: values.completedAt,
-      description: values.description.trim(),
-      images: values.images,
-      style: values.style.trim() || undefined,
-      finish: values.finish.trim() || undefined,
-      layout: values.layout.trim() || undefined,
-      duration: values.duration.trim() || undefined,
-      details: textToDetails(values.detailsText),
-      isPublished: values.isPublished,
-    });
+    try {
+      await onSubmit({
+        title: values.title.trim(),
+        slug: normalizedSlug,
+        category: values.category,
+        location: values.location.trim(),
+        completedAt: values.completedAt,
+        description: values.description.trim(),
+        images: values.images,
+        style: values.style.trim() || undefined,
+        finish: values.finish.trim() || undefined,
+        layout: values.layout.trim() || undefined,
+        duration: values.duration.trim() || undefined,
+        details: textToDetails(values.detailsText),
+        isPublished: values.isPublished,
+      });
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to save project. Please try again.",
+      );
+    }
   }
 
   return (
@@ -451,9 +459,10 @@ export function ProjectForm({
 
           {values.images.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {values.images.map((url) => (
+              {values.images.map((url, index) => (
                 <div
-                  key={url}
+                  key={`${url}-${index}`}
+                  data-testid="project-image-card"
                   className="relative overflow-hidden rounded-[10px] border border-[#E8E6E1] bg-[#FCFBF9]"
                 >
                   <Image
@@ -464,12 +473,42 @@ export function ProjectForm({
                     className="h-24 w-full object-cover"
                     unoptimized
                   />
+                  <div className="absolute left-1 top-1 flex items-center gap-1">
+                    {index === 0 ? (
+                      <span
+                        data-testid="project-image-primary-badge"
+                        className="rounded bg-[#1A1A18]/80 px-1.5 py-0.5 text-[10px] text-white"
+                      >
+                        Primary
+                      </span>
+                    ) : null}
+                    {index !== 0 ? (
+                      <button
+                        data-testid="project-set-primary-button"
+                        type="button"
+                        onClick={() =>
+                          setValues((prev) => {
+                            const nextImages = [...prev.images];
+                            const [selected] = nextImages.splice(index, 1);
+                            if (selected) {
+                              nextImages.unshift(selected);
+                            }
+                            return { ...prev, images: nextImages };
+                          })
+                        }
+                        className="rounded bg-[#1A1A18]/80 px-1.5 py-0.5 text-[10px] text-white"
+                        disabled={isSaving || isUploading}
+                      >
+                        Set Primary
+                      </button>
+                    ) : null}
+                  </div>
                   <button
                     type="button"
                     onClick={() =>
                       setValues((prev) => ({
                         ...prev,
-                        images: prev.images.filter((image) => image !== url),
+                        images: prev.images.filter((_, imageIndex) => imageIndex !== index),
                       }))
                     }
                     className="absolute right-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white"

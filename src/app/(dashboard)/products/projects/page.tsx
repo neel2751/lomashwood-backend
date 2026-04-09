@@ -169,14 +169,19 @@ export default function ProjectsPage() {
                     <td className="py-3 pr-3">
                       <div className="flex items-center gap-3">
                         {project.images?.[0] ? (
-                          <Image
-                            src={project.images[0]}
-                            alt={project.title}
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 rounded-[8px] border border-[#E8E6E1] object-cover"
-                            unoptimized
-                          />
+                          <div className="relative">
+                            <Image
+                              src={project.images[0]}
+                              alt={project.title}
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 rounded-[8px] border border-[#E8E6E1] object-cover"
+                              unoptimized
+                            />
+                            <span className="absolute -bottom-1 -right-1 rounded bg-[#1A1A18] px-1 py-0.5 text-[9px] font-medium text-white">
+                              Primary
+                            </span>
+                          </div>
                         ) : null}
                         <div>
                           <p className="font-medium">{project.title}</p>

@@ -69,9 +69,14 @@ export default function EditProjectPage() {
         submitLabel="Save Project"
         isSaving={updateProject.isPending}
         onSubmit={async (payload) => {
-          await updateProject.mutateAsync({ id: projectId, payload });
-          toast.success("Project updated successfully");
-          router.push("/products/projects");
+          try {
+            await updateProject.mutateAsync({ id: projectId, payload });
+            toast.success("Project updated successfully");
+            router.push("/products/projects");
+          } catch (error: any) {
+            toast.error("Failed to update project", error?.message || "Please try again");
+            throw error;
+          }
         }}
       />
     </div>
