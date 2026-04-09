@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 import { createProject, listProjects } from "@servers/projects.actions";
 import { logApiRouteError } from "@servers/_api-logger";
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
       operation: "listProjects",
       error,
     });
-    const status = error?.status ?? 500;
+    const status = error?.status ?? (error instanceof ZodError ? 400 : 500);
     return NextResponse.json(
       { message: parseZodError(error) || "Failed to fetch projects", requestId },
       { status, headers: NO_STORE_HEADERS },
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
       operation: "createProject",
       error,
     });
-    const status = error?.status ?? 500;
+    const status = error?.status ?? (error instanceof ZodError ? 400 : 500);
     return NextResponse.json(
       { message: parseZodError(error) || "Failed to create project", requestId },
       { status, headers: NO_STORE_HEADERS },

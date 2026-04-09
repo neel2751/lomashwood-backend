@@ -32,7 +32,7 @@ const projectCreateSchema = z.object({
   location: z.string().trim().min(1),
   completedAt: z.coerce.date(),
   description: z.string().trim().min(1),
-  images: z.array(z.string().trim().url()).default([]),
+  images: z.array(z.string().trim().min(1)).default([]),
   style: z.string().trim().optional(),
   finish: z.string().trim().optional(),
   layout: z.string().trim().optional(),
@@ -119,6 +119,48 @@ function normalizeDetails(input: Array<{ label: string; value: string }> | undef
   }));
 }
 
+function normalizeProjectImageUrl(url: string): string {
+  const value = url.trim();
+
+  if (!value) {
+    throw new ActionError("Project image URL cannot be empty", 400);
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  if (value.startsWith("//")) {
+    return `https:${value}`;
+  }
+
+  if (value.startsWith("/")) {
+    const siteBase =
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.NEXT_PUBLIC_URL?.trim() || "";
+
+    if (!siteBase) {
+      return value;
+    }
+
+    const normalizedBase = /^https?:\/\//i.test(siteBase) ? siteBase : `https://${siteBase}`;
+    return `${normalizedBase.replace(/\/$/, "")}${value}`;
+  }
+
+  if (/^[^/\s]+\.[^/\s]+(?:\/.*)?$/.test(value)) {
+    return `https://${value}`;
+  }
+
+  throw new ActionError("Project image URL is invalid", 400);
+}
+
+function normalizeProjectImages(images: string[] | undefined): string[] | undefined {
+  if (!images) {
+    return undefined;
+  }
+
+  return images.map(normalizeProjectImageUrl);
+}
+
 export async function listProjects(rawQuery: Record<string, unknown>) {
   const query = projectQuerySchema.parse(rawQuery);
   const { page, limit } = query;
@@ -167,6 +209,7 @@ export async function getProjectByIdOrSlug(identifier: string) {
 export async function createProject(payload: unknown) {
   const data = projectCreateSchema.parse(payload);
   const slug = await createUniqueProjectSlug(data.slug || data.title);
+  const images = normalizeProjectImages(data.images) ?? [];
 
   return prisma.project.create({
     data: {
@@ -176,7 +219,7 @@ export async function createProject(payload: unknown) {
       location: data.location,
       completedAt: data.completedAt,
       description: data.description,
-      images: data.images,
+      images,
       style: data.style || null,
       finish: data.finish || null,
       layout: data.layout || null,
@@ -204,6 +247,7 @@ export async function updateProject(id: string, payload: unknown) {
       : data.title !== undefined
         ? await createUniqueProjectSlug(existing.slug || data.title, id)
         : undefined;
+  const normalizedImages = normalizeProjectImages(data.images);
 
   return prisma.project.update({
     where: { id },
@@ -214,7 +258,7 @@ export async function updateProject(id: string, payload: unknown) {
       ...(data.location !== undefined ? { location: data.location } : {}),
       ...(data.completedAt !== undefined ? { completedAt: data.completedAt } : {}),
       ...(data.description !== undefined ? { description: data.description } : {}),
-      ...(data.images !== undefined ? { images: data.images } : {}),
+      ...(normalizedImages !== undefined ? { images: normalizedImages } : {}),
       ...(data.style !== undefined ? { style: data.style || null } : {}),
       ...(data.finish !== undefined ? { finish: data.finish || null } : {}),
       ...(data.layout !== undefined ? { layout: data.layout || null } : {}),
