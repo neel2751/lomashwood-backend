@@ -10,7 +10,7 @@ type SendEmailInput = {
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = Number(process.env.SMTP_PORT || 587);
 const smtpUser = process.env.SMTP_USER;
-const smtpPass = process.env.SMTP_PASS;
+const smtpPass = process.env.SMTP_PASSWORD;
 const smtpFrom = process.env.SMTP_FROM || "Lomash Wood <notifications@lomashwood.co.uk>";
 
 function hasSmtpConfig() {

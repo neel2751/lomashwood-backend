@@ -172,6 +172,85 @@ export async function sendAppointmentEmail(id: string, rawType: unknown) {
   };
 }
 
+async function sendAppointmentInternalNotification(appointment: {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  postcode: string;
+  address: string;
+  type: string;
+  slot: Date;
+  forKitchen: boolean;
+  forBedroom: boolean;
+  consultantName?: string | null;
+  showroomName?: string | null;
+  notes?: string | null;
+}) {
+  const adminTo = process.env.SMTP_TO;
+  if (!adminTo) {
+    console.info("[EMAIL_DISABLED] SMTP_TO not set, skipping internal notification");
+    return;
+  }
+
+  const dateTime = formatAppointmentDate(appointment.slot);
+  const typeLabel =
+    appointment.type === "home"
+      ? "Home Visit"
+      : appointment.type === "online"
+        ? "Online Consultation"
+        : "Showroom Visit";
+
+  const interests = [appointment.forKitchen && "Kitchen", appointment.forBedroom && "Bedroom"]
+    .filter(Boolean)
+    .join(", ");
+
+  const subject = `New Appointment Booked – ${appointment.customerName} (${typeLabel})`;
+
+  const rows = [
+    ["Name", appointment.customerName],
+    ["Email", appointment.customerEmail],
+    ["Phone", appointment.customerPhone],
+    ["Type", typeLabel],
+    ["Date & Time", dateTime],
+    ["Interested In", interests],
+    ["Postcode", appointment.postcode],
+    ["Address", appointment.address],
+    appointment.consultantName ? ["Consultant", appointment.consultantName] : null,
+    appointment.showroomName ? ["Showroom", appointment.showroomName] : null,
+    appointment.notes ? ["Notes", appointment.notes] : null,
+  ]
+    .filter(Boolean)
+    .map((row) => `<tr><td style="padding:4px 12px 4px 0;font-weight:600;">${row![0]}</td><td style="padding:4px 0;">${row![1]}</td></tr>`)
+    .join("");
+
+  const html = `
+    <h2 style="margin-bottom:16px;">New Appointment Booked</h2>
+    <table style="border-collapse:collapse;font-size:14px;">${rows}</table>
+    <p style="margin-top:20px;font-size:12px;color:#888;">Appointment ID: ${appointment.id}</p>
+  `;
+
+  const text = [
+    "New Appointment Booked",
+    `Name: ${appointment.customerName}`,
+    `Email: ${appointment.customerEmail}`,
+    `Phone: ${appointment.customerPhone}`,
+    `Type: ${typeLabel}`,
+    `Date & Time: ${dateTime}`,
+    `Interested In: ${interests}`,
+    `Postcode: ${appointment.postcode}`,
+    `Address: ${appointment.address}`,
+    appointment.consultantName ? `Consultant: ${appointment.consultantName}` : null,
+    appointment.showroomName ? `Showroom: ${appointment.showroomName}` : null,
+    appointment.notes ? `Notes: ${appointment.notes}` : null,
+    `Appointment ID: ${appointment.id}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  await sendSystemEmail({ to: adminTo, subject, text, html });
+}
+
 export async function listAppointments(rawQuery: Record<string, unknown>) {
   const query = querySchema.parse(rawQuery);
   const { page, limit } = query;
@@ -241,11 +320,11 @@ export async function createAppointment(payload: unknown) {
     return created;
   });
 
-  // Do not fail appointment creation if SMTP is unavailable.
+  // Internal notification to admin — does not fail appointment creation if SMTP is unavailable.
   try {
-    await sendAppointmentEmail(appointment.id, "confirmation");
+    await sendAppointmentInternalNotification(appointment);
   } catch (error) {
-    console.error("Failed to send appointment confirmation email", {
+    console.error("Failed to send appointment internal notification", {
       appointmentId: appointment.id,
       error,
     });
